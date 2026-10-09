@@ -1,0 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+:root { --ink: #17212b; --ink-soft: #2f5962; --muted: #718187; --paper: #fffaf3; --surface: #ffffff; --line: #eadfd4; --lime: #f6c85f; --mint: #a8d8d0; --sky: #d8eff0; --rose: #e9685c; --deep: #173b45; --font-sans: 'DM Sans', Arial, sans-serif; --font-display: 'Space Grotesk', Arial, sans-serif; }
+* { box-sizing: border-box; } html { scroll-behavior: smooth; } body { margin: 0; color: var(--ink); background: var(--paper); } button, input, textarea, select { font: inherit; } button { cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }

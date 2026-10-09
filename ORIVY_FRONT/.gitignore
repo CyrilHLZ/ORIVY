@@ -1,0 +1,23 @@
+# Les chemins sont relatifs à ORIVY_FRONT/
+
+# Dépendances : recréées par `npm install` à partir de package-lock.json
+node_modules/
+
+# Résultat du build (`npm run build`)
+dist/
+
+# Version corrigée : sert seulement de référence locale
+_correction/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Variables d'environnement locales (secrets éventuels)
+.env.local
+.env.*.local
+
+# Fichiers système / éditeur
+.DS_Store
+Thumbs.db
+.idea/
