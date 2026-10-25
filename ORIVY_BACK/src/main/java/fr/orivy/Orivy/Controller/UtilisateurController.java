@@ -2,14 +2,26 @@ package fr.orivy.Orivy.Controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
+import fr.orivy.Orivy.DTO.ReponseConnexion;
+import fr.orivy.Orivy.DTO.UtilisateurPrivee;
+import fr.orivy.Orivy.DTO.UtilisateurPublic;
 import fr.orivy.Orivy.Model.Utilisateur;
+import fr.orivy.Orivy.Service.JetonService;
 import fr.orivy.Orivy.Service.UtilisateurService;
 
 @RestController
@@ -18,53 +30,59 @@ import fr.orivy.Orivy.Service.UtilisateurService;
 public class UtilisateurController {
 
     private final UtilisateurService utilisateurService;
-    
-    public UtilisateurController(UtilisateurService utilisateurService) {
+    private final JetonService jetonService;
+
+    public UtilisateurController(UtilisateurService utilisateurService, JetonService jetonService) {
         this.utilisateurService = utilisateurService;
+        this.jetonService = jetonService;
     }
 
     @PostMapping("/inscription")
-    public String creerUtilisateur(@RequestBody Utilisateur utilisateur) {
-        return utilisateurService.creerUtilisateur(utilisateur);
+    @ResponseStatus(HttpStatus.CREATED)
+    public UtilisateurPrivee inscription(@RequestBody Utilisateur utilisateur) {
+        return UtilisateurPrivee.depuis(utilisateurService.creerUtilisateur(utilisateur));
     }
 
-    public String modifierUtilisateur(@RequestBody Utilisateur utilisateur) {
-        return utilisateurService.modifierUtilisateur(utilisateur);
+    @PutMapping("/{id}")
+    public UtilisateurPrivee modifierUtilisateur(@PathVariable Long id, @RequestBody Utilisateur utilisateur,
+                                             @AuthenticationPrincipal Jwt jwt) {
+        if (!estLuiMemeOuAdmin(id, jwt)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Tu ne peux modifier que ton propre profil.");
+        }
+        return UtilisateurPrivee.depuis(utilisateurService.modifierUtilisateur(id, utilisateur));
     }
 
-    public String supprimerUtilisateur(String email) {
-        return utilisateurService.supprimerUtilisateur(email);
-    }
-
-    public Utilisateur getUtilisateur(@PathVariable String email) {
-        return utilisateurService.getUtilisateur(email);
-    }
-
-    public List<Utilisateur> getAllUtilisateurs() {
-        return utilisateurService.getAllUtilisateurs();
-    }
 
     @PostMapping("/connexion")
-    public String authentifierUtilisateur(@RequestBody Utilisateur utilisateur) {
-        String email = utilisateur.getEmail();
-        String motDePasse = utilisateur.getMotDePasse();
-        return utilisateurService.authentifierUtilisateur(email, motDePasse);
+    public ReponseConnexion connexion(@RequestBody Utilisateur identifiants) {
+        Utilisateur utilisateur = utilisateurService.authentifierUtilisateur(identifiants.getEmail(), identifiants.getMotDePasse());
+        return new ReponseConnexion(jetonService.generateToken(utilisateur), UtilisateurPrivee.depuis(utilisateur));
     }
 
-    public String deconnecterUtilisateur(String email) {
-        return utilisateurService.deconnecterUtilisateur(email);
+    @GetMapping
+    public List<UtilisateurPublic> getAllUtilisateurs() {
+        return utilisateurService.getAllUtilisateurs().stream().map(UtilisateurPublic::depuis).toList();
     }
 
-    public String recupererMotDePasse(String email) {
-        return utilisateurService.recupererMotDePasse(email);
+    // L'appelant est-il ce membre, ou un admin ? (pour voir tout le profil, ou le modifier)
+    private boolean estLuiMemeOuAdmin(Long id, Jwt jwt) {
+        boolean estAdmin = "admin".equalsIgnoreCase(jwt.getClaimAsString("role"));
+        boolean estProprietaire = jwt.getSubject().equals(id.toString());
+        return estAdmin || estProprietaire;
     }
 
-    public String modifierMotDePasse(String email, String nouveauMotDePasse) {
-        return utilisateurService.modifierMotDePasse(email, nouveauMotDePasse);
+    @GetMapping("/{id}")
+    public Object getUtilisateur(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        Utilisateur utilisateur = utilisateurService.getUtilisateur(id);
+        if (estLuiMemeOuAdmin(id, jwt)) {
+            return UtilisateurPrivee.depuis(utilisateur);
+        }
+        return UtilisateurPublic.depuis(utilisateur);
     }
 
-    public String modifierRoleUtilisateur(String email, String nouveauRole) {
-        return utilisateurService.modifierRoleUtilisateur(email, nouveauRole);
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void supprimerUtilisateur(@PathVariable Long id) {
+        utilisateurService.supprimerUtilisateur(id);
     }
-
 }

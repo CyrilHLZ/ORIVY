@@ -1,11 +1,28 @@
 package fr.orivy.Orivy.Model;
 
+import java.time.LocalDate;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+
+@Entity 
 public class Utilisateur {
     
+    @Id
+    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+    private Long id;
     private String nom;
     private String prenom;
-    private String dateDeNaissance;
+    private LocalDate dateDeNaissance;
+    
+    @Column(unique = true)
     private String email;
+
+    @JsonProperty (access = JsonProperty.Access.WRITE_ONLY)
     private String motDePasse;
     private String role;
     private String numeroTelephone;
@@ -17,7 +34,7 @@ public class Utilisateur {
     public Utilisateur() {
     }
 
-    public Utilisateur(String nom, String prenom, String dateDeNaissance, String email, String motDePasse, String role, String numeroTelephone, String adresse, String ville, String codePostal, String pays) {
+    public Utilisateur(String nom, String prenom, LocalDate dateDeNaissance, String email, String motDePasse, String role, String numeroTelephone, String adresse, String ville, String codePostal, String pays) {
         this.nom = nom;
         this.prenom = prenom;
         this.dateDeNaissance = dateDeNaissance;
@@ -29,6 +46,10 @@ public class Utilisateur {
         this.ville = ville;
         this.codePostal = codePostal;
         this.pays = pays;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getNom() {
@@ -47,11 +68,11 @@ public class Utilisateur {
         this.prenom = prenom;
     }
 
-    public String getDateDeNaissance() {
+    public LocalDate getDateDeNaissance() {
         return dateDeNaissance;
     }
 
-    public void setDateDeNaissance(String dateDeNaissance) {
+    public void setDateDeNaissance(LocalDate dateDeNaissance) {
         this.dateDeNaissance = dateDeNaissance;
     }
 
