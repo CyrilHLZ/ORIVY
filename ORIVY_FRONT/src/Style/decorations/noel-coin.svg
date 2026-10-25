@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" aria-hidden="true">
+  <!-- Coin de Noël : un brin de sapin et trois boules suspendues (rouge, vert, or). -->
+  <g id="fils" stroke="#A89A8A" stroke-width="1.2">
+    <path d="M52 6 V38 M70 8 V55 M86 4 V29"/>
+  </g>
+  <g id="sapin" stroke="#2F6B4A" stroke-linecap="round">
+    <path d="M96 3 C82 6 66 6 46 4" fill="none" stroke-width="3"/>
+    <path d="M90 4 l-4 6 M80 5 l-3 6 M70 5 l-3 6 M60 5 l-3 6 M52 4 l-3 6 M85 4 l3 6 M75 5 l3 6 M65 5 l3 6 M56 4 l3 6" stroke-width="2"/>
+  </g>
+  <g id="boules" stroke-width="1.2">
+    <circle cx="52" cy="46" r="8" fill="#C12C15" stroke="#7E1D0E"/>
+    <circle cx="70" cy="64" r="9" fill="#2F7A55" stroke="#1E513A"/>
+    <circle cx="86" cy="36" r="7" fill="#E0B04A" stroke="#9C7426"/>
+  </g>
+  <g fill="#FFFFFF" opacity=".55">
+    <circle cx="49" cy="43" r="1.8"/><circle cx="67" cy="60" r="2"/><circle cx="84" cy="33" r="1.5"/>
+  </g>
+</svg>

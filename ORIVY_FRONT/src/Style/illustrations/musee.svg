@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" aria-hidden="true">
+  <!--
+    Musée : façade parisienne haussmannienne, colonnes à l'entrée, enseigne néon « Musée ».
+    Couleur de catégorie #b5527a : portes et bannières. Néon rose uniquement sur l'enseigne.
+    Animation (> 480px, sans mouvement réduit) : #neon s'allume doucement en 3 s puis « respire »
+    (opacité 0,85 ↔ 1 toutes les 4 s, aucun clignotement).
+  -->
+  <style>
+    @media (min-width: 480px) and (prefers-reduced-motion: no-preference) {
+      #neon { animation: allumage 3s ease-out both, respire 4s 3s ease-in-out infinite alternate; }
+      @keyframes allumage { 0% { opacity: .15; } 60% { opacity: .5; } 100% { opacity: 1; } }
+      @keyframes respire { from { opacity: 1; } to { opacity: .85; } }
+    }
+  </style>
+  <rect width="800" height="600" fill="#F4E9D8"/>
+  <!-- Immeuble -->
+  <g stroke="#1F1915" stroke-width="3" stroke-linejoin="round">
+    <path d="M90 600 V110 H710 V600 Z" fill="#EADBC3"/>
+    <path d="M70 110 H730 L700 60 H100 Z" fill="#7A8C99"/>
+    <path d="M200 60 v-30 h40 v30 M560 60 v-30 h40 v30" fill="#C9B79A"/>
+    <path d="M90 230 H710 M90 340 H710" fill="none"/>
+  </g>
+  <!-- Fenêtres et balcons en fer forgé -->
+  <g stroke="#1F1915" stroke-width="3" stroke-linejoin="round">
+    <g fill="#3E4A52">
+      <rect x="130" y="130" width="60" height="80" rx="4"/><rect x="250" y="130" width="60" height="80" rx="4"/>
+      <rect x="490" y="130" width="60" height="80" rx="4"/><rect x="610" y="130" width="60" height="80" rx="4"/>
+      <rect x="130" y="245" width="60" height="80" rx="4"/><rect x="610" y="245" width="60" height="80" rx="4"/>
+    </g>
+    <path d="M120 215 H700 M120 330 H200 M600 330 H680" fill="none"/>
+    <path d="M130 215 v-14 M150 215 v-14 M170 215 v-14 M190 215 v-14 M250 215 v-14 M270 215 v-14 M290 215 v-14 M310 215 v-14 M490 215 v-14 M510 215 v-14 M530 215 v-14 M550 215 v-14 M610 215 v-14 M630 215 v-14 M650 215 v-14 M670 215 v-14 M120 201 H320 M480 201 H680" fill="none" stroke-width="2"/>
+  </g>
+  <!-- Bannières -->
+  <g stroke="#1F1915" stroke-width="3" stroke-linejoin="round" fill="#b5527a">
+    <path d="M230 240 h50 v100 l-25 -16 l-25 16 z"/>
+    <path d="M520 240 h50 v100 l-25 -16 l-25 16 z"/>
+  </g>
+  <!-- Fronton et colonnes -->
+  <g stroke="#1F1915" stroke-width="3" stroke-linejoin="round">
+    <path d="M300 380 L400 330 L500 380 Z" fill="#E2D3BC"/>
+    <rect x="290" y="380" width="220" height="16" fill="#E2D3BC"/>
+    <g fill="#F4ECDD">
+      <rect x="304" y="396" width="22" height="160"/><rect x="354" y="396" width="22" height="160"/>
+      <rect x="424" y="396" width="22" height="160"/><rect x="474" y="396" width="22" height="160"/>
+    </g>
+    <path d="M376 556 V450 a24 24 0 0 1 48 0 V556 Z" fill="#b5527a"/>
+    <rect x="270" y="556" width="260" height="14" fill="#CDB99B"/>
+    <rect x="250" y="570" width="300" height="30" fill="#CDB99B"/>
+  </g>
+  <!-- Enseigne néon -->
+  <g id="neon">
+    <rect x="330" y="282" width="140" height="44" rx="10" fill="#2E2622" stroke="#1F1915" stroke-width="3"/>
+    <text x="400" y="315" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="30" fill="none" stroke="#FF7AB6" stroke-width="7" opacity=".35">Musée</text>
+    <text x="400" y="315" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="30" fill="#FFE3F0" stroke="#FF7AB6" stroke-width="1.5">Musée</text>
+  </g>
+</svg>

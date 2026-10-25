@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F6EFE6">
+  <title>Carte · ORIVY</title>
+  <script src="../themes.js"></script>
+  <script src="../saisons.js"></script>
+  <link rel="icon" href="../logo/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght,SOFT@9..144,600..700,100&display=swap" rel="stylesheet">
+  <!-- Leaflet : seule dépendance de la carte (dans React : npm install leaflet react-leaflet) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="../design-system.css">
+  <link rel="stylesheet" href="../themes.css">
+  <link rel="stylesheet" href="../saisons.css">
+  <link rel="stylesheet" href="../composants.css">
+  <link rel="stylesheet" href="pages.css">
+  <style>
+    /* Sur la carte, la décoration de coin gênerait la recherche : on garde seulement le petit objet du logo */
+    .page-carte .entete .deco-coin { display: none; }
+  </style>
+</head>
+<body data-page="carte" class="page-carte">
+<main class="carte-zone" id="contenu">
+  <h1 class="visuellement-cache">Carte des lieux</h1>
+  <div id="carte" role="application" aria-label="Carte des lieux en France. Les épingles sont accessibles avec la touche Tabulation."></div>
+
+  <!-- Recherche et filtres posés sur la carte -->
+  <div class="carte-outils">
+    <form class="champ" role="search" id="recherche">
+      <label class="visuellement-cache" for="recherche-ville">Cherche une ville</label>
+      <div class="champ__ligne">
+        <svg class="icone" aria-hidden="true"><use href="#i-loupe"/></svg>
+        <input class="champ__saisie" id="recherche-ville" type="search" placeholder="Cherche une ville : Nantes, Annecy…" autocomplete="off">
+      </div>
+    </form>
+    <div class="puces" role="group" aria-label="Filtrer par catégorie" id="filtres"></div>
+  </div>
+
+  <!-- Boutons flottants -->
+  <div class="carte-flottants">
+    <div class="carte-rayon" id="panneau-rayon" hidden>
+      <fieldset class="rayon">
+        <legend>Rayon autour de toi</legend>
+        <label><input type="radio" name="rayon" value="1"><span>1 km</span></label>
+        <label><input type="radio" name="rayon" value="5"><span>5</span></label>
+        <label><input type="radio" name="rayon" value="10" checked><span>10</span></label>
+        <label><input type="radio" name="rayon" value="25"><span>25</span></label>
+        <label><input type="radio" name="rayon" value="50"><span>50</span></label>
+      </fieldset>
+    </div>
+    <a class="bouton bouton--secondaire bouton--pilule" href="activites.html"><svg class="icone" aria-hidden="true"><use href="#i-liste"/></svg>Liste</a>
+    <button class="bouton bouton--icone bouton--flottant" type="button" id="me-localiser" aria-label="Me localiser"><svg class="icone" aria-hidden="true"><use href="#i-localiser"/></svg></button>
+  </div>
+
+  <!-- Tiroir de détail d'un lieu (rempli par carte.js) -->
+  <aside class="tiroir" id="tiroir" hidden aria-labelledby="tiroir-titre" tabindex="-1"></aside>
+
+  <!-- Messages lus par les lecteurs d'écran -->
+  <p class="visuellement-cache" aria-live="polite" id="annonce"></p>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="donnees.js"></script>
+<script src="proximite.js"></script>
+<script src="commun.js"></script>
+<script src="../icones/icones.js"></script>
+<script src="carte.js"></script>
+<script src="../outils/selecteur-apercu.js"></script>
+</body>
+</html>

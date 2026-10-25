@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="orivy-mono-titre">
+  <title id="orivy-mono-titre">ORIVY</title>
+  <!--
+    Monogramme ORIVY : l'épingle (le O posé dans la pointe du V) et le départ du sentier.
+    Version à intégrer en ligne : épingle en couleur principale, points en currentColor.
+    Usage : avatar de l'app, en-tête mobile replié, partages. Taille mini : 24px.
+  -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Épingle : cercle de rayon 14 + pointe en V jusqu'à y=54. -->
+    <path class="orivy-epingle" stroke="var(--couleur-principale, #A34E2C)" stroke-width="6"
+          d="M24 54 L11.6 30.5 A14 14 0 1 1 36.4 30.5 Z"/>
+    <!-- Départ du sentier : trois points. -->
+    <path class="orivy-sentier" stroke="currentColor" stroke-width="4.5" stroke-dasharray="0 8"
+          d="M36 54 H53"/>
+  </g>
+</svg>

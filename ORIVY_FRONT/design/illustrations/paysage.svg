@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <!--
+    Écran 1 de l'accueil : grand paysage français.
+    Collines en couches, lac, sentier en pointillés qui mène à une épingle (rappel du logo).
+    Animé seulement si l'image fait plus de 480px de large et sans « mouvement réduit » :
+      #nuages : dérive lente (40 s) · #oiseaux : traversée (26 s).
+  -->
+  <style>
+    @media (min-width: 480px) and (prefers-reduced-motion: no-preference) {
+      #nuages { animation: derive 40s ease-in-out infinite alternate; }
+      #oiseaux { animation: vol 26s linear infinite; }
+      @keyframes derive { from { transform: translateX(-30px); } to { transform: translateX(40px); } }
+      @keyframes vol { from { transform: translate(-300px, 40px); } to { transform: translate(1900px, -60px); } }
+    }
+  </style>
+  <rect width="1600" height="1000" fill="#F4E9D8"/>
+  <circle cx="1180" cy="230" r="110" fill="#F6CF7A" stroke="#1F1915" stroke-width="4"/>
+  <g id="nuages" fill="#FFF8EC" stroke="#1F1915" stroke-width="4" stroke-linejoin="round">
+    <path d="M210 210 q20 -50 75 -35 q30 -45 85 -10 q55 -10 60 45 z"/>
+    <path d="M760 150 q18 -40 62 -28 q26 -38 72 -6 q46 -6 48 38 z"/>
+    <path d="M1320 330 q15 -35 55 -24 q22 -32 62 -5 q40 -6 42 33 z"/>
+  </g>
+  <g id="oiseaux" fill="none" stroke="#1F1915" stroke-width="4" stroke-linecap="round">
+    <path d="M0 0 q12 -12 24 0 q12 -12 24 0"/>
+    <path d="M60 30 q9 -9 18 0 q9 -9 18 0"/>
+    <path d="M30 -40 q8 -8 16 0 q8 -8 16 0"/>
+  </g>
+  <!-- Montagnes au loin -->
+  <path d="M0 560 L180 400 L300 470 L470 330 L620 450 L760 380 L900 470 L1080 360 L1250 450 L1420 380 L1600 470 V1000 H0 Z" fill="#B9C6A3" stroke="#1F1915" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M470 330 L520 372 L500 380 L470 360 L445 375 Z M1080 360 L1125 395 L1100 402 L1080 388 L1058 398 Z" fill="#FFFBF6" stroke="#1F1915" stroke-width="3" stroke-linejoin="round"/>
+  <!-- Collines -->
+  <path d="M0 640 C220 560 380 600 560 620 C760 640 900 560 1100 580 C1300 600 1450 560 1600 590 V1000 H0 Z" fill="#9DB37E" stroke="#1F1915" stroke-width="4"/>
+  <!-- Lac -->
+  <path d="M760 720 C900 690 1180 690 1340 720 C1420 740 1380 790 1250 800 C1060 815 860 805 760 780 C700 765 700 735 760 720 Z" fill="#9CC3CF" stroke="#1F1915" stroke-width="4"/>
+  <path d="M860 745 h90 M1040 760 h120 M960 785 h70" stroke="#FFFBF6" stroke-width="4" stroke-linecap="round"/>
+  <!-- Colline au premier plan -->
+  <path d="M0 800 C260 720 460 760 640 820 C820 880 1000 860 1200 900 C1380 935 1500 920 1600 900 V1000 H0 Z" fill="#7F9A68" stroke="#1F1915" stroke-width="4"/>
+  <!-- Sapins -->
+  <g fill="#3E5A44" stroke="#1F1915" stroke-width="4" stroke-linejoin="round">
+    <path d="M150 760 l40 -110 l40 110 z"/><path d="M190 760 v22" fill="none"/>
+    <path d="M230 770 l32 -90 l32 90 z"/>
+    <path d="M1430 860 l36 -100 l36 100 z"/>
+    <path d="M1490 870 l28 -80 l28 80 z"/>
+  </g>
+  <!-- Le sentier en pointillés jusqu'à l'épingle -->
+  <path d="M1200 1000 C1260 930 1450 900 1460 830 C1470 770 1420 720 1340 690 C1260 665 1150 650 1110 585" fill="none" stroke="#1F1915" stroke-width="9" stroke-linecap="round" stroke-dasharray="0 26"/>
+  <g transform="translate(1110 585)">
+    <path d="M0 0 L-24 -40 A28 28 0 1 1 24 -40 Z" fill="#FFFBF6" stroke="#A34E2C" stroke-width="10" stroke-linejoin="round"/>
+  </g>
+</svg>

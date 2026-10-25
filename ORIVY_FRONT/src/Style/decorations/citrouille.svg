@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+  <!-- Citrouille souriante : mini d'Halloween. Amicale, pas effrayante. -->
+  <path d="M12 6.5 C12 4.5 13 3 14.5 2.5" fill="none" stroke="#5E6B33" stroke-width="1.8" stroke-linecap="round"/>
+  <g id="citrouille" fill="#E8832E" stroke="#A8552A" stroke-width="1.1">
+    <ellipse cx="7.5" cy="14" rx="5" ry="7"/>
+    <ellipse cx="16.5" cy="14" rx="5" ry="7"/>
+    <ellipse cx="12" cy="14" rx="5" ry="7.5"/>
+  </g>
+  <g fill="#4A2F5E">
+    <path d="M8.5 12 L10 10 L11 12 Z M13 12 L14 10 L15.5 12 Z"/>
+    <path d="M8.5 16 Q12 19 15.5 16 Q12 17.3 8.5 16 Z"/>
+  </g>
+</svg>

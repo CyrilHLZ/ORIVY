@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F6EFE6">
+  <title>Administration des lieux · ORIVY</title>
+  <script src="../themes.js"></script>
+  <script src="../saisons.js"></script>
+  <link rel="icon" href="../logo/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght,SOFT@9..144,600..700,100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../design-system.css">
+  <link rel="stylesheet" href="../themes.css">
+  <link rel="stylesheet" href="../saisons.css">
+  <link rel="stylesheet" href="../composants.css">
+  <link rel="stylesheet" href="pages.css">
+</head>
+<body data-page="profil" class="page-admin">
+<main class="conteneur">
+  <div class="section-titre" style="margin-top: var(--espace-5)">
+    <h1 style="margin: 0">Lieux et activités</h1>
+    <a class="bouton bouton--principal" href="#"><svg class="icone" aria-hidden="true"><use href="#i-plus"/></svg>Ajoute un lieu</a>
+  </div>
+
+  <div class="admin-stats">
+    <div class="encart"><strong>26</strong><span>lieux publiés</span></div>
+    <div class="encart"><strong>3</strong><span>en attente de validation</span></div>
+    <div class="encart"><strong>41</strong><span>sorties à venir</span></div>
+    <div class="encart"><strong>1 284</strong><span>membres</span></div>
+  </div>
+
+  <div class="admin-outils">
+    <div class="champ">
+      <label class="champ__label" for="cherche">Cherche un lieu</label>
+      <div class="champ__ligne">
+        <svg class="icone" aria-hidden="true"><use href="#i-loupe"/></svg>
+        <input class="champ__saisie" id="cherche" type="search" placeholder="Nom ou ville…">
+      </div>
+    </div>
+    <div class="champ">
+      <label class="champ__label" for="filtre-cat">Catégorie</label>
+      <select class="champ__saisie" id="filtre-cat"><option value="">Toutes</option></select>
+    </div>
+  </div>
+
+  <div class="tableau-cadre">
+    <table class="tableau">
+      <caption class="visuellement-cache">Liste des lieux</caption>
+      <thead>
+        <tr><th scope="col">Lieu</th><th scope="col">Catégorie</th><th scope="col">Ville</th><th scope="col">Note</th><th scope="col">Sorties</th><th scope="col">Statut</th><th scope="col"><span class="visuellement-cache">Actions</span></th></tr>
+      </thead>
+      <tbody id="lignes"></tbody>
+    </table>
+  </div>
+  <p class="annonce" aria-live="polite" id="annonce"></p>
+
+  <nav class="pagination" aria-label="Pages de la liste">
+    <a href="#" aria-label="Page précédente"><svg class="icone" aria-hidden="true"><use href="#i-chevron-gauche"/></svg></a>
+    <span aria-current="page">1</span>
+    <a href="#">2</a>
+    <a href="#">3</a>
+    <a href="#" aria-label="Page suivante"><svg class="icone" aria-hidden="true"><use href="#i-chevron-droit"/></svg></a>
+  </nav>
+
+  <dialog class="fenetre" id="confirmer" aria-labelledby="confirmer-titre">
+    <h2 id="confirmer-titre">Supprimer ce lieu ?</h2>
+    <p id="confirmer-texte"></p>
+    <form class="fenetre__actions" method="dialog">
+      <button class="bouton bouton--secondaire" value="non">Annuler</button>
+      <button class="bouton bouton--danger-plein" value="oui"><svg class="icone" aria-hidden="true"><use href="#i-supprimer"/></svg>Oui, supprimer</button>
+    </form>
+  </dialog>
+</main>
+
+<script src="donnees.js"></script>
+<script src="proximite.js"></script>
+<script>
+  (function () {
+    var D = window.ORIVY_DONNEES, P = window.ORIVY_PROXIMITE;
+    var $ = function (id) { return document.getElementById(id); };
+    var EN_ATTENTE = [14, 22, 24];   /* quelques lieux à valider pour la démonstration */
+
+    Object.keys(D.CATEGORIES).forEach(function (c) {
+      $("filtre-cat").insertAdjacentHTML("beforeend", '<option value="' + c + '">' + D.CATEGORIES[c].pluriel + "</option>");
+    });
+
+    function afficher() {
+      var q = $("cherche").value.trim().toLowerCase(), cat = $("filtre-cat").value;
+      var lieux = D.LIEUX.filter(function (l) {
+        return (!cat || l.cat === cat) && (!q || (l.nom + " " + l.ville).toLowerCase().indexOf(q) > -1);
+      }).slice(0, 10);
+      /* data-label : sert d'intitulé quand le tableau devient des cartes sur mobile */
+      $("lignes").innerHTML = lieux.map(function (l) {
+        var attente = EN_ATTENTE.indexOf(l.id) > -1;
+        return "<tr>" +
+          '<td data-label="Lieu">' + l.nom + "</td>" +
+          '<td data-label="Catégorie">' + P.badgeCat(l.cat) + "</td>" +
+          '<td data-label="Ville">' + l.ville + "</td>" +
+          '<td data-label="Note">' + P.note(l.note) + "</td>" +
+          '<td data-label="Sorties">' + l.sorties + "</td>" +
+          '<td data-label="Statut"><span class="statut ' + (attente ? "statut--attente" : "statut--publie") + '">' + (attente ? "En attente" : "Publié") + "</span></td>" +
+          '<td data-label="Actions"><div class="tableau__actions">' +
+            '<a class="bouton bouton--icone" href="#" aria-label="Modifier ' + l.nom + '">' + P.icone("modifier") + "</a>" +
+            '<button class="bouton bouton--danger" type="button" data-supprimer="' + l.id + '" aria-label="Supprimer ' + l.nom + '">' + P.icone("supprimer") + "</button>" +
+          "</div></td></tr>";
+      }).join("");
+      $("annonce").textContent = lieux.length + " lieu" + (lieux.length > 1 ? "x" : "") + " affiché" + (lieux.length > 1 ? "s" : "") + ".";
+    }
+    $("cherche").addEventListener("input", afficher);
+    $("filtre-cat").addEventListener("change", afficher);
+    $("lignes").addEventListener("click", function (e) {
+      var b = e.target.closest("[data-supprimer]");
+      if (!b) return;
+      var l = D.lieu(+b.getAttribute("data-supprimer"));
+      $("confirmer-texte").textContent = "« " + l.nom + " » et ses " + l.sorties + " sortie(s) prévue(s) disparaîtront de la carte. Les organisateurs seront prévenus.";
+      $("confirmer").showModal();
+    });
+    afficher();
+  })();
+</script>
+<script src="commun.js"></script>
+<script src="../icones/icones.js"></script>
+<script src="../outils/selecteur-apercu.js"></script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F6EFE6">
+  <title>Notifications · ORIVY</title>
+  <script src="../themes.js"></script>
+  <script src="../saisons.js"></script>
+  <link rel="icon" href="../logo/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght,SOFT@9..144,600..700,100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../design-system.css">
+  <link rel="stylesheet" href="../themes.css">
+  <link rel="stylesheet" href="../saisons.css">
+  <link rel="stylesheet" href="../composants.css">
+  <link rel="stylesheet" href="pages.css">
+</head>
+<body data-page="notifications" class="page-notifications">
+<main class="conteneur">
+  <div class="section-titre" style="margin-top: var(--espace-5)">
+    <h1 style="margin: 0">Notifications</h1>
+    <button class="bouton bouton--fantome" type="button" id="tout-lu"><svg class="icone" aria-hidden="true"><use href="#i-valider"/></svg>Tout marquer comme lu</button>
+  </div>
+
+  <section class="notifs-groupe" aria-labelledby="t-aujourdhui">
+    <h2 id="t-aujourdhui">Aujourd'hui</h2>
+    <ul class="notifs">
+      <li class="notif notif--non-lue">
+        <span class="notif__type"><span class="avatar avatar--c" aria-hidden="true">IN</span><svg class="icone" aria-hidden="true"><use href="#i-calendrier"/></svg></span>
+        <div><p class="notif__texte"><strong>Inès</strong> s'est inscrite à ta sortie <a href="sortie.html">Brunch lyonnais au bouchon</a>.</p><span class="notif__heure">il y a 5 min</span></div>
+        <span class="notif__point"><span class="visuellement-cache">Non lue</span></span>
+      </li>
+      <li class="notif notif--non-lue">
+        <span class="notif__type"><span class="avatar avatar--e" aria-hidden="true">MR</span><svg class="icone" aria-hidden="true"><use href="#i-suivre"/></svg></span>
+        <div><p class="notif__texte"><strong>Mathis</strong> te suit désormais.</p><span class="notif__heure">il y a 1 h</span>
+          <div class="notif__action"><button class="bouton bouton-suivre" type="button" aria-pressed="false">Suis en retour</button></div></div>
+        <span class="notif__point"><span class="visuellement-cache">Non lue</span></span>
+      </li>
+      <li class="notif notif--non-lue">
+        <span class="notif__type"><span class="avatar avatar--b" aria-hidden="true">YB</span><svg class="icone" aria-hidden="true"><use href="#i-commentaire"/></svg></span>
+        <div><p class="notif__texte"><strong>Yanis</strong> a commenté <a href="sortie.html#t-commentaires">Lever de soleil au puy de Dôme</a> : « Je prends le thermos de café, qui ramène les croissants ? »</p><span class="notif__heure">il y a 2 h</span>
+          <div class="notif__action"><a class="bouton bouton--secondaire" href="sortie.html#t-commentaires">Réponds</a></div></div>
+        <span class="notif__point"><span class="visuellement-cache">Non lue</span></span>
+      </li>
+    </ul>
+  </section>
+
+  <section class="notifs-groupe" aria-labelledby="t-semaine">
+    <h2 id="t-semaine">Cette semaine</h2>
+    <ul class="notifs">
+      <li class="notif">
+        <span class="notif__type"><span class="etat__icone" style="width: var(--cible-min); height: var(--cible-min)" aria-hidden="true"><svg class="icone"><use href="#i-horloge"/></svg></span></span>
+        <div><p class="notif__texte">Rappel : <a href="sortie.html">Lever de soleil au puy de Dôme</a> c'est dimanche à 7h. Pense à ta frontale !</p><span class="notif__heure">hier</span></div>
+        <span></span>
+      </li>
+      <li class="notif">
+        <span class="notif__type"><span class="avatar avatar--d" aria-hidden="true">TM</span><svg class="icone" aria-hidden="true"><use href="#i-image"/></svg></span>
+        <div><p class="notif__texte"><strong>Théo</strong> a ajouté 8 photos à <a href="sortie.html">Coucher de soleil à Étretat</a>.</p><span class="notif__heure">lundi</span></div>
+        <span></span>
+      </li>
+      <li class="notif">
+        <span class="notif__type"><span class="avatar avatar--c" aria-hidden="true">SD</span><svg class="icone" aria-hidden="true"><use href="#i-coeur"/></svg></span>
+        <div><p class="notif__texte"><strong>Sarah</strong> et 11 autres personnes aiment ta photo du Pont du Gard.</p><span class="notif__heure">dimanche</span></div>
+        <span></span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- État vide (affiché quand tout a été lu et effacé) -->
+  <div class="etat" hidden id="vide">
+    <span class="deco-vide" aria-hidden="true"></span>
+    <span class="etat__icone" aria-hidden="true"><svg class="icone icone--grande"><use href="#i-cloche"/></svg></span>
+    <h2 style="font-size: var(--taille-l); margin: 0">Tout est calme</h2>
+    <p>Aucune nouvelle notification. Profites-en pour préparer ta prochaine sortie !</p>
+  </div>
+</main>
+
+<script>
+  document.getElementById("tout-lu").addEventListener("click", function () {
+    document.querySelectorAll(".notif--non-lue").forEach(function (n) {
+      n.classList.remove("notif--non-lue");
+      var point = n.querySelector(".notif__point");
+      if (point) point.remove();
+    });
+    var pastille = document.querySelector(".entete .pastille");
+    if (pastille) pastille.remove();
+  });
+  document.querySelector("main").addEventListener("click", function (e) {
+    var b = e.target.closest(".bouton-suivre");
+    if (!b) return;
+    var actif = b.getAttribute("aria-pressed") === "true";
+    b.setAttribute("aria-pressed", String(!actif));
+    b.textContent = actif ? "Suis en retour" : "Abonné·e";
+  });
+</script>
+<script src="commun.js"></script>
+<script src="../icones/icones.js"></script>
+<script src="../outils/selecteur-apercu.js"></script>
+</body>
+</html>

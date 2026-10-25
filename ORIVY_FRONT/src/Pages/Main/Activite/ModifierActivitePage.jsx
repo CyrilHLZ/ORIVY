@@ -1,3 +1,7 @@
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { deleteActivity, getActivity, updateActivity } from '../../../Services/Activite/ActiviteService.js';
+
 const ModifierActivitePage = () => {
     const { id } = useParams();
     const [activity, setActivity] = useState(null);
@@ -5,9 +9,7 @@ const ModifierActivitePage = () => {
     useEffect(() => {
         const fetchActivity = async () => {
             try {
-                const data = await getActivities();
-                const foundActivity = data.find((act) => act.id === parseInt(id, 10));
-                setActivity(foundActivity);
+                setActivity(await getActivity(id));
             } catch (error) {
                 console.error('Erreur lors de la récupération de l’activité :', error);
             }
@@ -39,28 +41,6 @@ const ModifierActivitePage = () => {
             }
         }
     }
-
-    const updateActivity = async (id, updatedActivity) => {
-        try {
-            await apiRequest(`/activites/${id}`, {
-                method: 'PUT',
-                body: JSON.stringify(updatedActivity),
-            });
-        } catch (error) {
-            console.error('Erreur lors de la mise à jour de l’activité :', error);
-            throw error;
-        }  
-
-    };
-
-    const deleteActivity = async (id) => {
-        try {
-            await apiRequest(`/activites/${id}`, { method: 'DELETE' });
-        } catch (error) {
-            console.error('Erreur lors de la suppression de l’activité :', error);
-            throw error;
-        }
-    };
 
     if (!activity) {
         return <p>Chargement de l’activité...</p>;

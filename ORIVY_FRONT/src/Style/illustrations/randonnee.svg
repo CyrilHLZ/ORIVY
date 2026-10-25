@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" aria-hidden="true">
+  <!--
+    Randonnée : randonneur avec sac à dos sur un sentier de montagne, des sapins.
+    Couleur de catégorie #3c5960 : les montagnes.
+    Animation (> 480px, sans mouvement réduit) : #nuages dérivent (30 s).
+  -->
+  <style>
+    @media (min-width: 480px) and (prefers-reduced-motion: no-preference) {
+      #nuages { animation: derive 30s ease-in-out infinite alternate; }
+      @keyframes derive { from { transform: translateX(-30px); } to { transform: translateX(40px); } }
+    }
+  </style>
+  <rect width="800" height="600" fill="#F4E9D8"/>
+  <g id="nuages" fill="#FFF8EC" stroke="#1F1915" stroke-width="3" stroke-linejoin="round">
+    <path d="M110 120 q14 -34 52 -24 q20 -30 58 -6 q38 -6 40 30 z"/>
+    <path d="M520 90 q12 -28 44 -20 q18 -26 50 -4 q32 -4 34 24 z"/>
+  </g>
+  <!-- Montagnes -->
+  <path d="M-20 420 L170 180 L280 300 L400 140 L560 330 L660 220 L820 400 V600 H-20 Z" fill="#3c5960" stroke="#1F1915" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M170 180 L210 230 L190 236 L170 220 L150 238 L140 218 Z M400 140 L450 200 L425 208 L400 190 L375 210 L360 190 Z M660 220 L690 255 L672 260 L660 250 L645 262 L638 248 Z" fill="#FFFBF6" stroke="#1F1915" stroke-width="3" stroke-linejoin="round"/>
+  <!-- Alpage -->
+  <path d="M0 440 C180 400 320 420 480 400 C620 385 720 410 800 400 V600 H0 Z" fill="#9DB37E" stroke="#1F1915" stroke-width="3"/>
+  <!-- Sentier -->
+  <path d="M120 600 C200 540 380 540 420 500 C450 470 380 450 430 425 C470 405 540 410 560 400" fill="none" stroke="#D9C2A0" stroke-width="34" stroke-linecap="round"/>
+  <path d="M120 600 C200 540 380 540 420 500 C450 470 380 450 430 425 C470 405 540 410 560 400" fill="none" stroke="#1F1915" stroke-width="3" stroke-dasharray="2 14" stroke-linecap="round"/>
+  <!-- Sapins -->
+  <g fill="#3E5A44" stroke="#1F1915" stroke-width="3" stroke-linejoin="round">
+    <path d="M50 520 l34 -120 l34 120 z"/><path d="M110 540 l28 -95 l28 95 z"/>
+    <path d="M640 520 l36 -130 l36 130 z"/><path d="M710 540 l30 -105 l30 105 z"/>
+  </g>
+  <path d="M84 520 v16 M138 540 v14 M676 520 v16 M740 540 v14" stroke="#1F1915" stroke-width="3"/>
+  <!-- Randonneur -->
+  <g stroke="#1F1915" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M402 358 h40 a8 8 0 0 1 8 8 v50 a8 8 0 0 1 -8 8 h-40 a8 8 0 0 1 -8 -8 v-50 a8 8 0 0 1 8 -8 z" fill="#3c5960"/>
+    <path d="M404 380 h36" fill="none"/>
+    <circle cx="430" cy="335" r="17" fill="#F4E9D8"/>
+    <path d="M414 330 q16 -20 34 -4 z" fill="#E0803A"/>
+    <path d="M432 352 C440 380 444 410 440 440 L460 482 M440 440 L418 486 M436 372 L470 402 L478 452" fill="none"/>
+  </g>
+</svg>

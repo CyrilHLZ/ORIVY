@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 112" role="img" aria-labelledby="orivy-titre">
+  <title id="orivy-titre">ORIVY</title>
+  <!--
+    Logotype ORIVY, couleurs fixes du thème nuit (pour une balise img).
+    - Lettres R I V Y et sentier : #EDE6DA (la couleur du texte du thème).
+    - Épingle (le O) : la variable CSS couleur-principale, terracotta par défaut.
+    (Attention : un double tiret est interdit dans un commentaire XML.)
+    Grille : hauteur des capitales de y=24 à y=78, trait de 10, bouts arrondis.
+  -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Le O : une épingle de carte. Cercle de rayon 24 centré sur la ligne médiane (y=51)
+         + pointe en V qui descend sous la ligne de base, jusqu'à y=100. -->
+    <path class="orivy-epingle" stroke="#E58E6A" stroke-width="10"
+          d="M40 100 L19.1 62.8 A24 24 0 1 1 60.9 62.8 Z"/>
+    <!-- Le sentier : pointillés (un point tous les 12) qui partent de la pointe de l'épingle... -->
+    <path class="orivy-sentier" stroke="#EDE6DA" stroke-width="6" stroke-dasharray="0 12"
+          d="M54 100 H198"/>
+    <!-- R I V : capitales géométriques à trait constant. -->
+    <path class="orivy-lettres" stroke="#EDE6DA" stroke-width="10"
+          d="M84 78 V24 H100 A15 15 0 0 1 100 54 H84 M100 54 L116 78
+             M136 24 V78
+             M154 24 L174 78 L194 24"/>
+    <!-- ...et le Y, dont le pied descend et tourne pour devenir le sentier : la lettre se fond dans le chemin. -->
+    <path class="orivy-lettres" stroke="#EDE6DA" stroke-width="10"
+          d="M214 24 L232 51 L250 24 M232 51 V86 Q232 100 212 100"/>
+  </g>
+</svg>

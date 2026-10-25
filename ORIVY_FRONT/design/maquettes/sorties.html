@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F6EFE6">
+  <title>Sorties à venir · ORIVY</title>
+  <script src="../themes.js"></script>
+  <script src="../saisons.js"></script>
+  <link rel="icon" href="../logo/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght,SOFT@9..144,600..700,100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../design-system.css">
+  <link rel="stylesheet" href="../themes.css">
+  <link rel="stylesheet" href="../saisons.css">
+  <link rel="stylesheet" href="../composants.css">
+  <link rel="stylesheet" href="pages.css">
+  <style>
+    /* Sur le fil plein écran, la décoration de coin chevaucherait les filtres */
+    @media (max-width: 1023px) { .page-sorties .entete .deco-coin { display: none; } }
+  </style>
+</head>
+<body data-page="sorties" class="page-sorties">
+<main>
+  <div class="conteneur ordinateur-seulement">
+    <div class="section-titre">
+      <h1 style="margin: 0">Sorties à venir</h1>
+      <a class="bouton bouton--principal" href="sortie-formulaire.html"><svg class="icone" aria-hidden="true"><use href="#i-plus"/></svg>Crée une sortie</a>
+    </div>
+  </div>
+  <h1 class="visuellement-cache">Sorties à venir</h1>
+
+  <div class="conteneur" style="padding-inline: 0">
+    <!-- Filtres : posés sur le fil en mobile, au-dessus de la grille sur ordinateur -->
+    <div class="fil-filtres conteneur">
+      <div class="puces" role="group" aria-label="Filtrer les sorties" id="filtres">
+        <a class="puce" href="sortie-formulaire.html" style="background: var(--couleur-principale); border-color: var(--couleur-principale); color: var(--couleur-sur-principale)"><svg class="icone" aria-hidden="true"><use href="#i-plus"/></svg>Crée</a>
+        <button class="puce" type="button" data-filtre="tout" aria-pressed="true">Toutes</button>
+        <button class="puce" type="button" data-filtre="weekend" aria-pressed="false">Ce week-end</button>
+        <button class="puce cat-promenade" type="button" data-filtre="promenade" aria-pressed="false"><svg class="icone" aria-hidden="true"><use href="#i-cat-promenade"/></svg>Randonnées</button>
+        <button class="puce cat-bar" type="button" data-filtre="bar" aria-pressed="false"><svg class="icone" aria-hidden="true"><use href="#i-cat-bar"/></svg>Bars</button>
+        <button class="puce cat-cinema" type="button" data-filtre="cinema" aria-pressed="false"><svg class="icone" aria-hidden="true"><use href="#i-cat-cinema"/></svg>Cinémas</button>
+      </div>
+    </div>
+
+    <!-- Le fil : une sortie par écran sur mobile (scroll-snap), grille sur ordinateur -->
+    <div class="fil conteneur" id="fil" tabindex="0" aria-label="Sorties à venir, fais défiler vers le haut pour la suivante"></div>
+  </div>
+  <div class="toast" role="status" hidden id="toast"></div>
+</main>
+
+<script src="donnees.js"></script>
+<script src="proximite.js"></script>
+<script>
+  /* Construit les diapositives du fil (composant <DiapoSortie />) */
+  (function () {
+    var D = window.ORIVY_DONNEES, P = window.ORIVY_PROXIMITE;
+    var fil = document.getElementById("fil");
+    var sorties = D.SORTIES.slice().sort(function (a, b) { return a.date.localeCompare(b.date); });
+    var LYON = D.VILLES.lyon; /* l'utilisatrice habite Lyon : distance depuis chez elle */
+
+    function diapo(s, premiere) {
+      var lieu = D.lieu(s.lieu), orga = D.UTILISATEURS[s.orga];
+      var km = P.distanceKm(LYON[0], LYON[1], lieu.lat, lieu.lng);
+      var coeurs = 3 + (s.id * 7) % 23, coms = (s.id * 3) % 9;
+      return '<article class="diapo cat-' + lieu.cat + '" data-cat="' + lieu.cat + '" data-date="' + s.date + '" aria-labelledby="d' + s.id + '">' +
+        '<div class="photo">' + P.icone("cat-" + lieu.cat) +
+          '<img src="' + D.photo(lieu.cat, 900) + '" alt="' + lieu.alt + '"' + (premiere ? "" : ' loading="lazy"') + ' onerror="this.remove()"></div>' +
+        '<div class="diapo__voile" aria-hidden="true"></div>' +
+        '<div class="diapo__contenu">' +
+          '<span style="align-self:flex-start">' + P.badgeCat(lieu.cat) + "</span>" +
+          '<h2 id="d' + s.id + '"><a href="sortie.html?id=' + s.id + '">' + s.titre + "</a></h2>" +
+          '<p class="diapo__meta"><span>' + P.icone("horloge", "icone--petite") + P.dateLisible(s.date) + "</span>" +
+            "<span>" + P.icone("epingle", "icone--petite") + lieu.nom + " · " + lieu.ville + " · " + P.formaterDistance(km) + "</span></p>" +
+          '<div class="diapo__orga">' + P.avatar(s.orga) + "<span>Par " + orga.nom.split(" ")[0] + " · " + s.inscrits.length + "/" + s.max + " inscrits</span></div>" +
+          '<div class="diapo__boutons"><button class="bouton bouton--principal" type="button" data-rejoindre>Rejoins</button>' +
+            '<a class="bouton bouton--secondaire" href="sortie.html?id=' + s.id + '">Détails</a></div>' +
+        "</div>" +
+        '<div class="diapo__actions">' +
+          '<button class="bouton bouton--icone" type="button" aria-pressed="false" aria-label="J\'aime, ' + coeurs + ' personnes aiment">' + P.icone("coeur") + "</button><small aria-hidden=\"true\">" + coeurs + "</small>" +
+          '<a class="bouton bouton--icone" href="sortie.html?id=' + s.id + '#t-commentaires" aria-label="' + coms + ' commentaires">' + P.icone("commentaire") + "</a><small aria-hidden=\"true\">" + coms + "</small>" +
+          '<button class="bouton bouton--icone" type="button" aria-label="Partager">' + P.icone("partager") + "</button>" +
+        "</div>" +
+        (premiere ? '<p class="fil-aide" aria-hidden="true">' + P.icone("chevron-haut", "icone--petite") + "Glisse pour la suivante</p>" : "") +
+        "</article>";
+    }
+    fil.innerHTML = sorties.map(function (s, i) { return diapo(s, i === 0); }).join("");
+
+    /* Filtres */
+    var WEEKEND = ["2026-10-24", "2026-10-25"];
+    document.getElementById("filtres").addEventListener("click", function (e) {
+      var b = e.target.closest("button.puce");
+      if (!b) return;
+      var f = b.getAttribute("data-filtre");
+      document.querySelectorAll("#filtres button.puce").forEach(function (p) { p.setAttribute("aria-pressed", String(p === b)); });
+      fil.querySelectorAll(".diapo").forEach(function (d) {
+        var ok = f === "tout" || d.getAttribute("data-cat") === f || (f === "weekend" && WEEKEND.indexOf(d.getAttribute("data-date").slice(0, 10)) > -1);
+        d.hidden = !ok;
+      });
+      fil.scrollTo({ top: 0 });
+    });
+
+    /* J'aime, Rejoins */
+    var toast = document.getElementById("toast"), minuteur;
+    fil.addEventListener("click", function (e) {
+      var coeur = e.target.closest("[aria-pressed]");
+      if (coeur) coeur.setAttribute("aria-pressed", String(coeur.getAttribute("aria-pressed") !== "true"));
+      var rejoindre = e.target.closest("[data-rejoindre]");
+      if (rejoindre) {
+        rejoindre.textContent = "Inscrit·e ✓";
+        rejoindre.disabled = true;
+        toast.innerHTML = P.icone("valider") + "C'est noté, à bientôt !";
+        toast.hidden = false;
+        clearTimeout(minuteur);
+        minuteur = setTimeout(function () { toast.hidden = true; }, 3500);
+      }
+    });
+  })();
+</script>
+<script src="commun.js"></script>
+<script src="../icones/icones.js"></script>
+<script src="../outils/selecteur-apercu.js"></script>
+</body>
+</html>

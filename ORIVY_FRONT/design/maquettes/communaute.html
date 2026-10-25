@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F6EFE6">
+  <title>Communauté · ORIVY</title>
+  <script src="../themes.js"></script>
+  <script src="../saisons.js"></script>
+  <link rel="icon" href="../logo/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght,SOFT@9..144,600..700,100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../design-system.css">
+  <link rel="stylesheet" href="../themes.css">
+  <link rel="stylesheet" href="../saisons.css">
+  <link rel="stylesheet" href="../composants.css">
+  <link rel="stylesheet" href="pages.css">
+</head>
+<body data-page="communaute" class="page-communaute">
+<main class="conteneur">
+  <h1 class="page-titre">Communauté</h1>
+  <p class="page-intro">Trouve des gens qui aiment les mêmes sorties que toi, et suis ce qu'ils préparent.</p>
+
+  <form class="champ" role="search" onsubmit="return false" style="margin-bottom: var(--espace-6)">
+    <label class="visuellement-cache" for="cherche">Cherche un profil</label>
+    <div class="champ__ligne">
+      <svg class="icone" aria-hidden="true"><use href="#i-loupe"/></svg>
+      <input class="champ__saisie" id="cherche" type="search" placeholder="Cherche un prénom, une ville…">
+    </div>
+  </form>
+
+  <div class="communaute-grille">
+    <!-- Fil d'activité des personnes suivies (esprit Strava) -->
+    <section aria-labelledby="t-activite">
+      <h2 id="t-activite" style="font-size: var(--taille-xl)">Ce que font tes abonnements</h2>
+      <ul class="activites" id="activites">
+        <li class="activite">
+          <span class="avatar avatar--c" aria-hidden="true">IN</span>
+          <div>
+            <p><strong>Inès</strong> organise <a href="sortie.html">Lever de soleil au puy de Dôme</a></p>
+            <small>il y a 2 h · Orcines</small>
+          </div>
+          <div class="photo cat-promenade"><svg class="icone" aria-hidden="true"><use href="#i-cat-promenade"/></svg><img src="https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=200&q=70" alt="" loading="lazy" onerror="this.remove()"></div>
+          <div class="activite__reactions">
+            <button class="bouton bouton--fantome" type="button" aria-pressed="true"><svg class="icone icone--petite" aria-hidden="true"><use href="#i-coeur"/></svg>12</button>
+            <a class="bouton bouton--fantome" href="sortie.html#t-commentaires"><svg class="icone icone--petite" aria-hidden="true"><use href="#i-commentaire"/></svg>3</a>
+          </div>
+        </li>
+        <li class="activite">
+          <span class="avatar avatar--d" aria-hidden="true">TM</span>
+          <div>
+            <p><strong>Théo</strong> a partagé 8 photos de <a href="sortie.html">Coucher de soleil à Étretat</a></p>
+            <small>hier · Étretat</small>
+          </div>
+          <div class="photo cat-observatoire"><svg class="icone" aria-hidden="true"><use href="#i-cat-observatoire"/></svg><img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=200&q=70" alt="" loading="lazy" onerror="this.remove()"></div>
+          <div class="activite__reactions">
+            <button class="bouton bouton--fantome" type="button" aria-pressed="false"><svg class="icone icone--petite" aria-hidden="true"><use href="#i-coeur"/></svg>27</button>
+            <a class="bouton bouton--fantome" href="sortie.html#t-commentaires"><svg class="icone icone--petite" aria-hidden="true"><use href="#i-commentaire"/></svg>5</a>
+          </div>
+        </li>
+        <li class="activite">
+          <span class="avatar avatar--b" aria-hidden="true">YB</span>
+          <div>
+            <p><strong>Yanis</strong> a rejoint <a href="sortie.html">Brunch lyonnais au bouchon</a></p>
+            <small>hier · Lyon 1er</small>
+          </div>
+          <div class="photo cat-restaurant"><svg class="icone" aria-hidden="true"><use href="#i-cat-restaurant"/></svg><img src="https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=200&q=70" alt="" loading="lazy" onerror="this.remove()"></div>
+          <div class="activite__reactions">
+            <button class="bouton bouton--fantome" type="button" aria-pressed="false"><svg class="icone icone--petite" aria-hidden="true"><use href="#i-coeur"/></svg>4</button>
+            <a class="bouton bouton--fantome" href="sortie.html#t-commentaires"><svg class="icone icone--petite" aria-hidden="true"><use href="#i-commentaire"/></svg>0</a>
+          </div>
+        </li>
+        <li class="activite">
+          <span class="avatar avatar--c" aria-hidden="true">SD</span>
+          <div>
+            <p><strong>Sarah</strong> a ajouté <a href="carte.html?lieu=12">Calanque de Sormiou</a> à ses envies</p>
+            <small>il y a 3 jours · Marseille</small>
+          </div>
+          <div class="photo cat-promenade"><svg class="icone" aria-hidden="true"><use href="#i-cat-promenade"/></svg></div>
+          <div class="activite__reactions">
+            <button class="bouton bouton--fantome" type="button" aria-pressed="false"><svg class="icone icone--petite" aria-hidden="true"><use href="#i-coeur"/></svg>9</button>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Profils à suivre -->
+    <aside class="pile" aria-labelledby="t-suggestions">
+      <h2 id="t-suggestions" style="font-size: var(--taille-xl); margin: 0">Près de toi, à Lyon</h2>
+      <div class="liste-profils" id="profils" style="grid-template-columns: 1fr"></div>
+      <h2 style="font-size: var(--taille-xl); margin: var(--espace-4) 0 0">Les plus actifs ce mois-ci</h2>
+      <div class="liste-profils" id="actifs" style="grid-template-columns: 1fr"></div>
+    </aside>
+  </div>
+</main>
+
+<script src="donnees.js"></script>
+<script>
+  (function () {
+    var D = window.ORIVY_DONNEES;
+    function carte(cle, info, abonne) {
+      var u = D.UTILISATEURS[cle];
+      return '<div class="carte-utilisateur"><span class="avatar avatar--' + u.couleur + '" aria-hidden="true">' + u.initiales + "</span>" +
+        '<div><p class="carte-utilisateur__nom"><a href="profil.html?u=' + cle + '">' + u.nom + "</a></p>" +
+        '<p class="carte-utilisateur__info">' + info + "</p></div>" +
+        '<button class="bouton bouton-suivre" type="button" aria-pressed="' + abonne + '">' + (abonne ? "Abonné·e" : "Suivre") + "</button></div>";
+    }
+    document.getElementById("profils").innerHTML =
+      carte("mathis", "Lyon 6e · pique-niques et jeux de société", false) +
+      carte("yanis", "Lyon 1er · 3 sorties en commun avec toi", true) +
+      carte("ines", "Lyon 5e · organise des randos le dimanche", true);
+    document.getElementById("actifs").innerHTML =
+      carte("sarah", "Marseille · 9 sorties ce mois-ci", false) +
+      carte("nina", "Bordeaux · reine des guinguettes", false) +
+      carte("sami", "Lille · ciné-club et brocantes", false);
+
+    /* Suivre / J'aime : bascule de l'état (dans React : appel à l'API) */
+    document.querySelector("main").addEventListener("click", function (e) {
+      var b = e.target.closest("[aria-pressed]");
+      if (!b) return;
+      var actif = b.getAttribute("aria-pressed") === "true";
+      b.setAttribute("aria-pressed", String(!actif));
+      if (b.classList.contains("bouton-suivre")) b.textContent = actif ? "Suivre" : "Abonné·e";
+    });
+  })();
+</script>
+<script src="commun.js"></script>
+<script src="../icones/icones.js"></script>
+<script src="../outils/selecteur-apercu.js"></script>
+</body>
+</html>

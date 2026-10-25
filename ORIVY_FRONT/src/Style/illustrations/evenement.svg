@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" aria-hidden="true">
+  <!--
+    Événement : fête de village, lampions, silhouettes qui dansent.
+    Couleur de catégorie #e76f51 : lampions et fanions principaux.
+    Animation (> 480px, sans mouvement réduit) :
+      .lampion se balancent (rotation ±5°, 3 s) · .danseur sautillent (translation 8px, 0,9 s).
+  -->
+  <style>
+    @media (min-width: 480px) and (prefers-reduced-motion: no-preference) {
+      .lampion { transform-box: fill-box; transform-origin: 50% 0%; animation: balance 3s ease-in-out infinite alternate; }
+      .lampion:nth-child(2n) { animation-delay: -1.5s; }
+      .danseur { animation: danse .9s ease-in-out infinite alternate; }
+      .danseur:nth-child(2) { animation-delay: -.45s; }
+      .danseur:nth-child(3) { animation-delay: -.2s; }
+      @keyframes balance { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+      @keyframes danse { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+    }
+  </style>
+  <!-- Ciel de soirée d'été -->
+  <rect width="800" height="600" fill="#3F4E6B"/>
+  <rect y="300" width="800" height="300" fill="#4D5E7C"/>
+  <g fill="#FFF1D6"><circle cx="90" cy="60" r="2.5"/><circle cx="240" cy="40" r="2"/><circle cx="520" cy="70" r="2.5"/><circle cx="700" cy="40" r="2"/><circle cx="640" cy="120" r="2"/></g>
+  <!-- Maisons du village en fond -->
+  <g stroke="#1F1915" stroke-width="3" stroke-linejoin="round" fill="#6B6A7E">
+    <path d="M0 380 V250 L70 200 L140 250 V380 Z"/><path d="M140 380 V270 L210 230 L280 270 V380 Z"/>
+    <path d="M540 380 V260 L620 210 L700 260 V380 Z"/><path d="M700 380 V240 L760 200 L820 240 V380 Z"/>
+  </g>
+  <g fill="#F6D9A0" stroke="#1F1915" stroke-width="2"><rect x="50" y="280" width="34" height="40"/><rect x="200" y="300" width="30" height="36"/><rect x="600" y="290" width="34" height="40"/></g>
+  <!-- Place -->
+  <path d="M0 380 H800 V600 H0 Z" fill="#C9A06A" stroke="#1F1915" stroke-width="3"/>
+  <!-- Fils et fanions -->
+  <path d="M0 110 Q400 220 800 110" fill="none" stroke="#1F1915" stroke-width="3"/>
+  <g stroke="#1F1915" stroke-width="2" stroke-linejoin="round">
+    <path d="M60 126 l14 30 l14 -26 z" fill="#e76f51"/><path d="M160 150 l14 30 l14 -26 z" fill="#F6CF7A"/>
+    <path d="M260 166 l14 30 l14 -26 z" fill="#e76f51"/><path d="M360 172 l14 30 l14 -26 z" fill="#9CC3CF"/>
+    <path d="M460 170 l14 30 l14 -26 z" fill="#e76f51"/><path d="M560 160 l14 30 l14 -26 z" fill="#F6CF7A"/>
+    <path d="M660 140 l14 30 l14 -26 z" fill="#e76f51"/>
+  </g>
+  <path d="M0 40 Q400 160 800 40" fill="none" stroke="#1F1915" stroke-width="3"/>
+  <!-- Lampions -->
+  <g id="lampions" stroke="#1F1915" stroke-width="3" stroke-linejoin="round">
+    <g class="lampion"><path d="M150 72 v14"/><ellipse cx="150" cy="106" rx="22" ry="22" fill="#e76f51"/><path d="M130 100 h40 M130 112 h40" stroke-width="1.5"/></g>
+    <g class="lampion"><path d="M290 98 v14"/><ellipse cx="290" cy="132" rx="22" ry="22" fill="#F6CF7A"/><path d="M270 126 h40 M270 138 h40" stroke-width="1.5"/></g>
+    <g class="lampion"><path d="M400 106 v14"/><ellipse cx="400" cy="140" rx="24" ry="24" fill="#e76f51"/><path d="M378 134 h44 M378 146 h44" stroke-width="1.5"/></g>
+    <g class="lampion"><path d="M510 98 v14"/><ellipse cx="510" cy="132" rx="22" ry="22" fill="#7FB069"/><path d="M490 126 h40 M490 138 h40" stroke-width="1.5"/></g>
+    <g class="lampion"><path d="M650 72 v14"/><ellipse cx="650" cy="106" rx="22" ry="22" fill="#e76f51"/><path d="M630 100 h40 M630 112 h40" stroke-width="1.5"/></g>
+  </g>
+  <!-- Silhouettes qui dansent (au trait, sur fond clair de la place) -->
+  <g id="danseurs" fill="none" stroke="#1F1915" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <g class="danseur"><circle cx="250" cy="400" r="20" fill="#1F1915"/><path d="M250 420 v70 M250 440 l-36 -30 M250 440 l40 10 M250 490 l-24 50 M250 490 l30 46"/></g>
+    <g class="danseur"><circle cx="400" cy="390" r="20" fill="#1F1915"/><path d="M400 410 v74 M400 430 l-40 -20 M400 430 l36 -34 M400 484 l-30 50 M400 484 l20 52"/><path d="M380 470 q20 30 40 0" fill="#e76f51" stroke-width="3"/></g>
+    <g class="danseur"><circle cx="555" cy="402" r="20" fill="#1F1915"/><path d="M555 422 v68 M555 442 l-30 20 M555 442 l38 -26 M555 490 l-20 48 M555 490 l34 40"/></g>
+  </g>
+</svg>

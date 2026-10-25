@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F6EFE6">
+  <title>Crée une sortie · ORIVY</title>
+  <script src="../themes.js"></script>
+  <script src="../saisons.js"></script>
+  <link rel="icon" href="../logo/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght,SOFT@9..144,600..700,100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../design-system.css">
+  <link rel="stylesheet" href="../themes.css">
+  <link rel="stylesheet" href="../saisons.css">
+  <link rel="stylesheet" href="../composants.css">
+  <link rel="stylesheet" href="pages.css">
+</head>
+<body data-page="sorties" class="page-formulaire">
+<main class="conteneur">
+  <a class="bouton bouton--fantome" href="sorties.html" style="margin-top: var(--espace-3)"><svg class="icone" aria-hidden="true"><use href="#i-retour"/></svg>Retour</a>
+  <h1 class="page-titre" id="titre-page">Crée une sortie</h1>
+  <p class="page-intro" id="intro-page">Choisis un lieu, une date, et donne envie aux autres de te rejoindre.</p>
+
+  <div class="formulaire-sortie">
+    <form class="formulaire" id="formulaire" novalidate>
+      <div class="champ" id="champ-titre">
+        <label class="champ__label" for="titre">Titre de la sortie</label>
+        <input class="champ__saisie" id="titre" type="text" maxlength="70" required placeholder="Ex. : Pique-nique au bord de l'Erdre" aria-describedby="titre-aide titre-erreur">
+        <p class="champ__aide" id="titre-aide">Court et parlant : on doit comprendre l'idée en un coup d'œil.</p>
+        <p class="champ__erreur" id="titre-erreur" hidden><svg class="icone" aria-hidden="true"><use href="#i-alerte"/></svg>Donne un titre à ta sortie.</p>
+      </div>
+
+      <div class="champ" id="champ-lieu">
+        <label class="champ__label" for="lieu">Lieu</label>
+        <div class="champ__ligne">
+          <svg class="icone" aria-hidden="true"><use href="#i-epingle"/></svg>
+          <!-- Champ de recherche avec liste de suggestions (motif « combobox ») -->
+          <input class="champ__saisie" id="lieu" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggestions" autocomplete="off" required placeholder="Cherche un lieu : parc, musée, ville…" aria-describedby="lieu-erreur">
+        </div>
+        <ul class="suggestions" id="suggestions" role="listbox" hidden aria-label="Lieux proposés"></ul>
+        <p class="champ__erreur" id="lieu-erreur" hidden><svg class="icone" aria-hidden="true"><use href="#i-alerte"/></svg>Choisis un lieu dans la liste.</p>
+      </div>
+
+      <fieldset class="choix-cat">
+        <legend>Type de sortie</legend>
+        <div class="puces" id="types"></div>
+      </fieldset>
+
+      <div class="deux-champs">
+        <div class="champ" id="champ-date">
+          <label class="champ__label" for="date">Date</label>
+          <input class="champ__saisie" id="date" type="date" required min="2026-10-22" aria-describedby="date-erreur">
+          <p class="champ__erreur" id="date-erreur" hidden><svg class="icone" aria-hidden="true"><use href="#i-alerte"/></svg>Choisis une date à venir.</p>
+        </div>
+        <div class="champ">
+          <label class="champ__label" for="heure">Heure</label>
+          <input class="champ__saisie" id="heure" type="time" value="14:00">
+        </div>
+      </div>
+
+      <div class="champ">
+        <label class="champ__label" for="places">Nombre de places</label>
+        <input class="champ__saisie" id="places" type="number" min="2" max="50" value="10" inputmode="numeric" style="max-width: calc(var(--espace-9) * 1.5)">
+        <p class="champ__aide">Toi compris·e. Laisse 10 si tu ne sais pas.</p>
+      </div>
+
+      <div class="champ">
+        <label class="champ__label" for="description">Description</label>
+        <textarea class="champ__saisie" id="description" maxlength="600" placeholder="Le programme, ce qu'il faut apporter, où se retrouver…" aria-describedby="compteur"></textarea>
+        <p class="compteur" id="compteur" aria-live="polite">0 / 600</p>
+      </div>
+
+      <label class="televersement">
+        <svg class="icone icone--grande" aria-hidden="true"><use href="#i-appareil-photo"/></svg>
+        <strong>Ajoute une photo</strong>
+        <span style="font-size: var(--taille-s)">Facultatif · JPG ou PNG, 5 Mo maximum. Sinon, on prend la photo du lieu.</span>
+        <input type="file" accept="image/jpeg,image/png">
+      </label>
+
+      <div class="formulaire__pied">
+        <a class="bouton bouton--fantome" href="sorties.html">Annuler</a>
+        <button class="bouton bouton--principal" type="submit" id="valider">Publie la sortie</button>
+      </div>
+
+      <!-- Mode modifier uniquement -->
+      <section class="zone-danger" id="zone-danger" hidden aria-labelledby="t-danger">
+        <h2 id="t-danger">Supprimer la sortie</h2>
+        <p class="texte-doux" style="font-size: var(--taille-s)">Les inscrits seront prévenus. Cette action est définitive.</p>
+        <button class="bouton bouton--danger" type="button" onclick="document.getElementById('confirmer').showModal()"><svg class="icone" aria-hidden="true"><use href="#i-supprimer"/></svg>Supprimer la sortie</button>
+      </section>
+    </form>
+
+    <!-- Aperçu en direct (ordinateur) -->
+    <aside class="apercu-sortie" aria-label="Aperçu de ta sortie">
+      <h2 style="font-size: var(--taille-l); margin: 0">Aperçu</h2>
+      <p class="texte-doux" style="font-size: var(--taille-s); margin: 0">Voilà comment ta sortie apparaîtra dans la liste.</p>
+      <div id="apercu"></div>
+    </aside>
+  </div>
+
+  <dialog class="fenetre" id="confirmer" aria-labelledby="confirmer-titre">
+    <h2 id="confirmer-titre">Supprimer cette sortie ?</h2>
+    <p>Les 8 inscrits seront prévenus par une notification. Cette action est définitive.</p>
+    <form class="fenetre__actions" method="dialog">
+      <button class="bouton bouton--secondaire" value="non">Garder la sortie</button>
+      <button class="bouton bouton--danger-plein" value="oui"><svg class="icone" aria-hidden="true"><use href="#i-supprimer"/></svg>Oui, supprimer</button>
+    </form>
+  </dialog>
+  <div class="toast" role="status" hidden id="toast"></div>
+</main>
+
+<script src="donnees.js"></script>
+<script src="proximite.js"></script>
+<script>
+  (function () {
+    var D = window.ORIVY_DONNEES, P = window.ORIVY_PROXIMITE;
+    var params = new URLSearchParams(location.search);
+    var modifier = params.get("mode") === "modifier";
+    var lieuChoisi = D.lieu(+params.get("lieu")) || null;
+    var $ = function (id) { return document.getElementById(id); };
+
+    /* Types de sortie : boutons radio stylés en puces */
+    var types = ["promenade", "parc", "culture", "monument", "village", "observatoire", "restaurant", "bar", "cinema", "evenement", "sport", "autre"];
+    $("types").innerHTML = types.map(function (c, i) {
+      return '<label class="cat-' + c + '"><input type="radio" name="type" value="' + c + '"' + (i === 0 ? " checked" : "") + '>' +
+        '<span class="puce">' + P.icone("cat-" + c) + D.CATEGORIES[c].nom + "</span></label>";
+    }).join("");
+
+    /* Recherche de lieu avec suggestions */
+    var champLieu = $("lieu"), liste = $("suggestions");
+    function choisir(lieu) {
+      lieuChoisi = lieu;
+      champLieu.value = lieu.nom + " · " + lieu.ville;
+      liste.hidden = true;
+      champLieu.setAttribute("aria-expanded", "false");
+      var radio = document.querySelector('input[name="type"][value="' + lieu.cat + '"]');
+      if (radio) radio.checked = true;
+      $("lieu-erreur").hidden = true;
+      $("champ-lieu").classList.remove("champ--erreur");
+      majApercu();
+    }
+    champLieu.addEventListener("input", function () {
+      var q = champLieu.value.trim().toLowerCase();
+      var trouves = q.length < 2 ? [] : D.LIEUX.filter(function (l) { return (l.nom + " " + l.ville).toLowerCase().indexOf(q) > -1; }).slice(0, 5);
+      liste.innerHTML = trouves.map(function (l) {
+        return '<li role="option" id="s' + l.id + '" data-id="' + l.id + '" class="cat-' + l.cat + '">' + P.icone("cat-" + l.cat) +
+          "<span>" + l.nom + "<br><small>" + l.ville + " · " + D.CATEGORIES[l.cat].nom + "</small></span></li>";
+      }).join("");
+      liste.hidden = trouves.length === 0;
+      champLieu.setAttribute("aria-expanded", String(trouves.length > 0));
+      lieuChoisi = null;
+    });
+    liste.addEventListener("click", function (e) {
+      var li = e.target.closest("li");
+      if (li) choisir(D.lieu(+li.getAttribute("data-id")));
+    });
+    champLieu.addEventListener("keydown", function (e) {
+      var options = Array.prototype.slice.call(liste.querySelectorAll("li"));
+      if (!options.length) return;
+      var i = options.findIndex(function (o) { return o.getAttribute("aria-selected") === "true"; });
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        i = e.key === "ArrowDown" ? Math.min(i + 1, options.length - 1) : Math.max(i - 1, 0);
+        options.forEach(function (o, j) { o.setAttribute("aria-selected", String(j === i)); });
+        champLieu.setAttribute("aria-activedescendant", options[i].id);
+      } else if (e.key === "Enter" && i > -1) {
+        e.preventDefault();
+        choisir(D.lieu(+options[i].getAttribute("data-id")));
+      }
+    });
+
+    /* Compteur de caractères */
+    $("description").addEventListener("input", function () { $("compteur").textContent = this.value.length + " / 600"; });
+
+    /* Aperçu en direct */
+    function majApercu() {
+      var lieu = lieuChoisi || D.lieu(4);
+      var date = ($("date").value || "2026-11-01") + "T" + ($("heure").value || "14:00");
+      var faux = { id: 0, titre: $("titre").value || "Ta super sortie", lieu: lieu.id, date: date, orga: "moi", inscrits: ["moi"], max: +$("places").value || 10 };
+      $("apercu").innerHTML = P.carteSortieHTML(faux, null);
+    }
+    ["titre", "date", "heure", "places"].forEach(function (id) { $(id).addEventListener("input", majApercu); });
+
+    /* Validation : message sous chaque champ fautif, focus sur le premier */
+    $("formulaire").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var erreurs = [];
+      function verifier(ok, champ, bloc, erreur) {
+        $(bloc).classList.toggle("champ--erreur", !ok);
+        $(erreur).hidden = ok;
+        $(champ).setAttribute("aria-invalid", String(!ok));
+        if (!ok) erreurs.push($(champ));
+      }
+      verifier($("titre").value.trim().length > 0, "titre", "champ-titre", "titre-erreur");
+      verifier(!!lieuChoisi, "lieu", "champ-lieu", "lieu-erreur");
+      verifier(!!$("date").value && $("date").value >= "2026-10-22", "date", "champ-date", "date-erreur");
+      if (erreurs.length) { erreurs[0].focus(); return; }
+      $("toast").innerHTML = P.icone("valider") + (modifier ? "Modifications enregistrées." : "Ta sortie est en ligne !");
+      $("toast").hidden = false;
+    });
+
+    /* Mode « modifier » : champs préremplis + zone danger */
+    if (modifier) {
+      document.title = "Modifie ta sortie · ORIVY";
+      $("titre-page").textContent = "Modifie ta sortie";
+      $("intro-page").textContent = "Les inscrits seront prévenus des changements de date ou de lieu.";
+      $("valider").textContent = "Enregistre les modifications";
+      $("titre").value = "Lever de soleil au puy de Dôme";
+      $("date").value = "2026-10-25";
+      $("heure").value = "07:00";
+      $("places").value = 12;
+      $("description").value = "On grimpe à la frontale par le chemin des Muletiers pour arriver au sommet juste avant le lever du soleil.";
+      $("compteur").textContent = $("description").value.length + " / 600";
+      choisir(D.lieu(4));
+      $("zone-danger").hidden = false;
+    } else if (lieuChoisi) {
+      choisir(lieuChoisi);   /* arrivée depuis « Crée une sortie ici » sur la carte */
+    }
+    majApercu();
+  })();
+</script>
+<script src="commun.js"></script>
+<script src="../icones/icones.js"></script>
+<script src="../outils/selecteur-apercu.js"></script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F6EFE6">
+  <title>Lieux à découvrir · ORIVY</title>
+  <script src="../themes.js"></script>
+  <script src="../saisons.js"></script>
+  <link rel="icon" href="../logo/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght,SOFT@9..144,600..700,100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../design-system.css">
+  <link rel="stylesheet" href="../themes.css">
+  <link rel="stylesheet" href="../saisons.css">
+  <link rel="stylesheet" href="../composants.css">
+  <link rel="stylesheet" href="pages.css">
+</head>
+<body data-page="carte" class="page-activites">
+<main class="conteneur">
+  <h1 class="page-titre">Lieux à découvrir</h1>
+  <p class="page-intro">Monuments, parcs, randonnées, bonnes tables : trouve ta prochaine sortie près de chez toi.</p>
+
+  <!-- Système de proximité -->
+  <section class="proximite" aria-label="Où chercher">
+    <div class="proximite__position">
+      <!-- La position n'est JAMAIS demandée au chargement : seulement au clic ici -->
+      <button class="bouton bouton--secondaire bouton--pilule" type="button" id="autour"><svg class="icone" aria-hidden="true"><use href="#i-autour"/></svg>Autour de moi</button>
+      <form class="champ" id="form-ville" role="search">
+        <label class="visuellement-cache" for="ville">Ou tape une ville</label>
+        <div class="champ__ligne">
+          <svg class="icone" aria-hidden="true"><use href="#i-epingle"/></svg>
+          <input class="champ__saisie" id="ville" type="search" placeholder="Ou tape une ville : Lyon, Lille…" autocomplete="address-level2">
+        </div>
+      </form>
+    </div>
+    <div class="proximite__reglages">
+      <fieldset class="rayon" id="rayon" disabled>
+        <legend>Rayon de recherche</legend>
+        <label><input type="radio" name="rayon" value="1"><span>1 km</span></label>
+        <label><input type="radio" name="rayon" value="5"><span>5 km</span></label>
+        <label><input type="radio" name="rayon" value="10"><span>10 km</span></label>
+        <label><input type="radio" name="rayon" value="25" checked><span>25 km</span></label>
+        <label><input type="radio" name="rayon" value="50"><span>50 km</span></label>
+      </fieldset>
+      <label class="tri">Trier par
+        <select class="champ__saisie" id="tri">
+          <option value="proche">Plus proche</option>
+          <option value="note">Mieux noté</option>
+          <option value="recent">Plus récent</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <!-- Si la position est refusée -->
+  <p class="alerte-position" id="alerte" role="alert" hidden><svg class="icone" aria-hidden="true"><use href="#i-info"/></svg><span id="alerte-texte"></span></p>
+
+  <div class="puces" role="group" aria-label="Catégories" id="filtres"></div>
+
+  <div class="resultats-tete">
+    <p aria-live="polite" id="compte">26 lieux partout en France</p>
+    <a class="bouton bouton--fantome" href="carte.html"><svg class="icone" aria-hidden="true"><use href="#i-carte"/></svg>Vois sur la carte</a>
+  </div>
+
+  <div class="grille-lieux" id="resultats"></div>
+
+  <div class="etat" id="vide" hidden>
+    <span class="deco-vide" aria-hidden="true"></span>
+    <span class="etat__icone" aria-hidden="true"><svg class="icone icone--grande"><use href="#i-epingle"/></svg></span>
+    <h2 style="font-size: var(--taille-l); margin: 0">Rien dans ce rayon</h2>
+    <p>Aucun lieu à moins de <span id="vide-rayon">1 km</span>. Élargis le rayon, ou propose un lieu à l'équipe.</p>
+    <button class="bouton bouton--secondaire" type="button" id="elargir">Passer à 50 km</button>
+  </div>
+</main>
+
+<script src="donnees.js"></script>
+<script src="proximite.js"></script>
+<script src="activites.js"></script>
+<script src="commun.js"></script>
+<script src="../icones/icones.js"></script>
+<script src="../outils/selecteur-apercu.js"></script>
+</body>
+</html>

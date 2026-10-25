@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+  <!-- Boule de Noël : mini de Noël. -->
+  <path d="M12 0.5 V4" stroke="#A89A8A" stroke-width="1.2"/>
+  <rect x="9.5" y="3.5" width="5" height="3" rx="1" fill="#C9A34A" stroke="#8E7234" stroke-width="0.8"/>
+  <circle id="boule" cx="12" cy="14.5" r="8" fill="#C12C15" stroke="#7E1D0E" stroke-width="1.1"/>
+  <path d="M5 13.5 Q12 17 19 13.5" fill="none" stroke="#F3D58A" stroke-width="1.4" stroke-linecap="round"/>
+  <circle cx="9" cy="11" r="1.6" fill="#FFFFFF" opacity=".55"/>
+</svg>

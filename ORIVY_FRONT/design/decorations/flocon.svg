@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+  <!-- Flocon : mini de l'hiver, flocon qui tombe (hiver et Noël).
+       Bleu glacier moyen : visible sur fond clair comme sur le vert forêt de nuit. -->
+  <g id="flocon" fill="none" stroke="#7FB2D1" stroke-width="1.8" stroke-linecap="round">
+    <g id="branche">
+      <path d="M12 2 V22 M9 4.5 L12 7 L15 4.5 M9 19.5 L12 17 L15 19.5"/>
+    </g>
+    <use href="#branche" transform="rotate(60 12 12)"/>
+    <use href="#branche" transform="rotate(120 12 12)"/>
+  </g>
+</svg>

@@ -1,0 +1,233 @@
+/* ==========================================================================
+   ORIVY — Saisons et événements
+   --------------------------------------------------------------------------
+   Posé APRÈS design-system.css et themes.css. La saison est choisie par
+   saisons.js et écrite sur <html> :
+     <html data-theme="…" data-saison="printemps | ete | automne | hiver | halloween | noel"
+           data-decorations="on | off">
+
+   La saison gère :
+     - la principale (une terracotta « déclinée » : rosée, dorée, brique…),
+     - l'accent (c'est lui qui porte vraiment la couleur de la saison),
+     - les décorations (coin de l'en-tête, petit objet près du logo,
+       états vides, éléments qui tombent).
+   Chaque saison a une version claire (aube, jour, crépuscule) et une
+   version nuit. Tous les couples ont été vérifiés : outils/verifier-contrastes.js.
+
+   Pour un aperçu côte à côte, poser data-theme ET data-saison sur le même bloc.
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   1. Couleurs : version claire (aube, jour, crépuscule)
+   -------------------------------------------------------------------------- */
+
+/* Printemps : terracotta rosée + vert tendre */
+[data-saison="printemps"] {
+  --couleur-principale: #A9463F;
+  --couleur-principale-survol: #933D36;
+  --couleur-accent: #63924B;
+  --couleur-accent-texte: #4B6F39;
+  --couleur-succes: #4B6F39;
+}
+
+/* Été : terracotta dorée + bleu ciel (le jaune soleil reste dans les décorations) */
+[data-saison="ete"] {
+  --couleur-principale: #975523;
+  --couleur-principale-survol: #824A1F;
+  --couleur-accent: #3F8CC2;
+  --couleur-accent-texte: #2F6993;
+}
+
+/* Automne : brique + vert mousse */
+[data-saison="automne"] {
+  --couleur-principale: #A04D2C;
+  --couleur-principale-survol: #8C4326;
+  --couleur-accent: #808C42;
+  --couleur-accent-texte: #606A32;
+  --couleur-succes: #606A32;
+}
+
+/* Hiver : terracotta de base + bleu glacier */
+[data-saison="hiver"] {
+  --couleur-principale: #A34E2C;
+  --couleur-principale-survol: #873F22;
+  --couleur-accent: #4B8EAF;
+  --couleur-accent-texte: #396B84;
+}
+
+/* Halloween (20 – 31 octobre) : orange citrouille + violet doux */
+[data-saison="halloween"] {
+  --couleur-principale: #A24C1A;
+  --couleur-principale-survol: #8F4317;
+  --couleur-accent: #9778BA;
+  --couleur-accent-texte: #7954A3;
+}
+
+/* Noël (1er – 26 décembre) : rouge écarlate + vert sapin.
+   L'écarlate (teinte 8°, orangée) reste distinct du danger framboise (346°, rosée),
+   et le bouton danger est toujours en CONTOUR avec icône : jamais un aplat comme le bouton principal. */
+[data-saison="noel"] {
+  --couleur-principale: #C12C15;
+  --couleur-principale-survol: #A82613;
+  --couleur-accent: #42946B;
+  --couleur-accent-texte: #337152;
+  --couleur-succes: #337152;
+}
+
+
+/* --------------------------------------------------------------------------
+   2. Couleurs : version nuit
+   Sélecteur [data-theme="nuit"][data-saison="…"] : plus précis que chacun
+   des deux seuls, il gagne toujours, quel que soit l'ordre des fichiers.
+   -------------------------------------------------------------------------- */
+[data-theme="nuit"][data-saison="printemps"] {
+  --couleur-principale: #D08680;  --couleur-principale-survol: #DDA6A2;
+  --couleur-accent: #6BA94C;      --couleur-accent-texte: #6BA94C;  --couleur-succes: #6BA94C;
+}
+[data-theme="nuit"][data-saison="ete"] {
+  --couleur-principale: #D48649;  --couleur-principale-survol: #E0A77B;
+  --couleur-accent: #56A0D5;      --couleur-accent-texte: #56A0D5;
+}
+[data-theme="nuit"][data-saison="automne"] {
+  --couleur-principale: #D58565;  --couleur-principale-survol: #E0A68F;
+  --couleur-accent: #91A145;      --couleur-accent-texte: #91A145;  --couleur-succes: #91A145;
+}
+[data-theme="nuit"][data-saison="hiver"] {
+  --couleur-principale: #E58E6A;  --couleur-principale-survol: #EFA585;
+  --couleur-accent: #57A1C7;      --couleur-accent-texte: #57A1C7;
+}
+[data-theme="nuit"][data-saison="halloween"] {
+  --couleur-principale: #E17F47;  --couleur-principale-survol: #E9A279;
+  --couleur-accent: #AC8BD3;      --couleur-accent-texte: #AC8BD3;
+}
+[data-theme="nuit"][data-saison="noel"] {
+  --couleur-principale: #EE7563;  --couleur-principale-survol: #F39C8F;
+  --couleur-accent: #51A97D;      --couleur-accent-texte: #51A97D;  --couleur-succes: #51A97D;
+}
+
+
+/* --------------------------------------------------------------------------
+   3. Images des décorations
+   Les chemins url() sont relatifs à CE fichier (design/saisons.css).
+   -------------------------------------------------------------------------- */
+[data-saison="printemps"] { --deco-coin: url("decorations/printemps-coin.svg"); --deco-mini: url("decorations/fleur.svg"); --deco-chute: url("decorations/fleur.svg"); }
+[data-saison="ete"]       { --deco-coin: url("decorations/ete-coin.svg");       --deco-mini: url("decorations/soleil.svg"); --deco-chute: none; }
+[data-saison="automne"]   { --deco-coin: url("decorations/automne-coin.svg");   --deco-mini: url("decorations/feuille.svg"); --deco-chute: url("decorations/feuille.svg"); }
+[data-saison="hiver"]     { --deco-coin: url("decorations/hiver-coin.svg");     --deco-mini: url("decorations/flocon.svg"); --deco-chute: url("decorations/flocon.svg"); }
+[data-saison="halloween"] { --deco-coin: url("decorations/halloween-coin.svg"); --deco-mini: url("decorations/citrouille.svg"); --deco-chute: url("decorations/feuille.svg"); }
+[data-saison="noel"]      { --deco-coin: url("decorations/noel-coin.svg");      --deco-mini: url("decorations/boule.svg"); --deco-chute: url("decorations/flocon.svg"); }
+
+
+/* --------------------------------------------------------------------------
+   4. Emplacements des décorations
+   Toujours : aria-hidden="true" dans le HTML, pointer-events: none ici
+   (une décoration n'empêche jamais un clic), et masquées si l'utilisateur
+   les a désactivées (data-decorations="off").
+
+   HTML à poser dans les composants :
+     <span class="deco-coin" aria-hidden="true"></span>      coin de l'en-tête
+     <span class="deco-mini" aria-hidden="true"></span>      à côté du logo
+     <span class="deco-vide" aria-hidden="true"></span>      au-dessus d'un état vide
+     <div class="deco-chute" aria-hidden="true">              éléments qui tombent
+       <i></i><i></i><i></i><i></i><i></i><i></i>            (6 maximum)
+     </div>
+   -------------------------------------------------------------------------- */
+.deco-coin,
+.deco-mini,
+.deco-vide,
+.deco-chute {
+  pointer-events: none;
+  user-select: none;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+}
+
+/* Coin de l'en-tête : en haut à droite, en partie hors du bloc. Le parent doit être en position: relative. */
+.deco-coin {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--espace-8);
+  height: var(--espace-8);
+  background-image: var(--deco-coin);
+  background-position: top right;
+  z-index: var(--plan-decor);
+  transform-origin: top right;
+  animation: deco-balance 6s var(--courbe-douce) infinite alternate;
+}
+@media (min-width: 1024px) {
+  .deco-coin { width: var(--espace-9); height: var(--espace-9); }
+}
+
+/* Petit objet à côté de l'épingle du logo */
+.deco-mini {
+  display: inline-block;
+  width: var(--espace-4);
+  height: var(--espace-4);
+  background-image: var(--deco-mini);
+  vertical-align: top;
+  animation: deco-balance 4s var(--courbe-douce) infinite alternate;
+}
+
+/* Illustration au-dessus d'un état vide (« Aucune sortie prévue… ») */
+.deco-vide {
+  display: block;
+  width: var(--espace-9);
+  height: var(--espace-9);
+  margin: 0 auto var(--espace-4);
+  background-image: var(--deco-coin);
+}
+
+/* Éléments qui tombent : 6 particules, chacune avec sa position et son rythme */
+.deco-chute {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: var(--plan-decor);
+}
+.deco-chute i {
+  position: absolute;
+  top: calc(var(--espace-4) * -1);
+  width: var(--espace-3);
+  height: var(--espace-3);
+  background: var(--deco-chute) no-repeat center / contain;
+  opacity: 0;
+  animation: deco-chute 9s linear infinite;
+}
+.deco-chute i:nth-child(1) { left: 8%;  animation-delay: 0s; }
+.deco-chute i:nth-child(2) { left: 24%; animation-delay: -3s; animation-duration: 11s; }
+.deco-chute i:nth-child(3) { left: 41%; animation-delay: -6s; }
+.deco-chute i:nth-child(4) { left: 58%; animation-delay: -1.5s; animation-duration: 12s; }
+.deco-chute i:nth-child(5) { left: 74%; animation-delay: -4.5s; animation-duration: 10s; }
+.deco-chute i:nth-child(6) { left: 90%; animation-delay: -7.5s; }
+[data-saison="ete"] .deco-chute { display: none; }   /* l'été ne fait rien tomber */
+
+/* Animations : uniquement transform et opacity */
+@keyframes deco-balance {
+  from { transform: rotate(-3deg); }
+  to   { transform: rotate(3deg); }
+}
+@keyframes deco-chute {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg);         opacity: 0; }
+  10%  { opacity: 0.9; }
+  50%  { transform: translate3d(var(--espace-4), 50vh, 0) rotate(160deg); }
+  90%  { opacity: 0.9; }
+  100% { transform: translate3d(calc(var(--espace-2) * -1), 100vh, 0) rotate(320deg); opacity: 0; }
+}
+
+/* Décorations désactivées par l'utilisateur */
+[data-decorations="off"] .deco-coin,
+[data-decorations="off"] .deco-mini,
+[data-decorations="off"] .deco-vide,
+[data-decorations="off"] .deco-chute {
+  display: none;
+}
+
+/* Mouvement réduit : rien ne bouge, rien ne tombe */
+@media (prefers-reduced-motion: reduce) {
+  .deco-coin,
+  .deco-mini { animation: none; }
+  .deco-chute { display: none; }
+}

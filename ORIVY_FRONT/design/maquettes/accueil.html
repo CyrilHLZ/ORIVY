@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F6EFE6">
+  <title>Accueil · ORIVY</title>
+  <meta name="description" content="Découvre la France, vis l'instant, profite à plusieurs.">
+  <!-- Thème horaire et saison posés avant l'affichage (pas de flash) -->
+  <script src="../themes.js"></script>
+  <script src="../saisons.js"></script>
+  <link rel="icon" href="../logo/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght,SOFT@9..144,600..700,100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../design-system.css">
+  <link rel="stylesheet" href="../themes.css">
+  <link rel="stylesheet" href="../saisons.css">
+  <link rel="stylesheet" href="../composants.css">
+  <link rel="stylesheet" href="accueil.css">
+</head>
+<body data-page="accueil">
+<main class="accueil" id="accueil">
+
+  <!-- ÉCRAN 1 : le paysage, l'accroche, deux boutons -->
+  <section class="ecran ecran--intro" id="ecran-intro" aria-labelledby="titre-intro">
+    <div class="ecran__scene">
+      <!-- Pas de lazy loading ici : c'est la première chose qu'on voit -->
+      <img class="intro__paysage" src="../illustrations/paysage.svg" alt="" width="1600" height="1000" fetchpriority="high">
+      <div class="deco-chute" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="intro__carte">
+        <h1 id="titre-intro">Découvre la France, <em>vis l'instant</em>, profite à plusieurs.</h1>
+        <p class="intro__signature">Des lieux à explorer et des sorties à partager, partout en France.</p>
+        <div class="intro__boutons">
+          <a class="bouton bouton--principal" href="carte.html"><svg class="icone" aria-hidden="true"><use href="#i-carte"/></svg>Explore la carte</a>
+          <a class="bouton bouton--secondaire" href="sorties.html"><svg class="icone" aria-hidden="true"><use href="#i-calendrier"/></svg>Vois les sorties</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ÉCRANS DE CATÉGORIE : l'ordre est réarrangé selon la saison par accueil.js
+       (ordre par défaut ci-dessous = celui du brief). -->
+  <div class="ecrans-categories" id="categories">
+
+    <section class="ecran ecran--cat cat-culture" data-cat="culture" id="ecran-culture" aria-labelledby="t-culture">
+      <div class="ecran__scene">
+        <div class="ecran__illu"><img src="../illustrations/musee.svg" alt="" width="800" height="600" loading="lazy"></div>
+        <div class="ecran__texte">
+          <span class="badge-cat"><svg class="icone" aria-hidden="true"><use href="#i-cat-culture"/></svg>Musées & culture</span>
+          <h2 id="t-culture">Laisse-toi surprendre</h2>
+          <p>Des grands musées parisiens aux petites collections de province, il y a toujours une salle qui t'attend.</p>
+          <a class="bouton bouton--principal" href="carte.html?cat=culture">Vois les musées sur la carte</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="ecran ecran--cat cat-parc" data-cat="parc" id="ecran-parc" aria-labelledby="t-parc">
+      <div class="ecran__scene">
+        <!-- L'arbre change avec la saison : accueil.js ajoute #printemps, #automne ou #hiver à l'adresse -->
+        <div class="ecran__illu"><img class="illu-saison" src="../illustrations/parc.svg" alt="" width="800" height="600" loading="lazy"></div>
+        <div class="ecran__texte">
+          <span class="badge-cat"><svg class="icone" aria-hidden="true"><use href="#i-cat-parc"/></svg>Parcs & jardins</span>
+          <h2 id="t-parc">Respire au vert</h2>
+          <p>Une pelouse, un grand arbre, un pique-nique entre amis : le bonheur tient parfois à peu de chose.</p>
+          <a class="bouton bouton--principal" href="carte.html?cat=parc">Vois les parcs sur la carte</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="ecran ecran--cat cat-promenade" data-cat="promenade" id="ecran-promenade" aria-labelledby="t-promenade">
+      <div class="ecran__scene">
+        <div class="ecran__illu"><img src="../illustrations/randonnee.svg" alt="" width="800" height="600" loading="lazy"></div>
+        <div class="ecran__texte">
+          <span class="badge-cat"><svg class="icone" aria-hidden="true"><use href="#i-cat-promenade"/></svg>Randonnées</span>
+          <h2 id="t-promenade">Prends de la hauteur</h2>
+          <p>Sentiers de crête, chemins côtiers, balades en forêt : enfile tes chaussures, la France est à toi.</p>
+          <a class="bouton bouton--principal" href="carte.html?cat=promenade">Vois les randonnées sur la carte</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="ecran ecran--cat cat-village" data-cat="village" id="ecran-village" aria-labelledby="t-village">
+      <div class="ecran__scene">
+        <div class="ecran__illu"><img src="../illustrations/village.svg" alt="" width="800" height="600" loading="lazy"></div>
+        <div class="ecran__texte">
+          <span class="badge-cat"><svg class="icone" aria-hidden="true"><use href="#i-cat-village"/></svg>Villages</span>
+          <h2 id="t-village">Flâne dans les ruelles</h2>
+          <p>Pierres dorées, volets colorés et marchés du dimanche : les plus beaux villages n'attendent que toi.</p>
+          <a class="bouton bouton--principal" href="carte.html?cat=village">Vois les villages sur la carte</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="ecran ecran--cat cat-observatoire" data-cat="observatoire" id="ecran-observatoire" aria-labelledby="t-observatoire">
+      <div class="ecran__scene">
+        <div class="ecran__illu"><img src="../illustrations/point-de-vue.svg" alt="" width="800" height="600" loading="lazy"></div>
+        <div class="ecran__texte">
+          <span class="badge-cat"><svg class="icone" aria-hidden="true"><use href="#i-cat-observatoire"/></svg>Points de vue</span>
+          <h2 id="t-observatoire">Admire le panorama</h2>
+          <p>Falaises d'Étretat, dune du Pilat, belvédères du Verdon : vis les couchers de soleil en grand.</p>
+          <a class="bouton bouton--principal" href="carte.html?cat=observatoire">Vois les points de vue sur la carte</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="ecran ecran--cat cat-restaurant" data-cat="restaurant" id="ecran-restaurant" aria-labelledby="t-restaurant">
+      <div class="ecran__scene">
+        <div class="ecran__illu"><img src="../illustrations/restaurant.svg" alt="" width="800" height="600" loading="lazy"></div>
+        <div class="ecran__texte">
+          <span class="badge-cat"><svg class="icone" aria-hidden="true"><use href="#i-cat-restaurant"/></svg>Restaurants</span>
+          <h2 id="t-restaurant">Mets les pieds sous la table</h2>
+          <p>Bistrots de quartier, tables de chef et crêperies : partage un bon repas à plusieurs.</p>
+          <a class="bouton bouton--principal" href="carte.html?cat=restaurant">Vois les restaurants sur la carte</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="ecran ecran--cat cat-bar" data-cat="bar" id="ecran-bar" aria-labelledby="t-bar">
+      <div class="ecran__scene">
+        <div class="ecran__illu"><img src="../illustrations/bar.svg" alt="" width="800" height="600" loading="lazy"></div>
+        <div class="ecran__texte">
+          <span class="badge-cat"><svg class="icone" aria-hidden="true"><use href="#i-cat-bar"/></svg>Bars</span>
+          <h2 id="t-bar">Trinque en terrasse</h2>
+          <p>Guinguettes au bord de l'eau, bars à vin, toits-terrasses : profite de la soirée avec ta bande.</p>
+          <a class="bouton bouton--principal" href="carte.html?cat=bar">Vois les bars sur la carte</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="ecran ecran--cat cat-cinema" data-cat="cinema" id="ecran-cinema" aria-labelledby="t-cinema">
+      <div class="ecran__scene">
+        <div class="ecran__illu"><img src="../illustrations/cinema.svg" alt="" width="800" height="600" loading="lazy"></div>
+        <div class="ecran__texte">
+          <span class="badge-cat"><svg class="icone" aria-hidden="true"><use href="#i-cat-cinema"/></svg>Cinémas</span>
+          <h2 id="t-cinema">Fais-toi une toile</h2>
+          <p>Salles Art déco, cinémas de quartier, séances en plein air : le grand écran, c'est mieux ensemble.</p>
+          <a class="bouton bouton--principal" href="carte.html?cat=cinema">Vois les cinémas sur la carte</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="ecran ecran--cat cat-evenement" data-cat="evenement" id="ecran-evenement" aria-labelledby="t-evenement">
+      <div class="ecran__scene">
+        <div class="ecran__illu"><img src="../illustrations/evenement.svg" alt="" width="800" height="600" loading="lazy"></div>
+        <div class="ecran__texte">
+          <span class="badge-cat"><svg class="icone" aria-hidden="true"><use href="#i-cat-evenement"/></svg>Événements</span>
+          <h2 id="t-evenement">Vis l'instant</h2>
+          <p>Fêtes de village, festivals, marchés de Noël : ne rate plus rien de ce qui se passe près de toi.</p>
+          <a class="bouton bouton--principal" href="carte.html?cat=evenement">Vois les événements sur la carte</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="ecran ecran--cat cat-monument" data-cat="monument" id="ecran-monument" aria-labelledby="t-monument">
+      <div class="ecran__scene">
+        <div class="ecran__illu"><img src="../illustrations/monument.svg" alt="" width="800" height="600" loading="lazy"></div>
+        <div class="ecran__texte">
+          <span class="badge-cat"><svg class="icone" aria-hidden="true"><use href="#i-cat-monument"/></svg>Monuments</span>
+          <h2 id="t-monument">Remonte le temps</h2>
+          <p>Châteaux de la Loire, ponts romains, abbayes perchées : l'histoire de France se visite en vrai.</p>
+          <a class="bouton bouton--principal" href="carte.html?cat=monument">Vois les monuments sur la carte</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- DERNIER ÉCRAN : les 3 prochaines sorties -->
+  <section class="ecran ecran--sorties" id="ecran-sorties" aria-labelledby="t-sorties">
+    <div class="ecran__scene conteneur">
+      <h2 id="t-sorties">Les prochaines sorties</h2>
+      <p class="sous-titre">Rejoins une bande, ou lance ta propre sortie.</p>
+      <div class="carrousel">
+        <article class="carte-sortie">
+          <div class="carte-sortie__date" aria-hidden="true"><span class="carte-sortie__jour">25</span><span class="carte-sortie__mois">oct.</span></div>
+          <div class="carte-sortie__corps">
+            <span class="badge-cat cat-promenade" style="align-self: flex-start"><svg class="icone" aria-hidden="true"><use href="#i-cat-promenade"/></svg>Randonnée</span>
+            <h3 class="carte-sortie__titre"><a href="sortie.html">Lever de soleil au puy de Dôme</a></h3>
+            <p class="carte-sortie__meta">
+              <span><svg class="icone" aria-hidden="true"><use href="#i-horloge"/></svg>Dim. 25 oct. · 7h</span>
+              <span><svg class="icone" aria-hidden="true"><use href="#i-epingle"/></svg>Orcines</span>
+            </p>
+          </div>
+          <div class="carte-sortie__pied">
+            <div class="pile-avatars" aria-label="8 inscrits"><span class="avatar avatar--s avatar--c" aria-hidden="true">IN</span><span class="avatar avatar--s avatar--d" aria-hidden="true">TM</span><span class="avatar avatar--s avatar--b" aria-hidden="true">YB</span><span class="pile-avatars__reste" aria-hidden="true">+5</span></div>
+            <button class="bouton bouton--principal" type="button">Rejoins</button>
+          </div>
+        </article>
+        <article class="carte-sortie">
+          <div class="carte-sortie__date" aria-hidden="true"><span class="carte-sortie__jour">31</span><span class="carte-sortie__mois">oct.</span></div>
+          <div class="carte-sortie__corps">
+            <span class="badge-cat cat-cinema" style="align-self: flex-start"><svg class="icone" aria-hidden="true"><use href="#i-cat-cinema"/></svg>Cinéma</span>
+            <h3 class="carte-sortie__titre"><a href="sortie.html">Nuit des films d'horreur au Grand Rex</a></h3>
+            <p class="carte-sortie__meta">
+              <span><svg class="icone" aria-hidden="true"><use href="#i-horloge"/></svg>Sam. 31 oct. · 20h30</span>
+              <span><svg class="icone" aria-hidden="true"><use href="#i-epingle"/></svg>Paris 2e</span>
+            </p>
+          </div>
+          <div class="carte-sortie__pied">
+            <div class="pile-avatars" aria-label="12 inscrits"><span class="avatar avatar--s avatar--b" aria-hidden="true">LB</span><span class="avatar avatar--s avatar--c" aria-hidden="true">SD</span><span class="avatar avatar--s avatar--d" aria-hidden="true">NG</span><span class="pile-avatars__reste" aria-hidden="true">+9</span></div>
+            <button class="bouton bouton--principal" type="button">Rejoins</button>
+          </div>
+        </article>
+        <article class="carte-sortie">
+          <div class="carte-sortie__date" aria-hidden="true"><span class="carte-sortie__jour">1er</span><span class="carte-sortie__mois">nov.</span></div>
+          <div class="carte-sortie__corps">
+            <span class="badge-cat cat-parc" style="align-self: flex-start"><svg class="icone" aria-hidden="true"><use href="#i-cat-parc"/></svg>Parc</span>
+            <h3 class="carte-sortie__titre"><a href="sortie.html">Pique-nique d'automne à la Tête d'Or</a></h3>
+            <p class="carte-sortie__meta">
+              <span><svg class="icone" aria-hidden="true"><use href="#i-horloge"/></svg>Dim. 1er nov. · 12h30</span>
+              <span><svg class="icone" aria-hidden="true"><use href="#i-epingle"/></svg>Lyon 6e</span>
+            </p>
+          </div>
+          <div class="carte-sortie__pied">
+            <div class="pile-avatars" aria-label="5 inscrits"><span class="avatar avatar--s avatar--e" aria-hidden="true">MR</span><span class="avatar avatar--s avatar--a" aria-hidden="true">AK</span><span class="pile-avatars__reste" aria-hidden="true">+3</span></div>
+            <button class="bouton bouton--principal" type="button">Rejoins</button>
+          </div>
+        </article>
+      </div>
+      <div class="sorties__action">
+        <a class="bouton bouton--secondaire" href="sortie-formulaire.html"><svg class="icone" aria-hidden="true"><use href="#i-plus"/></svg>Crée une sortie</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Indicateur de progression (ordinateur) : rempli par accueil.js -->
+  <nav class="progression" id="progression" aria-label="Écrans de l'accueil"></nav>
+</main>
+
+<script src="commun.js"></script>
+<script src="../icones/icones.js"></script>
+<script src="accueil.js"></script>
+<script src="../outils/selecteur-apercu.js"></script>
+</body>
+</html>

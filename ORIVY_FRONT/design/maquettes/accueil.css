@@ -1,0 +1,617 @@
+/* ==========================================================================
+   ORIVY — Page d'accueil
+   --------------------------------------------------------------------------
+   Mobile d'abord : défilement vertical classique, blocs empilés, simple fondu.
+   L'effet « scan » (ordinateur uniquement) est ajouté dans la seconde
+   moitié du fichier, sous la media query ordinateur.
+   ========================================================================== */
+
+
+/* ==========================================================================
+   A. MOBILE ET TABLETTE (CSS de base)
+   ========================================================================== */
+
+.accueil { overflow-x: clip; }
+
+/* Chaque écran (intro, catégorie, sorties) */
+.ecran { position: relative; }
+.ecran__scene { position: relative; }
+
+/* --- Écran 1 : le paysage --- */
+.ecran--intro .ecran__scene {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: calc(100svh - var(--hauteur-entete) - var(--cible-min) - var(--espace-4));
+  padding: var(--espace-4) var(--marge-page);
+}
+/* Mobile : le paysage occupe le haut de l'écran (sentier et épingle visibles),
+   la carte de texte vient se poser sur sa partie basse */
+.intro__paysage {
+  position: absolute;
+  inset: 0 0 auto 0;
+  width: 100%;
+  height: 62%;
+  object-fit: cover;
+  object-position: 50% 78%;
+}
+.intro__carte {
+  position: relative;
+  z-index: var(--plan-contenu);
+  padding: var(--espace-5) var(--espace-4);
+  background: var(--couleur-surface);
+  border-radius: var(--rayon-grand);
+  box-shadow: var(--ombre-3);
+}
+.intro__carte h1 {
+  font-size: var(--taille-3xl);
+  line-height: 1.05;
+  margin-bottom: var(--espace-3);
+}
+.intro__carte h1 em { font-style: normal; color: var(--couleur-principale); }
+.intro__signature { margin: 0 0 var(--espace-5); color: var(--couleur-texte-doux); font-weight: var(--graisse-moyenne); }
+.intro__boutons { display: flex; flex-direction: column; gap: var(--espace-2); }
+
+/* --- Écrans de catégorie : illustration en haut, texte dessous --- */
+.ecrans-categories { display: flex; flex-direction: column; gap: var(--espace-8); padding: var(--espace-8) 0; }
+.ecran--cat .ecran__scene {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-5);
+  padding-inline: var(--marge-page);
+}
+.ecran__illu {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--rayon-grand);
+  background: var(--cat);            /* visible le temps du chargement (lazy loading) */
+  box-shadow: var(--ombre-2);
+}
+.ecran__illu img { width: 100%; height: 100%; object-fit: cover; }
+.ecran__texte { display: flex; flex-direction: column; align-items: flex-start; gap: var(--espace-3); }
+.ecran__texte h2 { margin: 0; font-size: var(--taille-3xl); }
+.ecran__texte p { margin: 0; font-size: var(--taille-l); line-height: var(--interligne-normal); color: var(--couleur-texte-doux); }
+.ecran__texte .bouton { margin-top: var(--espace-2); }
+
+/* --- Dernier écran : les prochaines sorties --- */
+.ecran--sorties .ecran__scene { padding: var(--espace-6) var(--marge-page) var(--espace-8); }
+.ecran--sorties h2 { font-size: var(--taille-3xl); }
+.ecran--sorties .sous-titre { color: var(--couleur-texte-doux); margin-bottom: var(--espace-5); }
+.ecran--sorties .carte-sortie { height: 100%; }
+.sorties__action { display: flex; justify-content: center; margin-top: var(--espace-4); }
+
+/* Indicateur de progression : seulement sur ordinateur */
+.progression { display: none; }
+
+/* --- Apparition en fondu (mobile) ---
+   1) Navigateurs récents : animation liée au défilement (scroll-driven), sans JavaScript.
+   2) Sinon : accueil.js ajoute .js-repli sur <html> et la classe .est-visible
+      avec un IntersectionObserver.
+   Sans JavaScript ni support : tout est simplement visible. */
+@keyframes apparition {
+  from { opacity: 0; transform: translateY(var(--espace-5)); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .ecran--cat .ecran__scene,
+    .ecran--sorties .ecran__scene {
+      animation: apparition linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+  }
+  .js-repli .ecran--cat .ecran__scene,
+  .js-repli .ecran--sorties .ecran__scene {
+    opacity: 0;
+    transform: translateY(var(--espace-5));
+    transition: opacity var(--duree-lente) var(--courbe-sortie), transform var(--duree-lente) var(--courbe-sortie);
+  }
+  .js-repli .est-visible .ecran__scene { opacity: 1; transform: none; }
+}
+
+/* Tablette : un peu plus d'air, les sorties à deux de front */
+@media (min-width: 768px) {
+  .intro__paysage { inset: 0; height: 100%; object-position: 50% 60%; }
+  .intro__carte h1 { font-size: var(--taille-4xl); }
+  .intro__carte { max-width: calc(var(--espace-9) * 6); padding: var(--espace-6); }
+  .intro__boutons { flex-direction: row; }
+  .ecran--cat .ecran__scene { max-width: calc(var(--espace-9) * 7); margin-inline: auto; }
+}
+
+
+/* ==========================================================================
+   B. ORDINATEUR : L'EFFET « SCAN » (remplace la tornade puis la plongée, 2026-10-23)
+   --------------------------------------------------------------------------
+   Activé uniquement sur grand écran avec une souris :
+     (min-width: 1024px) and (hover: hover) and (pointer: fine)
+
+   Mise en page : chaque écran fait la hauteur de la fenêtre (moins l'en-tête)
+   et s'aimante en position (scroll-snap obligatoire, un écran à la fois).
+
+   L'animation, liée au défilement (animation-timeline: view()) :
+     Une transition douce, sans rotation ni zoom :
+     SORTIE de l'écran courant (pendant qu'il quitte la fenêtre par le haut)
+       il défile normalement, recule à peine (échelle 1 → 0,97)
+       et s'estompe (opacité 1 → 0,2)
+     ENTRÉE de l'écran suivant (pendant qu'il monte depuis le bas)
+       son contenu monte de 6 % et apparaît (opacité 0 → 1)
+       une fine ligne lumineuse (le « scan ») balaie l'écran de bas en haut,
+       avec un léger halo derrière elle, puis disparaît.
+     Le scan est un calque ::after déplacé en translateY : on n'anime toujours
+     que transform et opacity.
+     Durée : celle du défilement ; avec le scroll-snap, un cran prend
+     environ 500 à 700 ms selon le navigateur.
+
+   Repli sans animation-timeline (Firefox, Safari anciens) : accueil.js pose
+   .js-repli et bascule .est-visible ; l'entrée se joue alors en transition
+   CSS de 900 ms (même montée de 6 %).
+
+   Mouvement réduit : pas de zoom, un simple fondu d'opacité.
+   Seuls transform et opacity sont animés. Écran posé = transform: none,
+   donc tout est lisible et cliquable.
+   ========================================================================== */
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+
+  /* --- Mise en page plein écran ---
+     html:has(.accueil) : l'aimantation ne s'applique QUE si la page contient l'accueil.
+     (Dans React, une feuille importée reste chargée quand on change de page :
+     un simple « html { … } » s'appliquerait ensuite à tout le site.) */
+  html:has(.accueil) {
+    scroll-snap-type: y mandatory;
+    scroll-padding-top: var(--hauteur-entete);
+  }
+  .ecrans-categories { display: block; padding: 0; }
+  .ecran {
+    height: calc(100vh - var(--hauteur-entete));
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+  .ecran .ecran__scene {
+    height: 100%;
+    will-change: transform, opacity;
+  }
+
+  /* Écran 1 : paysage en plein écran, texte à gauche */
+  .ecran--intro .ecran__scene { justify-content: center; padding: 0 var(--espace-9); }
+  .intro__carte { max-width: calc(var(--espace-9) * 6); }
+
+  /* Écrans de catégorie : illustration d'un côté, texte de l'autre, en alternance */
+  .ecran--cat .ecran__scene {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    align-items: center;
+    gap: var(--espace-8);
+    max-width: var(--largeur-contenu);
+    margin-inline: auto;
+    padding-inline: var(--marge-page);
+  }
+  .ecran__illu { max-height: 72vh; }
+  .ecran__texte h2 { font-size: var(--taille-4xl); }
+  .ecran__texte p { max-width: 32ch; }
+  /* Une sur deux : texte à gauche, illustration à droite */
+  .ecran--cat:nth-child(even) .ecran__scene { grid-template-columns: 1fr 1.15fr; }
+  .ecran--cat:nth-child(even) .ecran__illu { order: 2; }
+
+  /* Dernier écran : les 3 sorties côte à côte */
+  .ecran--sorties .ecran__scene { display: flex; flex-direction: column; justify-content: center; }
+
+  /* --- Indicateur de progression : des points à droite --- */
+  .progression {
+    position: fixed;
+    right: var(--espace-4);
+    top: 50%;
+    z-index: var(--plan-navigation);
+    display: flex;
+    flex-direction: column;
+    transform: translateY(-50%);
+  }
+  .progression a {
+    display: grid;
+    place-items: center;
+    width: var(--cible-min);
+    height: calc(var(--cible-min) * 0.6);   /* les points se touchent, la zone de clic reste large */
+  }
+  .progression a::before {
+    content: "";
+    width: var(--espace-2);
+    height: var(--espace-2);
+    border-radius: var(--rayon-pilule);
+    background: var(--couleur-bordure-forte);
+    transition: transform var(--duree-normale) var(--courbe-sortie), background-color var(--duree-normale) var(--courbe-douce);
+  }
+  .progression a:hover::before { background: var(--couleur-texte); }
+  .progression a[aria-current="step"]::before { background: var(--couleur-principale); transform: scale(1.6); }
+
+  /* --- Le scan (navigateurs avec animation-timeline) --- */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      /* Les écrans de catégorie entrent ET sortent */
+      .ecran .ecran__scene {
+        animation: scan-entree linear both, scan-sortie linear forwards;
+        animation-timeline: view(), view();
+        animation-range: entry 0% entry 100%, exit 0% exit 100%;
+      }
+      /* L'écran 1 ne fait que sortir, le dernier ne fait qu'entrer */
+      .ecran--intro .ecran__scene {
+        animation: scan-sortie linear forwards;
+        animation-timeline: view();
+        animation-range: exit 0% exit 100%;
+      }
+      /* La ligne de scan : un calque de toute la hauteur de l'écran, dont seul le haut
+         est dessiné (ligne de 2px + halo qui s'estompe). On le fait monter. */
+      /* clip et non hidden : hidden ferait de .ecran un conteneur de défilement,
+         et view() suivrait alors ce conteneur immobile au lieu de la page */
+      .ecran { overflow: clip; }
+      .ecran:not(.ecran--intro)::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: var(--plan-contenu);
+        pointer-events: none;
+        background:
+          linear-gradient(to right, transparent, rgb(127 216 245 / 0.95) 20%, rgb(255 255 255) 50%, rgb(127 216 245 / 0.95) 80%, transparent) top / 100% 2px no-repeat,
+          /* (44) traînée lumineuse : deux lignes plus pâles qui suivent la première */
+          linear-gradient(to right, transparent, rgb(127 216 245 / 0.45) 30%, rgb(127 216 245 / 0.45) 70%, transparent) 0 12px / 100% 1px no-repeat,
+          linear-gradient(to right, transparent, rgb(127 216 245 / 0.25) 35%, rgb(127 216 245 / 0.25) 65%, transparent) 0 26px / 100% 1px no-repeat,
+          linear-gradient(to bottom, rgb(127 216 245 / 0.22), rgb(127 216 245 / 0) 120px) top / 100% 120px no-repeat;
+        animation: scan-ligne linear both;
+        animation-timeline: view();
+        animation-range: entry 10% entry 100%;
+      }
+      .ecran--sorties .ecran__scene {
+        animation: scan-entree linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 100%;
+      }
+    }
+
+    /* Repli JavaScript (pas d'animation-timeline) : entrée en transition */
+    .js-repli .ecran .ecran__scene {
+      opacity: 0;
+      transform: translateY(6%);
+      transition: transform 900ms var(--courbe-sortie), opacity 600ms var(--courbe-douce);
+    }
+    .js-repli .ecran.est-visible .ecran__scene { opacity: 1; transform: none; }
+  }
+
+  /* Mouvement réduit : simple fondu, sans zoom */
+  @media (prefers-reduced-motion: reduce) {
+    @supports (animation-timeline: view()) {
+      .ecran .ecran__scene {
+        animation: fondu-entree linear both;
+        animation-timeline: view();
+        animation-range: entry 40% entry 100%;
+      }
+    }
+  }
+}
+
+/* Écran qui sort : il défile normalement, recule à peine et s'estompe. */
+@keyframes scan-sortie {
+  from { transform: none; opacity: 1; }
+  to   { transform: scale(0.97); opacity: 0.2; }
+}
+/* Contenu de l'écran qui entre : il monte un peu et apparaît. */
+@keyframes scan-entree {
+  0%   { transform: translateY(6%); opacity: 0; }
+  40%  { opacity: 0.4; }
+  100% { transform: none; opacity: 1; }
+}
+/* La ligne de scan : part du bas de l'écran, monte jusqu'en haut, puis s'éteint. */
+@keyframes scan-ligne {
+  0%   { transform: translateY(100%); opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translateY(-4%); opacity: 0; }
+}
+@keyframes fondu-entree {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ==========================================================================
+   C. FONDS PHOTO (premier écran, et écrans qui ont une photo : .ecran--fond)
+   ========================================================================== */
+
+/* Premier écran avec la photo du lac : on cadre sur le couple et le reflet du soleil */
+.intro__paysage--photo { object-position: 28% 72%; }
+
+/* Écran de catégorie avec photo : sur téléphone, la photo remplace l'illustration
+   dans le même cadre 4:3, recadrée sur la façade « MUSÉE » */
+.ecran--fond .ecran__illu img { object-position: 80% 62%; }
+
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  .intro__paysage--photo { object-position: 50% 60%; }
+  /* Sur le lac, la carte de texte passe à droite et en bas : le couple reste visible à gauche */
+  .ecran--intro:has(.intro__paysage--photo) .ecran__scene { align-items: flex-end; justify-content: flex-end; padding-bottom: var(--espace-7); }
+  .ecran--intro:has(.intro__paysage--photo) .intro__carte { max-width: calc(var(--espace-9) * 5.2); }
+  .ecran--intro:has(.intro__paysage--photo) .intro__carte h1 { font-size: var(--taille-3xl); }
+
+  /* Écran avec photo : la photo couvre tout l'écran, le texte est dans une carte posée dessus */
+  .ecran--fond .ecran__scene,
+  .ecran--fond:nth-child(even) .ecran__scene {
+    display: flex;
+    flex-direction: row;          /* la base mobile est en colonne : on repasse en ligne */
+    align-items: flex-end;        /* carte en bas…                          */
+    justify-content: flex-start;  /* …à gauche : le couple et « MUSÉE » restent visibles */
+    max-width: none;
+    padding: 0 var(--espace-9) var(--espace-7);
+  }
+  .ecran--fond .ecran__illu {
+    position: absolute;
+    inset: 0;
+    max-height: none;
+    aspect-ratio: auto;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .ecran--fond .ecran__illu img { object-position: 50% 55%; }
+  .ecran--fond .ecran__texte {
+    position: relative;
+    max-width: calc(var(--espace-9) * 5);
+    padding: var(--espace-6);
+    background: var(--couleur-surface);
+    border-radius: var(--rayon-grand);
+    box-shadow: var(--ombre-3);
+  }
+  .ecran--fond .ecran__texte h2 { font-size: var(--taille-3xl); }
+}
+
+
+/* ==========================================================================
+   D. AMBIANCE SUR LES PHOTOS (halo qui respire + grains de lumière)
+   Purement décoratif, ne bloque aucun clic. Uniquement transform et opacity.
+   Aucun zoom de la photo : elle garde sa netteté.
+   ========================================================================== */
+.ambiance {
+  position: absolute;
+  inset: 0;
+  z-index: var(--plan-decor);
+  overflow: hidden;
+  pointer-events: none;
+}
+/* Halo doré de coucher de soleil : grand disque très flou qui dérive et respire */
+.ambiance__halo {
+  position: absolute;
+  top: -20%;
+  left: 35%;
+  width: 70%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 190 110 / 0.35), rgb(255 190 110 / 0));
+  mix-blend-mode: screen;
+  opacity: 0.6;
+}
+/* Grains de lumière : petits points dorés qui montent en oscillant */
+.ambiance i {
+  position: absolute;
+  bottom: -2%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgb(255 226 160);
+  box-shadow: 0 0 6px 2px rgb(255 200 120 / 0.6);
+  opacity: 0;
+}
+.ambiance i:nth-child(2)  { left: 6%;  --duree: 13s; --delai: 0s;   --x: 18px; }
+.ambiance i:nth-child(3)  { left: 14%; --duree: 17s; --delai: -6s;  --x: -14px; }
+.ambiance i:nth-child(4)  { left: 23%; --duree: 15s; --delai: -2s;  --x: 22px; }
+.ambiance i:nth-child(5)  { left: 31%; --duree: 19s; --delai: -11s; --x: -20px; }
+.ambiance i:nth-child(6)  { left: 40%; --duree: 14s; --delai: -4s;  --x: 16px; }
+.ambiance i:nth-child(7)  { left: 49%; --duree: 18s; --delai: -9s;  --x: -18px; }
+.ambiance i:nth-child(8)  { left: 57%; --duree: 16s; --delai: -1s;  --x: 24px; }
+.ambiance i:nth-child(9)  { left: 66%; --duree: 20s; --delai: -13s; --x: -16px; }
+.ambiance i:nth-child(10) { left: 74%; --duree: 15s; --delai: -7s;  --x: 14px; }
+.ambiance i:nth-child(11) { left: 83%; --duree: 17s; --delai: -3s;  --x: -22px; }
+.ambiance i:nth-child(12) { left: 91%; --duree: 19s; --delai: -10s; --x: 20px; }
+.ambiance i:nth-child(13) { left: 97%; --duree: 14s; --delai: -5s;  --x: -12px; }
+.ambiance i:nth-child(3n) { width: 3px; height: 3px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .ambiance__halo { animation: halo-respire 14s ease-in-out infinite alternate; }
+  .ambiance i { animation: grain-monte var(--duree) linear var(--delai) infinite; }
+}
+/* Sous mouvement réduit : le halo reste fixe, les grains disparaissent */
+@media (prefers-reduced-motion: reduce) {
+  .ambiance i { display: none; }
+}
+@keyframes halo-respire {
+  from { transform: translate(0, 0);     opacity: 0.45; }
+  to   { transform: translate(-12%, 6%); opacity: 0.8; }
+}
+@keyframes grain-monte {
+  0%   { transform: translate(0, 0);                 opacity: 0; }
+  15%  { opacity: 0.9; }
+  50%  { transform: translate(var(--x), -45vh); }
+  85%  { opacity: 0.7; }
+  100% { transform: translate(calc(var(--x) * -1), -90vh); opacity: 0; }
+}
+/* L'écran d'accueil : l'ambiance sous la carte de texte */
+.ecran--intro .intro__carte { position: relative; z-index: var(--plan-contenu); }
+
+/* Position de la carte de texte sur les photos (ordinateur) : choisie écran par écran
+   dans EcransAccueil.js pour ne cacher ni les personnes ni le sujet de la photo */
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  .ecran--fond.carte-bas-droite .ecran__scene,
+  .ecran--fond.carte-haut-droite .ecran__scene { justify-content: flex-end; }
+  .ecran--fond.carte-haut-droite .ecran__scene,
+  .ecran--fond.carte-haut-gauche .ecran__scene { align-items: flex-start; padding-top: var(--espace-6); }
+}
+
+/* --------------------------------------------------------------------------
+   Variantes d'ambiance : feuilles d'érable orange qui tombent, oiseaux qui volent.
+   Mêmes <i> que les grains de lumière, mais plus grands, avec une image,
+   qui partent du HAUT et descendent en se balançant.
+   -------------------------------------------------------------------------- */
+.ambiance--feuilles i {
+  top: -6%;
+  bottom: auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--chute-image) no-repeat center / contain;
+}
+.ambiance--feuilles i { --chute-image: url("../decorations/feuille-erable-1.svg"); }
+.ambiance--feuilles i:nth-child(3n + 1) { --chute-image: url("../decorations/feuille-erable-2.svg"); width: 28px; height: 28px; }
+.ambiance--feuilles i:nth-child(3n + 2) { --chute-image: url("../decorations/feuille-erable-3.svg"); width: 40px; height: 40px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Les feuilles tombent en tournoyant */
+  .ambiance--feuilles i { animation: feuille-tombe calc(var(--duree) * 0.9) linear var(--delai) infinite; }
+}
+@keyframes feuille-tombe {
+  0%   { transform: translate(0, 0) rotate(0deg);                      opacity: 0; }
+  8%   { opacity: 0.95; }
+  25%  { transform: translate(var(--x), 25vh) rotate(90deg); }
+  50%  { transform: translate(calc(var(--x) * -1), 50vh) rotate(180deg); }
+  75%  { transform: translate(var(--x), 75vh) rotate(270deg); }
+  92%  { opacity: 0.9; }
+  100% { transform: translate(0, 100vh) rotate(360deg);                 opacity: 0; }
+}
+
+/* Oiseaux : une petite volée qui traverse le ciel (le haut de la photo), de gauche à droite.
+   <i> se déplace (lent, 22 à 34 s) ; <b> à l'intérieur bat des ailes (rapide, 0,5 s) :
+   deux éléments, car un seul ne peut pas suivre deux rythmes à la fois. */
+.ambiance--oiseaux i {
+  top: var(--hauteur);
+  bottom: auto;
+  left: -6%;
+  width: 22px;
+  height: 11px;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.ambiance--oiseaux b {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: url("../decorations/oiseau.svg") no-repeat center / contain;
+}
+.ambiance--oiseaux i:nth-child(1) { --hauteur: 14%; --duree: 26s; --delai: 0s;    --y: -18px; }
+.ambiance--oiseaux i:nth-child(2) { --hauteur: 17%; --duree: 26s; --delai: -0.9s; --y: -14px; width: 17px; height: 9px; }
+.ambiance--oiseaux i:nth-child(3) { --hauteur: 12%; --duree: 26s; --delai: -1.6s; --y: -20px; width: 15px; height: 8px; }
+.ambiance--oiseaux i:nth-child(4) { --hauteur: 26%; --duree: 34s; --delai: -12s;  --y: 16px; }
+.ambiance--oiseaux i:nth-child(5) { --hauteur: 29%; --duree: 34s; --delai: -13s;  --y: 12px;  width: 16px; height: 8px; }
+.ambiance--oiseaux i:nth-child(6) { --hauteur: 8%;  --duree: 22s; --delai: -17s;  --y: 10px;  width: 19px; height: 10px; }
+.ambiance--oiseaux i:nth-child(7) { --hauteur: 34%; --duree: 30s; --delai: -6s;   --y: -10px; width: 14px; height: 7px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .ambiance--oiseaux i { animation: oiseau-vole var(--duree) linear var(--delai) infinite; }
+  .ambiance--oiseaux b { animation: battement 0.5s ease-in-out infinite alternate; transform-origin: 50% 60%; }
+  .ambiance--oiseaux i:nth-child(2n) b { animation-duration: 0.42s; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ambiance--oiseaux i { display: none; }
+}
+@keyframes oiseau-vole {
+  0%   { transform: translate(0, 0);                     opacity: 0; }
+  6%   { opacity: 0.85; }
+  50%  { transform: translate(60vw, var(--y)); }
+  94%  { opacity: 0.85; }
+  100% { transform: translate(115vw, 0);                 opacity: 0; }
+}
+/* Ailes hautes / ailes basses : on écrase la silhouette verticalement */
+@keyframes battement {
+  from { transform: scaleY(1); }
+  to   { transform: scaleY(0.35); }
+}
+
+
+/* ==========================================================================
+   E. VERRE DÉPOLI ET GRANDS TITRES BLANCS SUR LES PHOTOS  (idées 5 et 7)
+   Ordinateur uniquement : c'est là que le texte est posé SUR la photo.
+   Le voile sombre à 55 % garantit au moins 4,5:1 pour le texte blanc,
+   même devant la zone la plus claire d'une photo (vérifié au calcul).
+   ========================================================================== */
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  .ecran--fond .ecran__texte,
+  .ecran--intro .intro__carte {
+    color: #FFFFFF;
+    background: rgb(22 17 13 / 0.55);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(140%);
+    border: 1px solid rgb(255 255 255 / 0.22);
+    box-shadow: 0 20px 50px rgb(0 0 0 / 0.25);
+  }
+  /* Titres plus grands, en blanc, avec une ombre douce qui les détache de la photo */
+  .ecran--fond .ecran__texte h2,
+  .ecran--intro .intro__carte h1 {
+    color: #FFFFFF;
+    font-size: var(--taille-4xl);
+    line-height: 1.05;
+    text-shadow: 0 2px 18px rgb(0 0 0 / 0.35);
+  }
+  .ecran--fond .ecran__texte p,
+  .ecran--intro .intro__signature { color: rgb(255 255 255 / 0.92); }
+  .ecran--intro .intro__signature strong { color: #FFFFFF; }
+  /* « vis l'instant » : pêche claire, lisible sur le voile sombre (la terracotta y serait trop foncée) */
+  .ecran--intro .intro__carte h1 em { color: #FFC9A8; }
+  .ecran--intro .titre-mots em::after { background: #FFC9A8; }
+  /* Bouton secondaire : en contour blanc, pour rester dans le verre */
+  .ecran--intro .intro__carte .bouton--secondaire {
+    background: rgb(255 255 255 / 0.08);
+    color: #FFFFFF;
+    border-color: rgb(255 255 255 / 0.7);
+  }
+}
+
+
+/* ==========================================================================
+   F. EN-TÊTE TRANSPARENT AU-DESSUS DE LA PHOTO D'ACCUEIL  (idée 10)
+   Tant qu'on est tout en haut de l'accueil (body.entete-transparente, posée par
+   HomePage.jsx), l'en-tête laisse voir la photo : texte blanc sur un léger
+   dégradé sombre. Dès qu'on descend, son fond opaque réapparaît en fondu
+   (deux calques ::before / ::after dont on ne change que l'opacité).
+   ========================================================================== */
+.page-accueil .entete {
+  position: fixed;
+  left: 0;
+  right: 0;
+  background: transparent;
+  border-bottom-color: transparent;
+  transition: color var(--duree-normale), border-color var(--duree-normale);
+}
+/* L'en-tête sort du flux : on lui garde sa place en haut de la page */
+.page-accueil .accueil { padding-top: var(--hauteur-entete); }
+.page-accueil .entete::before,
+.page-accueil .entete::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity var(--duree-normale) var(--courbe-douce);
+}
+/* Fond opaque (état normal) */
+.page-accueil .entete::before { background: var(--couleur-surface); }
+/* Dégradé sombre (état transparent), pour que le texte blanc reste lisible */
+.page-accueil .entete::after {
+  background: linear-gradient(to bottom, rgb(15 11 8 / 0.55), rgb(15 11 8 / 0));
+  opacity: 0;
+}
+
+/* --- État transparent : tout en haut de l'accueil --- */
+.entete-transparente .entete { color: #FFFFFF; border-bottom-color: transparent; }
+.entete-transparente .entete::before { opacity: 0; }
+.entete-transparente .entete::after { opacity: 1; }
+/* La photo d'accueil remonte sous l'en-tête */
+.page-accueil .ecran--intro { margin-top: calc(var(--hauteur-entete) * -1); }
+.page-accueil .ecran--intro .ecran__scene { padding-top: var(--hauteur-entete); }
+.entete-transparente .entete__logo,
+.entete-transparente .entete .bouton--icone,
+.entete-transparente .entete__nav a,
+.entete-transparente .entete__nav a .icone { color: #FFFFFF; }
+.entete-transparente .entete__nav a:hover,
+.entete-transparente .entete__nav a[aria-current="page"] { background: rgb(255 255 255 / 0.18); color: #FFFFFF; }
+.entete-transparente .entete .bouton--icone:hover { background: rgb(255 255 255 / 0.18); }
+.entete-transparente .entete__connexion { color: #FFFFFF; border-color: rgb(255 255 255 / 0.8); background: rgb(255 255 255 / 0.08); }
+.entete-transparente .entete .deco-coin { opacity: 0; }
+
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  /* Le premier écran prend toute la hauteur, l'en-tête flotte par-dessus */
+  .page-accueil .ecran--intro { height: 100vh; }
+}

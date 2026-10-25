@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F6EFE6">
+  <title>Ton profil · ORIVY</title>
+  <script src="../themes.js"></script>
+  <script src="../saisons.js"></script>
+  <link rel="icon" href="../logo/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght,SOFT@9..144,600..700,100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../design-system.css">
+  <link rel="stylesheet" href="../themes.css">
+  <link rel="stylesheet" href="../saisons.css">
+  <link rel="stylesheet" href="../composants.css">
+  <link rel="stylesheet" href="pages.css">
+</head>
+<body data-page="profil" class="page-profil">
+<main class="conteneur">
+  <div class="profil-mise-en-page">
+    <div>
+      <!-- En-tête du profil -->
+      <header class="profil-tete">
+        <span class="avatar avatar--xl avatar--a" aria-hidden="true" id="p-avatar">CL</span>
+        <div class="profil-tete__infos">
+          <h1 id="p-nom">Camille Laurent</h1>
+          <p class="texte-doux" style="margin: 0; display: inline-flex; gap: var(--espace-1); align-items: center"><svg class="icone icone--petite" aria-hidden="true"><use href="#i-epingle"/></svg><span id="p-ville">Lyon</span> · membre depuis mars 2026</p>
+          <p class="bio" id="p-bio">Randos le week-end, ciné-club le jeudi et toujours partante pour un pique-nique. Je cherche des copains pour faire le GR20 l'été prochain ⛰️</p>
+          <div class="stats">
+            <a class="stat" href="communaute.html"><strong>128</strong><span>abonnés</span></a>
+            <a class="stat" href="communaute.html"><strong>94</strong><span>abonnements</span></a>
+            <span class="stat"><strong>23</strong><span>sorties</span></span>
+          </div>
+          <!-- Mon profil -->
+          <div class="ligne-actions" id="actions-moi">
+            <button class="bouton bouton--secondaire" type="button"><svg class="icone" aria-hidden="true"><use href="#i-modifier"/></svg>Modifier le profil</button>
+            <a class="bouton bouton--fantome" href="#reglages"><svg class="icone" aria-hidden="true"><use href="#i-reglages"/></svg>Réglages</a>
+            <a class="bouton bouton--fantome" href="admin.html"><svg class="icone" aria-hidden="true"><use href="#i-bouclier"/></svg>Administration</a>
+          </div>
+          <!-- Profil d'une autre personne -->
+          <div class="ligne-actions" id="actions-autre" hidden>
+            <button class="bouton bouton-suivre" type="button" aria-pressed="false">Suivre</button>
+            <a class="bouton bouton--secondaire" href="messages.html"><svg class="icone" aria-hidden="true"><use href="#i-messages"/></svg>Message</a>
+          </div>
+        </div>
+      </header>
+
+      <div class="onglets-section profil-onglets" role="tablist" aria-label="Sorties et photos">
+        <button role="tab" id="o-orga" aria-selected="true" aria-controls="p-orga">Organisées (6)</button>
+        <button role="tab" id="o-passees" aria-selected="false" aria-controls="p-passees" tabindex="-1">Passées (17)</button>
+        <button role="tab" id="o-photos" aria-selected="false" aria-controls="p-photos" tabindex="-1">Photos</button>
+      </div>
+      <div role="tabpanel" id="p-orga" aria-labelledby="o-orga" class="pile"></div>
+      <div role="tabpanel" id="p-passees" aria-labelledby="o-passees" class="pile" hidden></div>
+      <div role="tabpanel" id="p-photos" aria-labelledby="o-photos" hidden>
+        <div class="grille-photos" id="photos"></div>
+      </div>
+    </div>
+
+    <!-- Réglages : en bas sur mobile, à droite sur ordinateur -->
+    <aside id="reglages" aria-labelledby="t-reglages">
+      <div class="encart reglages">
+        <h2 id="t-reglages" style="font-size: var(--taille-xl); margin: 0">Réglages</h2>
+
+        <h3>Apparence</h3>
+        <fieldset class="rayon" id="choix-theme">
+          <legend>Thème</legend>
+          <label><input type="radio" name="theme" value="auto"><span>Automatique</span></label>
+          <label><input type="radio" name="theme" value="jour"><span>Jour</span></label>
+          <label><input type="radio" name="theme" value="nuit"><span>Nuit</span></label>
+        </fieldset>
+        <p class="champ__aide">Automatique : l'app suit le soleil, de l'aube à la nuit.</p>
+        <label class="interrupteur">
+          <span class="interrupteur__texte">Décorations saisonnières<small>Citrouilles, flocons, fleurs…</small></span>
+          <input type="checkbox" role="switch" id="choix-deco">
+        </label>
+
+        <h3>Notifications</h3>
+        <label class="interrupteur"><span class="interrupteur__texte">Inscriptions à mes sorties</span><input type="checkbox" role="switch" checked></label>
+        <label class="interrupteur"><span class="interrupteur__texte">Nouveaux abonnés</span><input type="checkbox" role="switch" checked></label>
+        <label class="interrupteur"><span class="interrupteur__texte">Commentaires</span><input type="checkbox" role="switch"></label>
+        <label class="interrupteur"><span class="interrupteur__texte">Rappel la veille d'une sortie</span><input type="checkbox" role="switch" checked></label>
+
+        <h3>Compte</h3>
+        <a class="bouton bouton--fantome" href="auth.html" style="justify-content: flex-start"><svg class="icone" aria-hidden="true"><use href="#i-deconnexion"/></svg>Se déconnecter</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<script src="donnees.js"></script>
+<script src="proximite.js"></script>
+<script>
+  (function () {
+    var D = window.ORIVY_DONNEES, P = window.ORIVY_PROXIMITE;
+    var $ = function (id) { return document.getElementById(id); };
+
+    /* Profil d'une autre personne : ?u=ines */
+    var cle = new URLSearchParams(location.search).get("u");
+    var autre = cle && D.UTILISATEURS[cle];
+    if (autre) {
+      document.title = autre.nom + " · ORIVY";
+      $("p-nom").textContent = autre.nom;
+      $("p-ville").textContent = autre.ville;
+      $("p-avatar").textContent = autre.initiales;
+      $("p-avatar").className = "avatar avatar--xl avatar--" + autre.couleur;
+      $("p-bio").textContent = "Toujours partante pour un lever de soleil ou une expo. J'organise des randos autour de Lyon un dimanche sur deux.";
+      $("actions-moi").hidden = true;
+      $("actions-autre").hidden = false;
+      $("reglages").hidden = true;
+      document.body.setAttribute("data-page", "communaute");
+    }
+
+    /* Onglets : flèches gauche/droite, comme le motif ARIA « tabs » */
+    var onglets = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+    function activer(o) {
+      onglets.forEach(function (x) {
+        var actif = x === o;
+        x.setAttribute("aria-selected", String(actif));
+        x.tabIndex = actif ? 0 : -1;
+        $(x.getAttribute("aria-controls")).hidden = !actif;
+      });
+      o.focus();
+    }
+    onglets.forEach(function (o, i) {
+      o.addEventListener("click", function () { activer(o); });
+      o.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight") activer(onglets[(i + 1) % onglets.length]);
+        if (e.key === "ArrowLeft") activer(onglets[(i - 1 + onglets.length) % onglets.length]);
+      });
+    });
+
+    /* Contenu des onglets */
+    $("p-orga").innerHTML = D.SORTIES.filter(function (s) { return s.inscrits.indexOf("moi") > -1; }).map(function (s) { return P.carteSortieHTML(s); }).join("");
+    $("p-passees").innerHTML = D.SORTIES.slice(3, 6).map(function (s) { return P.carteSortieHTML(s); }).join("").replace(/>Rejoins</g, ">Revoir<");
+    $("photos").innerHTML = ["promenade", "observatoire", "parc", "village", "restaurant", "monument", "culture", "bar", "promenade"].map(function (c) {
+      return '<div class="photo cat-' + c + '">' + P.icone("cat-" + c) + '<img src="' + D.photo(c, 400) + '" alt="Photo de sortie : ' + D.CATEGORIES[c].nom.toLowerCase() + '" loading="lazy" onerror="this.remove()"></div>';
+    }).join("");
+
+    /* Réglages branchés sur les vrais scripts des thèmes et des saisons */
+    var pref = window.orivyTheme.preference();
+    document.querySelector('input[name="theme"][value="' + pref + '"]').checked = true;
+    $("choix-theme").addEventListener("change", function (e) { window.orivyTheme.choisir(e.target.value); });
+    $("choix-deco").checked = window.orivySaison.decorations();
+    $("choix-deco").addEventListener("change", function (e) { window.orivySaison.activerDecorations(e.target.checked); });
+
+    /* Bouton Suivre */
+    var suivre = document.querySelector(".bouton-suivre");
+    suivre.addEventListener("click", function () {
+      var actif = suivre.getAttribute("aria-pressed") === "true";
+      suivre.setAttribute("aria-pressed", String(!actif));
+      suivre.textContent = actif ? "Suivre" : "Abonné·e";
+    });
+  })();
+</script>
+<script src="commun.js"></script>
+<script src="../icones/icones.js"></script>
+<script src="../outils/selecteur-apercu.js"></script>
+</body>
+</html>

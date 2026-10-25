@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { createActivity } from '../../../Services/api.js';
-import '../../Styles/Main/Pages.css';
+import { createActivity } from '../../../Services/Activite/ActiviteService.js';
 
 const CreateActivitePage = () => {
     const [formData, setFormData] = useState({ nom: '', description: '', dateDebut: '', categorie: '' });

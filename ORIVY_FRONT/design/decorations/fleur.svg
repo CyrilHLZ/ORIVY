@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+  <!-- Fleur de cerisier : 5 pétales roses, cœur miel. Mini du printemps et pétale qui tombe. -->
+  <g id="fleur" fill="#F2A7B5" stroke="#C9707F" stroke-width="1">
+    <ellipse cx="12" cy="6.5" rx="3.6" ry="4.5"/>
+    <ellipse cx="12" cy="6.5" rx="3.6" ry="4.5" transform="rotate(72 12 12)"/>
+    <ellipse cx="12" cy="6.5" rx="3.6" ry="4.5" transform="rotate(144 12 12)"/>
+    <ellipse cx="12" cy="6.5" rx="3.6" ry="4.5" transform="rotate(216 12 12)"/>
+    <ellipse cx="12" cy="6.5" rx="3.6" ry="4.5" transform="rotate(288 12 12)"/>
+  </g>
+  <circle cx="12" cy="12" r="2.4" fill="#E8B04A"/>
+</svg>

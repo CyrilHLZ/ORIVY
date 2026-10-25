@@ -1,14 +1,41 @@
-const apiRequest = async (path, options = {}) => {
+import { lireJeton } from './jeton.js';
+
+
+/**
+ * Client HTTP unique de l'application.
+ * Tous les services l'utilisent : c'est le SEUL endroit du projet qui appelle fetch.
+ *
+ * - ajoute le préfixe /api (le proxy Vite redirige vers le back)
+ * - transforme automatiquement `body` en JSON
+ * - lance une erreur si le back répond avec un code d'échec (404, 500...)
+ * - renvoie directement les données (JSON, texte, ou null si la réponse est vide)
+ */
+export const apiRequest = async (path, { body, headers, ...options } = {}) => {
+    const jeton = lireJeton();
+
     const response = await fetch(`/api${path}`, {
+        ...options,
         headers: {
             'Content-Type': 'application/json',
-            ...options.headers,
+            ...(jeton && { 'Authorization': `Bearer ${jeton}` }),
+            ...headers,
         },
-        ...options,
+        body: body !== undefined ? JSON.stringify(body) : undefined,
     });
 
+     if (response.status === 401 && jeton) {
+        window.dispatchEvent(new Event('orivy:session-expiree'));
+    }
+
     if (!response.ok) {
-        const message = await response.text();
+        // Spring renvoie { status, error, message, ... } : on ne garde que le message
+        const texte = await response.text();
+        let message = texte;
+        try {
+            message = JSON.parse(texte).message || texte;
+        } catch {
+            // réponse en texte brut : on la garde telle quelle
+        }
         throw new Error(message || `Erreur HTTP ${response.status}`);
     }
 
@@ -16,21 +43,3 @@ const apiRequest = async (path, options = {}) => {
     const contentType = response.headers.get('content-type') || '';
     return contentType.includes('application/json') ? response.json() : response.text();
 };
-
-export const getActivities = () => apiRequest('/activites');
-export const createActivity = (activity) => apiRequest('/activites', {
-    method: 'POST',
-    body: JSON.stringify(activity),
-});
-export const getMapData = () => apiRequest('/carte');
-export const createPoint = (point) => apiRequest('/points-interet', { method: 'POST', body: JSON.stringify(point) });
-export const updatePoint = (id, point) => apiRequest(`/points-interet/${id}`, { method: 'PUT', body: JSON.stringify(point) });
-export const deletePoint = (id) => apiRequest(`/points-interet/${id}`, { method: 'DELETE' });
-export const register = (user) => apiRequest('/utilisateurs/inscription', {
-    method: 'POST',
-    body: JSON.stringify(user),
-});
-export const login = (credentials) => apiRequest('/utilisateurs/connexion', {
-    method: 'POST',
-    body: JSON.stringify(credentials),
-});

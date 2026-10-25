@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" aria-hidden="true">
+  <!--
+    Bar : terrasse de guinguette au bord de l'eau, guirlandes lumineuses.
+    Couleur de catégorie #8d5b4c : le plancher et la cabane en bois.
+    Animation (> 480px, sans mouvement réduit) : .ampoule scintillent doucement,
+    chacune à son rythme (cycle de 2,4 s ou plus) : jamais plus de 3 flashs par seconde.
+  -->
+  <style>
+    @media (min-width: 480px) and (prefers-reduced-motion: no-preference) {
+      .ampoule { animation: scintille 2.4s ease-in-out infinite alternate; }
+      .ampoule:nth-child(3n) { animation-delay: -0.8s; animation-duration: 3s; }
+      .ampoule:nth-child(3n+1) { animation-delay: -1.6s; animation-duration: 2.8s; }
+      @keyframes scintille { from { opacity: 1; } to { opacity: .45; } }
+    }
+  </style>
+  <!-- Ciel du soir et rivière -->
+  <rect width="800" height="600" fill="#E9D1C0"/>
+  <rect y="0" width="800" height="140" fill="#D9B8B0"/>
+  <path d="M0 330 C140 300 300 320 420 300 C560 280 700 310 800 300 V380 H0 Z" fill="#6E8A6A" stroke="#1F1915" stroke-width="3"/>
+  <rect y="370" width="800" height="70" fill="#8FB1BC" stroke="#1F1915" stroke-width="3"/>
+  <path d="M60 400 h80 M260 415 h60 M480 398 h90 M660 418 h70" stroke="#F6D9A0" stroke-width="3" stroke-linecap="round"/>
+  <!-- Arbres de la rive -->
+  <g fill="#4F6E4A" stroke="#1F1915" stroke-width="3">
+    <circle cx="90" cy="250" r="60"/><circle cx="160" cy="280" r="45"/><circle cx="700" cy="250" r="65"/>
+  </g>
+  <!-- Cabane en bois -->
+  <g stroke="#1F1915" stroke-width="3" stroke-linejoin="round">
+    <path d="M520 440 V260 L620 200 L720 260 V440 Z" fill="#8d5b4c"/>
+    <path d="M540 280 v160 M570 270 v170 M600 260 v180 M640 260 v180 M670 270 v170 M700 280 v160" stroke-width="1.5" opacity=".5" fill="none"/>
+    <rect x="570" y="320" width="100" height="60" fill="#F6D9A0"/>
+    <rect x="560" y="380" width="120" height="16" fill="#C9A06A"/>
+  </g>
+  <!-- Plancher -->
+  <path d="M0 440 H800 V600 H0 Z" fill="#8d5b4c" stroke="#1F1915" stroke-width="3"/>
+  <path d="M0 480 H800 M0 525 H800 M0 570 H800" stroke="#1F1915" stroke-width="2" opacity=".45"/>
+  <!-- Tables, verres -->
+  <g stroke="#1F1915" stroke-width="3.5" stroke-linecap="round">
+    <ellipse cx="200" cy="470" rx="60" ry="12" fill="#E2D3BC"/><path d="M200 482 v70 M175 552 h50" fill="none"/>
+    <ellipse cx="400" cy="490" rx="60" ry="12" fill="#E2D3BC"/><path d="M400 502 v70 M375 572 h50" fill="none"/>
+  </g>
+  <g stroke="#1F1915" stroke-width="2.5">
+    <path d="M185 462 l3 -18 h10 l3 18 z M210 462 l3 -18 h10 l3 18 z" fill="#F6CF7A"/>
+    <path d="M388 482 l3 -18 h10 l3 18 z" fill="#E7A6A0"/>
+  </g>
+  <!-- Fil des guirlandes -->
+  <path d="M0 120 Q200 220 400 130 Q600 40 800 140" fill="none" stroke="#1F1915" stroke-width="3"/>
+  <path d="M0 190 Q250 280 520 200" fill="none" stroke="#1F1915" stroke-width="3"/>
+  <!-- Ampoules (couleur chaude, halo léger) -->
+  <g id="guirlandes" stroke="#1F1915" stroke-width="2">
+    <circle class="ampoule" cx="50" cy="143" r="11" fill="#FFD27A"/>
+    <circle class="ampoule" cx="120" cy="168" r="11" fill="#FFD27A"/>
+    <circle class="ampoule" cx="190" cy="178" r="11" fill="#FFD27A"/>
+    <circle class="ampoule" cx="260" cy="172" r="11" fill="#FFD27A"/>
+    <circle class="ampoule" cx="330" cy="153" r="11" fill="#FFD27A"/>
+    <circle class="ampoule" cx="400" cy="130" r="11" fill="#FFD27A"/>
+    <circle class="ampoule" cx="470" cy="106" r="11" fill="#FFD27A"/>
+    <circle class="ampoule" cx="540" cy="92" r="11" fill="#FFD27A"/>
+    <circle class="ampoule" cx="610" cy="92" r="11" fill="#FFD27A"/>
+    <circle class="ampoule" cx="680" cy="106" r="11" fill="#FFD27A"/>
+    <circle class="ampoule" cx="750" cy="126" r="11" fill="#FFD27A"/>
+    <circle class="ampoule" cx="70" cy="215" r="11" fill="#FFD27A"/>
+    <circle class="ampoule" cx="150" cy="236" r="11" fill="#FFD27A"/>
+    <circle class="ampoule" cx="240" cy="243" r="11" fill="#FFD27A"/>
+    <circle class="ampoule" cx="330" cy="236" r="11" fill="#FFD27A"/>
+    <circle class="ampoule" cx="420" cy="220" r="11" fill="#FFD27A"/>
+  </g>
+</svg>

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F6EFE6">
+  <title>Saisons ORIVY</title>
+  <script src="themes.js"></script>
+  <script src="saisons.js"></script>
+  <link rel="icon" href="logo/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght,SOFT@9..144,600..700,100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="design-system.css">
+  <link rel="stylesheet" href="themes.css">
+  <link rel="stylesheet" href="saisons.css">
+  <style>
+    /* Mise en page de l'aperçu uniquement, en variables */
+    main { max-width: var(--largeur-contenu); margin: 0 auto; padding: var(--espace-6) var(--marge-page) var(--espace-9); }
+    .intro { color: var(--couleur-texte-doux); }
+    .saison { margin-top: var(--espace-7); }
+    .paire { display: grid; gap: var(--espace-4); }
+    @media (min-width: 768px) { .paire { grid-template-columns: 1fr 1fr; } }
+
+    .ecran {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      border-radius: var(--rayon-grand);
+      box-shadow: var(--ombre-2);
+      min-height: calc(var(--espace-9) * 4);
+    }
+    .ecran__tete {
+      position: relative;
+      display: flex; align-items: center; gap: var(--espace-1);
+      padding: var(--espace-4);
+      background: var(--couleur-surface);
+      border-bottom: 1px solid var(--couleur-bordure);
+    }
+    .ecran__tete svg { width: var(--logo-largeur-min); }
+    .ecran__corps { position: relative; z-index: var(--plan-contenu); padding: var(--espace-4); display: flex; flex-direction: column; gap: var(--espace-3); }
+    .etiquette { font-size: var(--taille-s); color: var(--couleur-texte-doux); }
+
+    .bouton {
+      align-self: flex-start;
+      min-height: var(--cible-min); padding: 0 var(--espace-4);
+      border-radius: var(--rayon-petit); border: 2px solid transparent;
+      font-weight: var(--graisse-forte); cursor: pointer;
+      background: var(--couleur-principale); color: var(--couleur-sur-principale);
+    }
+    .bouton:hover { background: var(--couleur-principale-survol); }
+    .ligne { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espace-3); font-size: var(--taille-s); }
+    .puce {
+      display: inline-flex; align-items: center; min-height: var(--cible-min);
+      padding: 0 var(--espace-3); border-radius: var(--rayon-pilule);
+      border: 1.5px solid var(--couleur-accent); color: var(--couleur-accent-texte);
+      font-weight: var(--graisse-forte);
+    }
+    .interrupteur { width: var(--cible-min); height: var(--espace-5); border-radius: var(--rayon-pilule); background: var(--couleur-accent); position: relative; }
+    .interrupteur::after { content: ""; position: absolute; top: var(--espace-1); right: var(--espace-1); width: var(--espace-4); height: var(--espace-4); border-radius: var(--rayon-pilule); background: var(--couleur-surface); }
+    .vide { text-align: center; padding: var(--espace-4); border: 1.5px dashed var(--couleur-bordure); border-radius: var(--rayon-carte); }
+    .vide p { margin: 0 auto; color: var(--couleur-texte-doux); font-size: var(--taille-s); }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Saisons et événements</h1>
+  <p class="intro">Chaque saison en version claire (jour) et sombre (nuit). La saison change la principale,
+    l'accent et les décorations. Les décorations sont discrètes, décoratives (masquées aux lecteurs d'écran)
+    et ne bloquent jamais un clic.</p>
+  <div id="saisons"></div>
+
+  <template id="modele">
+    <div class="ecran">
+      <div class="deco-chute" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="ecran__tete">
+        <svg viewBox="0 0 260 112" role="img" aria-label="ORIVY">
+          <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="var(--couleur-principale)" stroke-width="10" d="M40 100 L19.1 62.8 A24 24 0 1 1 60.9 62.8 Z"/>
+            <path stroke="currentColor" stroke-width="6" stroke-dasharray="0 12" d="M54 100 H198"/>
+            <path stroke="currentColor" stroke-width="10" d="M84 78 V24 H100 A15 15 0 0 1 100 54 H84 M100 54 L116 78 M136 24 V78 M154 24 L174 78 L194 24"/>
+            <path stroke="currentColor" stroke-width="10" d="M214 24 L232 51 L250 24 M232 51 V86 Q232 100 212 100"/>
+          </g>
+        </svg>
+        <span class="deco-mini" aria-hidden="true"></span>
+        <span class="deco-coin" aria-hidden="true"></span>
+      </div>
+      <div class="ecran__corps">
+        <span class="etiquette"></span>
+        <button class="bouton" type="button">Crée une sortie</button>
+        <div class="ligne"><span class="puce">Ce week-end</span><span class="interrupteur" aria-hidden="true"></span> Décorations</div>
+        <div class="vide">
+          <span class="deco-vide" aria-hidden="true"></span>
+          <p>Aucune sortie prévue par ici pour l'instant. Et si tu lançais la première ?</p>
+        </div>
+      </div>
+    </div>
+  </template>
+</main>
+
+<script>
+  /* Construit les 6 saisons × (jour, nuit) à partir du modèle */
+  var noms = { printemps: "Printemps", ete: "Été", automne: "Automne", hiver: "Hiver", halloween: "Halloween · 20 – 31 oct.", noel: "Noël · 1er – 26 déc." };
+  var zone = document.getElementById("saisons");
+  Object.keys(noms).forEach(function (saison) {
+    var section = document.createElement("section");
+    section.className = "saison";
+    section.innerHTML = "<h2>" + noms[saison] + "</h2>";
+    var paire = document.createElement("div");
+    paire.className = "paire";
+    ["jour", "nuit"].forEach(function (theme) {
+      var ecran = document.getElementById("modele").content.cloneNode(true);
+      var bloc = ecran.querySelector(".ecran");
+      bloc.setAttribute("data-theme", theme);
+      bloc.setAttribute("data-saison", saison);
+      ecran.querySelector(".etiquette").textContent = theme === "jour" ? "Version claire (aube, jour, crépuscule)" : "Version nuit";
+      paire.appendChild(ecran);
+    });
+    section.appendChild(paire);
+    zone.appendChild(section);
+  });
+</script>
+<script src="outils/selecteur-apercu.js"></script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" aria-hidden="true">
+  <!--
+    Parc : deux personnes assises sur l'herbe sous un grand arbre, une nappe de pique-nique.
+    Couleur de catégorie #4f9d69 : feuillage d'été et nappe.
+    L'arbre change selon la saison grâce au fragment de l'adresse :
+      parc.svg (été, par défaut) · parc.svg#printemps · parc.svg#automne · parc.svg#hiver
+    Technique : les groupes #printemps, #automne, #hiver englobent le dessin ; quand l'un est
+    « ciblé » (:target), on montre les éléments de sa saison et on cache ceux de l'été.
+    Animation (> 480px, sans mouvement réduit) : .chute (feuilles, pétales ou flocons) tombe lentement.
+  -->
+  <style>
+    .s-printemps, .s-automne, .s-hiver { display: none; }
+    #printemps:target .s-printemps, #automne:target .s-automne, #hiver:target .s-hiver { display: inline; }
+    #printemps:target .s-ete, #automne:target .s-ete, #hiver:target .s-ete { display: none; }
+    @media (min-width: 480px) and (prefers-reduced-motion: no-preference) {
+      .chute > * { animation: tombe 9s linear infinite; }
+      .chute > *:nth-child(2) { animation-delay: -3s; animation-duration: 11s; }
+      .chute > *:nth-child(3) { animation-delay: -6s; animation-duration: 10s; }
+      .chute > *:nth-child(4) { animation-delay: -1.5s; animation-duration: 12s; }
+      @keyframes tombe {
+        0% { transform: translate(0, -40px) rotate(0deg); opacity: 0; }
+        10% { opacity: 1; }
+        100% { transform: translate(-60px, 360px) rotate(240deg); opacity: 0; }
+      }
+    }
+  </style>
+  <g id="printemps"><g id="automne"><g id="hiver">
+    <rect width="800" height="600" fill="#F4E9D8"/>
+    <rect class="s-hiver" width="800" height="600" fill="#E8EEF0"/>
+    <!-- Pelouse (neige en hiver) -->
+    <path d="M0 400 C200 370 500 380 800 360 V600 H0 Z" fill="#9DB37E" stroke="#1F1915" stroke-width="3"/>
+    <path class="s-hiver" d="M0 400 C200 370 500 380 800 360 V600 H0 Z" fill="#FFFBF6" stroke="#1F1915" stroke-width="3"/>
+    <!-- Tronc et branches -->
+    <g stroke="#1F1915" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M545 420 C555 340 540 280 520 220 L560 230 C575 290 590 330 600 300 C610 260 640 230 670 210 L680 230 C650 260 625 300 620 360 C615 400 620 420 630 425 Z" fill="#8A6448"/>
+      <path class="s-hiver" d="M520 220 C500 180 480 160 450 150 M560 230 C570 180 590 150 620 130 M670 210 C700 180 720 170 740 170 M600 300 C580 250 590 200 600 170" fill="none" stroke-width="4"/>
+    </g>
+    <!-- Feuillage d'été -->
+    <g class="s-ete" fill="#4f9d69" stroke="#1F1915" stroke-width="3">
+      <circle cx="500" cy="190" r="80"/><circle cx="600" cy="140" r="90"/><circle cx="690" cy="200" r="75"/><circle cx="590" cy="240" r="70"/>
+    </g>
+    <!-- Printemps : feuillage tendre + fleurs -->
+    <g class="s-printemps">
+      <g fill="#8FC27A" stroke="#1F1915" stroke-width="3"><circle cx="500" cy="190" r="80"/><circle cx="600" cy="140" r="90"/><circle cx="690" cy="200" r="75"/><circle cx="590" cy="240" r="70"/></g>
+      <g fill="#F2A7B5" stroke="#C9707F" stroke-width="2">
+        <circle cx="470" cy="160" r="9"/><circle cx="540" cy="200" r="9"/><circle cx="600" cy="100" r="9"/><circle cx="650" cy="160" r="9"/>
+        <circle cx="710" cy="220" r="9"/><circle cx="560" cy="250" r="9"/><circle cx="620" cy="210" r="9"/><circle cx="520" cy="140" r="9"/>
+      </g>
+    </g>
+    <!-- Automne : feuillage orange et ocre -->
+    <g class="s-automne" stroke="#1F1915" stroke-width="3">
+      <circle cx="500" cy="190" r="80" fill="#E0803A"/><circle cx="600" cy="140" r="90" fill="#D9A441"/><circle cx="690" cy="200" r="75" fill="#C76A2E"/><circle cx="590" cy="240" r="70" fill="#E0803A"/>
+    </g>
+    <!-- Hiver : neige posée sur les branches -->
+    <g class="s-hiver" fill="#FFFBF6" stroke="#1F1915" stroke-width="2.5" stroke-linejoin="round">
+      <path d="M445 148 q10 -8 22 0 z M612 128 q10 -10 22 0 z M732 168 q8 -8 18 0 z M520 216 q14 -8 30 0 z"/>
+    </g>
+    <!-- Nappe de pique-nique -->
+    <path d="M140 470 L380 450 L420 520 L150 540 Z" fill="#4f9d69" stroke="#1F1915" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M200 465 L210 537 M260 460 L275 533 M320 455 L340 528 M145 497 L398 482" stroke="#FFFBF6" stroke-width="5" opacity=".7"/>
+    <!-- Deux personnes assises, au trait -->
+    <g fill="none" stroke="#1F1915" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="225" cy="372" r="20" fill="#F4E9D8"/>
+      <path d="M225 392 C215 420 215 445 222 470 M222 470 L275 478 L290 505 M222 440 L262 452 M218 420 L190 450" />
+      <circle cx="330" cy="364" r="20" fill="#F4E9D8"/>
+      <path d="M318 352 C312 340 330 330 345 345" />
+      <path d="M330 384 C340 410 342 440 336 465 M336 465 L290 480 L282 505 M335 420 L300 438 M338 410 L370 440 L388 432"/>
+    </g>
+    <!-- Panier -->
+    <path d="M360 480 h44 l-6 30 h-32 z" fill="#C9A06A" stroke="#1F1915" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M366 480 q16 -24 32 0" fill="none" stroke="#1F1915" stroke-width="3"/>
+    <!-- Ce qui tombe, selon la saison -->
+    <!-- Une classe de saison par groupe : un élément qui porterait s-ete ET s-automne serait caché dans les deux -->
+    <g class="chute s-ete" fill="#7FB069" stroke="#4F7A3E" stroke-width="1.5">
+      <path d="M460 270 c6 4 8 12 0 20 c-8 -8 -6 -16 0 -20 z"/><path d="M650 290 c6 4 8 12 0 20 c-8 -8 -6 -16 0 -20 z"/>
+    </g>
+    <g class="chute s-automne" fill="#E0803A" stroke="#A8552A" stroke-width="1.5">
+      <path d="M460 270 c6 4 8 12 0 20 c-8 -8 -6 -16 0 -20 z"/><path d="M560 300 c6 4 8 12 0 20 c-8 -8 -6 -16 0 -20 z"/>
+      <path d="M650 290 c6 4 8 12 0 20 c-8 -8 -6 -16 0 -20 z"/><path d="M700 260 c6 4 8 12 0 20 c-8 -8 -6 -16 0 -20 z"/>
+    </g>
+    <g class="chute s-printemps" fill="#F2A7B5" stroke="#C9707F" stroke-width="1.5">
+      <ellipse cx="460" cy="260" rx="5" ry="7"/><ellipse cx="560" cy="300" rx="5" ry="7"/><ellipse cx="650" cy="280" rx="5" ry="7"/><ellipse cx="700" cy="250" rx="5" ry="7"/>
+    </g>
+    <g class="chute s-hiver" fill="#FFFBF6" stroke="#7FB2D1" stroke-width="2">
+      <circle cx="160" cy="120" r="6"/><circle cx="360" cy="80" r="5"/><circle cx="560" cy="60" r="6"/><circle cx="740" cy="110" r="5"/>
+    </g>
+  </g></g></g>
+</svg>

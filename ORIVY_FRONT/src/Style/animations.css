@@ -1,0 +1,899 @@
+/* ==========================================================================
+   ORIVY — Animations
+   --------------------------------------------------------------------------
+   Posé APRÈS accueil.css. Les numéros (1) … (100) renvoient à la liste des
+   propositions validées par l'utilisateur le 2026-10-23.
+   Règles de la maison :
+     - on n'anime que transform et opacity (fluide, même sur un vieux téléphone) ;
+     - tout est décoratif (aria-hidden) et ne bloque aucun clic ;
+     - sous « mouvement réduit », les animations sont coupées ;
+     - pas plus de 3 flashs par seconde.
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. LE CADRE DES PHOTOS ANIMÉES  (PhotoAnimee.jsx)
+   ========================================================================== */
+
+/* Le conteneur devient une « boîte de mesure » : 100cqw = sa largeur, 100cqh = sa hauteur */
+.photo-animee {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  container-type: size;
+}
+/* Le cadre fait ce que ferait object-fit: cover, mais à la main :
+   il est au moins aussi large ET aussi haut que le conteneur, en gardant le ratio
+   de l'image, et il est décalé selon le cadrage (--px, --py entre 0 et 1). */
+.photo-cadre {
+  --lw: max(100cqw, 100cqh * var(--r));
+  --lh: max(100cqh, 100cqw / var(--r));
+  position: absolute;
+  width: var(--lw);
+  height: var(--lh);
+  left: calc((100cqw - var(--lw)) * var(--px));
+  top: calc((100cqh - var(--lh)) * var(--py));
+  /* 1em = 1 % de la largeur de l'image : les effets grandissent avec la photo */
+  font-size: calc(var(--lw) / 100);
+}
+.photo-cadre > img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.photo-effets { position: absolute; inset: 0; pointer-events: none; }
+
+/* Chaque effet est posé en % de l'image ; ses enfants sont des petits éléments animés */
+.effet { position: absolute; pointer-events: none; }
+.effet i, .effet b, .effet span { position: absolute; display: block; }
+
+
+/* ==========================================================================
+   2. EFFETS SUR LES PHOTOS  (1 à 30)
+   ========================================================================== */
+
+/* (1, 21) Reflets qui scintillent : petites étoiles de lumière */
+.effet--reflets i {
+  width: 1.4em; height: 1.4em;
+  margin: -0.7em 0 0 -0.7em;
+  background: radial-gradient(closest-side, #FFFFFF, rgb(255 236 190 / 0.6) 35%, rgb(255 236 190 / 0));
+  opacity: 0;
+}
+
+/* (2) Brume : grandes nappes blanches très douces */
+.effet--brume i {
+  width: 70%; height: 60%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 255 255 / 0.55), rgb(255 255 255 / 0));
+  opacity: 0.6;
+}
+.effet--brume i:nth-child(1) { left: 0;   top: 20%; }
+.effet--brume i:nth-child(2) { left: 30%; top: 40%; --delai: -4s; }
+.effet--brume i:nth-child(3) { left: 15%; top: 0;   --delai: -8s; }
+
+/* (3, 28) Nuages : formes floues qui traversent la zone de ciel */
+.effet--nuages i {
+  width: 28%; height: 45%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 244 236 / 0.5), rgb(255 244 236 / 0));
+  left: -30%;
+}
+.effet--nuages i:nth-child(1) { top: 5%; }
+.effet--nuages i:nth-child(2) { top: 40%; width: 20%; --delai: -25s; }
+.effet--nuages i:nth-child(3) { top: 20%; width: 34%; --delai: -50s; }
+
+/* (4) Lucioles : seulement au crépuscule et la nuit */
+.effet--lucioles { display: none; }
+[data-theme="crepuscule"] .effet--lucioles,
+[data-theme="nuit"] .effet--lucioles { display: block; }
+.effet--lucioles i {
+  width: 0.5em; height: 0.5em; border-radius: 50%;
+  background: #F5F7A8;
+  box-shadow: 0 0 0.6em 0.25em rgb(230 240 120 / 0.7);
+  opacity: 0;
+}
+
+/* (5, 11) Flamme : une lueur chaude qui vacille (irrégulière, jamais plus de 3 flashs/s) */
+.effet--flamme i {
+  width: 5em; height: 5em; margin: -2.5em 0 0 -2.5em;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 214 130 / 0.75), rgb(255 160 60 / 0.25) 45%, rgb(255 160 60 / 0));
+  mix-blend-mode: screen;
+}
+
+/* (6, 22) Ruissellement : fines lignes de lumière qui descendent dans l'eau */
+.effet--ruissellement { overflow: hidden; }
+.effet--ruissellement i {
+  width: 0.25em; height: 30%;
+  background: linear-gradient(to bottom, rgb(255 255 255 / 0), rgb(255 255 255 / 0.85), rgb(255 255 255 / 0));
+  top: -30% !important;
+  opacity: 0.8;
+}
+
+/* (7) Gouttes qui brillent autour de la fontaine */
+.effet--gouttes i {
+  width: 0.4em; height: 0.4em; border-radius: 50%;
+  background: #FFF6E0;
+  box-shadow: 0 0 0.4em 0.1em rgb(255 230 170 / 0.8);
+  opacity: 0;
+}
+
+/* (8, 19, 24) Réverbères : une lueur qui s'allume (l'un après l'autre) puis respire */
+.effet--lampe i {
+  width: var(--taille); height: var(--taille);
+  margin: calc(var(--taille) / -2) 0 0 calc(var(--taille) / -2);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 226 150 / 0.85), rgb(255 190 90 / 0.3) 45%, rgb(255 190 90 / 0));
+  mix-blend-mode: screen;
+}
+
+/* (51) Fenêtres qui s'allument la nuit seulement */
+.effet--fenetre { display: none; }
+[data-theme="nuit"] .effet--fenetre { display: block; }
+.effet--fenetre i {
+  width: 3em; height: 3.6em; margin: -1.8em 0 0 -1.5em;
+  border-radius: 0.4em;
+  background: radial-gradient(closest-side, rgb(255 210 120 / 0.7), rgb(255 210 120 / 0));
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+
+/* (9, 23) Pétales qui s'envolent */
+.effet--petales i {
+  width: 1.1em; height: 0.7em;
+  border-radius: 60% 0 60% 0;
+  background: var(--couleur-petale);
+  opacity: 0;
+}
+
+/* (12) Vapeur : volutes qui montent et s'étirent */
+.effet--vapeur i {
+  width: 1.6em; height: 4em; margin-left: -0.8em; top: -4em;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 255 255 / 0.45), rgb(255 255 255 / 0));
+  opacity: 0;
+}
+.effet--vapeur i:nth-child(2) { --delai: -1.3s; margin-left: 0; }
+.effet--vapeur i:nth-child(3) { --delai: -2.6s; margin-left: -1.5em; }
+
+/* (13) Reflet de lumière qui glisse sur l'auvent */
+.effet--reflet { overflow: hidden; }
+.effet--reflet i {
+  top: -20%; left: -40%; width: 25%; height: 140%;
+  background: linear-gradient(to right, rgb(255 255 255 / 0), rgb(255 240 210 / 0.35), rgb(255 255 255 / 0));
+  transform: skewX(-20deg);
+}
+
+/* (14) Enseigne « ORIVY » : un néon doux qui s'allume puis respire */
+.effet--neon i {
+  inset: -15%;
+  border-radius: 1em;
+  background: radial-gradient(closest-side, rgb(255 214 140 / 0.45), rgb(255 214 140 / 0));
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+
+/* (15) Feuilles qui roulent sur les pavés */
+.effet--feuilles-sol { overflow: hidden; }
+.effet--feuilles-sol i {
+  width: 2.4em; height: 2.4em; left: -5%;
+  background: url("decorations/feuille-erable-1.svg") no-repeat center / contain;
+}
+.effet--feuilles-sol i:nth-child(1) { top: 30%; }
+.effet--feuilles-sol i:nth-child(2) { top: 60%; --delai: -7s; background-image: url("decorations/feuille-erable-2.svg"); }
+.effet--feuilles-sol i:nth-child(3) { top: 10%; --delai: -14s; background-image: url("decorations/feuille-erable-3.svg"); }
+
+/* (16, 17, 21) Ondes concentriques autour des barques et des voiliers */
+.effet--ondes i {
+  width: 6em; height: 1.6em; margin: -0.8em 0 0 -3em;
+  border: 0.18em solid rgb(255 240 215 / 0.7);
+  border-radius: 50%;
+  opacity: 0;
+}
+.effet--ondes i:nth-child(2) { animation-delay: calc(var(--delai) - 1.2s) !important; }
+.effet--ondes i:nth-child(3) { animation-delay: calc(var(--delai) - 2.4s) !important; }
+
+/* (18) Drapeaux au sommet des tours : un mât et un fanion qui flotte */
+.effet--drapeau i {
+  width: 2.4em; height: 1.3em; left: 0.15em; top: -2.6em;
+  background: #A8173A;
+  clip-path: polygon(0 0, 100% 35%, 0 75%);
+  transform-origin: left center;
+}
+.effet--drapeau::before {
+  content: ""; position: absolute; left: 0; top: -2.8em;
+  width: 0.18em; height: 2.9em; background: #2E2622;
+}
+
+/* (20) Hirondelles qui tournent autour des tours */
+.effet--hirondelles span { width: 0; height: 0; }
+.effet--hirondelles i { left: var(--rayon); width: 2em; height: 1em; margin: -0.5em 0 0 -1em; }
+.effet--hirondelles b { inset: 0; background: url("decorations/oiseau.svg") no-repeat center / contain; }
+
+/* (25) Herbes hautes qui ondulent depuis leur base */
+.effet--herbes i {
+  bottom: 0; width: 2.6em; height: calc(var(--hauteur) * 0.7);
+  opacity: 0.45;   /* discrètes : elles se fondent dans les herbes de la photo */
+  background: url("decorations/herbe.svg") no-repeat bottom / 100% 100%;
+  transform-origin: 50% 100%;
+}
+
+/* (26) Fleurs sauvages qui se balancent */
+.effet--fleur i {
+  width: 1.8em; height: 1.8em; margin: -1.8em 0 0 -0.9em;
+  background: url("decorations/fleur.svg") no-repeat center / contain;
+  transform-origin: 50% 100%;
+}
+
+/* (27) Papillons qui volettent : <i> se déplace, <b> bat des ailes */
+.effet--papillons i { width: 1.3em; height: 1.05em; }   /* petits, discrets */
+.effet--papillons b { inset: 0; background: url("decorations/papillon.svg") no-repeat center / contain; }
+
+/* (29) Aigle : il plane en larges cercles très lents */
+.effet--aigle span { width: 0; height: 0; }
+.effet--aigle i { left: 9em; width: 6em; height: 2em; margin: -1em 0 0 -3em; background: url("decorations/aigle.svg") no-repeat center / contain; }
+
+/* Soleil couchant : un halo qui respire (i) et une couronne de rayons qui tourne (b) */
+.effet--soleil i, .effet--soleil b {
+  width: var(--taille); height: var(--taille);
+  margin: calc(var(--taille) / -2) 0 0 calc(var(--taille) / -2);
+  border-radius: 50%;
+  mix-blend-mode: screen;
+}
+.effet--soleil i { background: radial-gradient(closest-side, rgb(255 240 200 / 0.7), rgb(255 170 80 / 0.25) 40%, rgb(255 170 80 / 0)); }
+.effet--soleil b {
+  background: repeating-conic-gradient(rgb(255 225 160 / 0.22) 0deg 4deg, rgb(255 225 160 / 0) 4deg 18deg);
+  -webkit-mask: radial-gradient(closest-side, #000 20%, transparent);
+  mask: radial-gradient(closest-side, #000 20%, transparent);
+}
+
+/* Le ciel rougit lentement au-dessus de l'horizon */
+.effet--rougeoie {
+  background: linear-gradient(to bottom, rgb(255 90 70 / 0), rgb(255 90 70 / 0.22) 70%, rgb(255 120 60 / 0.3));
+  mix-blend-mode: soft-light;
+  opacity: 0;
+}
+
+/* Petit voilier sur l'horizon : <i> avance, <b> dessine la voile et la coque */
+.effet--voilier { overflow: hidden; }
+.effet--voilier i { right: -3em; bottom: 0; width: 1.6em; height: 2.2em; opacity: 0; }
+.effet--voilier b {
+  inset: 0;
+  background:
+    linear-gradient(#2E2622, #2E2622) bottom / 100% 0.3em no-repeat,                   /* la coque */
+    linear-gradient(to right, #FFF4E6, #F3D9C0) 0 0 / 100% calc(100% - 0.35em) no-repeat; /* la voile */
+  clip-path: polygon(45% 0, 45% 82%, 100% 82%, 90% 100%, 10% 100%, 0 82%, 40% 82%, 5% 78%, 40% 10%);
+}
+
+/* Phare : un point lumineux (b) et un faisceau (i) qui tourne, la nuit seulement */
+.effet--phare { display: none; }
+[data-theme="nuit"] .effet--phare,
+[data-theme="crepuscule"] .effet--phare { display: block; }
+.effet--phare b {
+  width: 1.6em; height: 1.6em; margin: -0.8em 0 0 -0.8em; border-radius: 50%;
+  background: radial-gradient(closest-side, #FFFBE8, rgb(255 236 170 / 0.5) 45%, rgb(255 236 170 / 0));
+  mix-blend-mode: screen;
+}
+.effet--phare i {
+  left: 0; top: -0.6em; width: 22em; height: 1.2em;
+  background: linear-gradient(to right, rgb(255 246 210 / 0.55), rgb(255 246 210 / 0));
+  clip-path: polygon(0 45%, 100% 0, 100% 100%, 0 55%);
+  transform-origin: left center;
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+
+/* Hirondelles ou mouettes plus lointaines : tout le ballet est réduit */
+.effet--hirondelles { scale: var(--echelle); }
+
+/* Guirlande guinguette : chaque ampoule scintille doucement, sans jamais s'éteindre */
+.effet--ampoule i {
+  width: 2.4em; height: 2.4em; margin: -1.2em 0 0 -1.2em;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 236 180 / 0.9), rgb(255 200 110 / 0.3) 45%, rgb(255 200 110 / 0));
+  mix-blend-mode: screen;
+}
+
+/* Chenillard de la marquise du cinéma : une vague de lumière la parcourt */
+.effet--chenillard i {
+  width: 2.2em; height: 2.2em; margin: -1.1em 0 0 -1.1em;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 244 210 / 0.95), rgb(255 210 120 / 0.3) 45%, rgb(255 210 120 / 0));
+  mix-blend-mode: screen;
+  opacity: 0.3;
+}
+
+/* Confettis de la fête : petits rectangles aux couleurs de la guinguette */
+.effet--confettis { overflow: hidden; }
+.effet--confettis i {
+  top: -5% !important;
+  width: 0.7em; height: 1em;
+  background: #E8604A;
+  opacity: 0;
+}
+.effet--confettis i:nth-child(5n + 1) { background: #FFD27A; }
+.effet--confettis i:nth-child(5n + 2) { background: #6FCB8F; }
+.effet--confettis i:nth-child(5n + 3) { background: #6FA8DC; }
+.effet--confettis i:nth-child(5n + 4) { background: #F2A7B5; width: 0.9em; height: 0.6em; }
+
+/* Notes de musique qui montent de la scène */
+.effet--notes i { opacity: 0; font-style: normal; font-size: 2.2em; line-height: 1;
+  color: #FFE9B8; text-shadow: 0 0 0.4em rgb(255 200 110 / 0.8); }
+.effet--notes i::before { content: "♪"; }
+.effet--notes i:nth-child(2n)::before { content: "♫"; }
+
+
+
+/* ==========================================================================
+   3. COUCHE HEURE ET SAISON  (46 à 60)
+   Chaque bloc n'apparaît que si <html> porte le bon data-theme / data-saison.
+   Les décorations désactivées dans les réglages coupent toute la couche.
+   ========================================================================== */
+.couche-saison { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.couche-saison > div { position: absolute; inset: 0; display: none; }
+.couche-saison i, .couche-saison b { position: absolute; display: block; }
+[data-decorations="off"] .couche-saison { display: none; }
+
+[data-theme="aube"] .s-brume,
+[data-theme="jour"] .s-rayons,
+[data-theme="crepuscule"] .s-rose,
+[data-theme="nuit"] .s-etoiles,
+[data-saison="printemps"] .s-petales,
+[data-saison="ete"] .s-chaleur,
+[data-saison="ete"] .s-abeilles,
+[data-saison="automne"] .s-feuilles,
+[data-saison="halloween"] .s-citrouille,
+[data-saison="hiver"] .s-flocons,
+[data-saison="noel"] .s-flocons,
+[data-saison="noel"] .s-guirlande,
+[data-saison="noel"] .s-filante { display: block; }
+
+/* (46) Aube : brume qui se lève au ras du sol */
+.s-brume i { left: -10%; width: 70%; height: 30%; bottom: -5%; border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 238 232 / 0.55), rgb(255 238 232 / 0)); }
+.s-brume i:nth-child(2) { left: 40%; bottom: 0; --delai: -9s; }
+
+/* (47) Jour : rayons de soleil qui balaient doucement l'écran */
+.s-rayons i { top: -30%; left: 10%; width: 12%; height: 160%;
+  background: linear-gradient(to right, rgb(255 246 220 / 0), rgb(255 246 220 / 0.18), rgb(255 246 220 / 0));
+  transform: rotate(20deg); opacity: 0; }
+.s-rayons i:nth-child(2) { left: 40%; width: 8%; --delai: -5s; }
+.s-rayons i:nth-child(3) { left: 70%; width: 14%; --delai: -10s; }
+
+/* (48) Crépuscule : le ciel rosit doucement */
+.s-rose { background: linear-gradient(to bottom, rgb(255 140 170 / 0.22), rgb(255 140 170 / 0) 55%); opacity: 0; }
+
+/* (49) Nuit : étoiles qui scintillent dans le haut de l'image */
+.s-etoiles { bottom: 60% !important; }
+.s-etoiles i { width: 3px; height: 3px; border-radius: 50%; background: #FFFFFF;
+  box-shadow: 0 0 4px 1px rgb(255 255 255 / 0.6); opacity: 0; }
+
+
+/* (52, 55, 58) Ce qui tombe : pétales, feuilles, flocons */
+.s-chute i { top: -6% !important; width: 18px; height: 18px; opacity: 0;
+  background: var(--image-chute) no-repeat center / contain; }
+.s-petales { --image-chute: url("decorations/fleur.svg"); }
+.s-feuilles { --image-chute: url("decorations/feuille-erable-1.svg"); }
+.s-feuilles i:nth-child(3n) { --image-chute: url("decorations/feuille-erable-2.svg"); width: 24px; height: 24px; }
+.s-flocons { --image-chute: url("decorations/flocon.svg"); }
+.s-flocons i:nth-child(2n) { width: 12px; height: 12px; }
+
+/* (53) Été : la chaleur fait trembler la lumière à l'horizon */
+.s-chaleur i { left: 0; right: 0; top: 48%; height: 6%;
+  background: linear-gradient(to bottom, rgb(255 230 180 / 0), rgb(255 230 180 / 0.18), rgb(255 230 180 / 0)); }
+
+/* (54) Été : abeilles qui butinent */
+.s-abeilles { top: 55% !important; }
+.s-abeilles i { width: 16px; height: 12px; }
+.s-abeilles b { inset: 0; background: url("decorations/abeille.svg") no-repeat center / contain; }
+
+
+/* (57) Halloween : une citrouille clignote doucement dans un coin */
+.s-citrouille { inset: auto auto 4% 3% !important; width: 52px; height: 52px;
+  background: url("decorations/citrouille.svg") no-repeat center / contain; }
+
+/* (59) Noël : guirlande lumineuse en haut de l'écran */
+.s-guirlande { bottom: auto !important; height: 40px;
+  background: radial-gradient(120% 60px at 50% -20px, transparent 58%, rgb(46 38 34 / 0.7) 59%, rgb(46 38 34 / 0.7) 61%, transparent 62%); }
+.s-guirlande i { top: 14px; width: 10px; height: 14px; border-radius: 50% 50% 45% 45%; background: #FFD27A;
+  box-shadow: 0 0 8px 2px rgb(255 210 122 / 0.7); }
+.s-guirlande i:nth-child(3n) { background: #E8604A; box-shadow: 0 0 8px 2px rgb(232 96 74 / 0.7); }
+.s-guirlande i:nth-child(3n + 1) { background: #6FCB8F; box-shadow: 0 0 8px 2px rgb(111 203 143 / 0.7); }
+
+/* (60) Noël : étoile filante */
+.s-filante i { top: 10%; left: 10%; width: 140px; height: 2px;
+  background: linear-gradient(to right, rgb(255 255 255 / 0), #FFFFFF);
+  transform: rotate(18deg); opacity: 0; }
+
+
+/* ==========================================================================
+   4. LES MOUVEMENTS (coupés sous « mouvement réduit »)
+   ========================================================================== */
+@media (prefers-reduced-motion: no-preference) {
+  .effet--reflets i { animation: scintille var(--duree) ease-in-out var(--delai) infinite; }
+  .effet--brume i { animation: derive-lente 14s ease-in-out var(--delai, 0s) infinite alternate; }
+  .effet--nuages i { animation: traverse 75s linear var(--delai, 0s) infinite; }
+  .effet--lucioles i { animation: luciole var(--duree) ease-in-out var(--delai) infinite alternate; }
+  .effet--flamme i { animation: vacille 1.6s steps(1, end) infinite, vacille-doux 0.8s ease-in-out infinite alternate; }
+  .effet--ruissellement i { animation: ruisselle calc(var(--duree) * 0.35) linear var(--delai) infinite; }
+  .effet--gouttes i { animation: goutte calc(var(--duree) * 0.5) ease-out var(--delai) infinite; }
+  .effet--lampe i { animation: allumage 1.2s ease-out calc(var(--ordre) * 0.6s) both, respire 4s ease-in-out calc(1.2s + var(--ordre) * 0.6s) infinite alternate; }
+  .effet--fenetre i { animation: allumage 1s ease-out calc(var(--ordre) * 0.9s) forwards; }
+  .effet--petales i { animation: petale var(--duree) ease-in-out var(--delai) infinite; }
+  .effet--vapeur i { animation: vapeur 3.9s ease-out var(--delai, 0s) infinite; }
+  .effet--reflet i { animation: reflet-glisse 7s ease-in-out infinite; }
+  .effet--neon i { animation: allumage 2.4s ease-out both, respire 4s ease-in-out 2.4s infinite alternate; }
+  .effet--feuilles-sol i { animation: roule 21s linear var(--delai, 0s) infinite; }
+  .effet--ondes i { animation: onde 3.6s ease-out var(--delai) infinite; }
+  .effet--drapeau i { animation: flotte 1.4s ease-in-out var(--delai) infinite alternate; }
+  .effet--hirondelles span { animation: tourne var(--duree) linear var(--delai) infinite; }
+  .effet--hirondelles b, .effet--papillons b { animation: battement 0.45s ease-in-out infinite alternate; }
+  .effet--herbes i { animation: ondule 3.6s ease-in-out var(--delai) infinite alternate; }
+  .effet--fleur i { animation: ondule 2.8s ease-in-out var(--delai) infinite alternate; }
+  .effet--papillons i { animation: volette var(--duree) ease-in-out var(--delai) infinite alternate; }
+  .effet--aigle span { animation: tourne 40s linear infinite; }
+  .effet--soleil i { animation: soleil-respire 6s ease-in-out infinite alternate; }
+  .effet--soleil b { animation: tourne 90s linear infinite; }
+  .effet--descend { animation: soleil-descend 40s ease-in-out infinite alternate; }
+  .effet--rougeoie { animation: rougeoie 40s ease-in-out infinite alternate; }
+  .effet--voilier i { animation: voilier 70s linear 2s infinite; }
+  .effet--phare i { animation: phare 8s linear infinite; }
+  .effet--phare b { animation: respire 4s ease-in-out infinite alternate; }
+  .effet--ampoule i { animation: ampoule var(--duree) ease-in-out var(--delai) infinite alternate; }
+  .effet--chenillard i { animation: chenillard 3s ease-in-out calc(var(--ordre) * 0.5s) infinite; }
+  .effet--confettis i { animation: confetti calc(var(--duree) * 1.4) linear var(--delai) infinite; }
+  .effet--notes i { animation: note calc(var(--duree) * 1.2) ease-out var(--delai) infinite; }
+
+  .s-brume i { animation: derive-lente 18s ease-in-out var(--delai, 0s) infinite alternate; }
+  .s-rayons i { animation: rayon 15s ease-in-out var(--delai, 0s) infinite; }
+  .s-rose { animation: respire-rose 12s ease-in-out infinite alternate; }
+  .s-etoiles i { animation: scintille var(--duree) ease-in-out var(--delai) infinite; }
+  .s-chute i { animation: tombe calc(var(--duree) * 2.4) linear var(--delai) infinite; }
+  .s-chaleur i { animation: chaleur 3s ease-in-out infinite alternate; }
+  .s-abeilles i { animation: volette var(--duree) ease-in-out var(--delai) infinite alternate; }
+  .s-abeilles b { animation: battement 0.12s linear infinite alternate; }   /* battement rapide mais sans éclat lumineux */
+  .s-citrouille { animation: respire 3s ease-in-out infinite alternate; }
+  .s-guirlande i { animation: scintille 2.8s ease-in-out var(--delai) infinite; }
+  .s-filante i { animation: filante 9s ease-in 2s infinite; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .photo-effets, .couche-saison { display: none; }
+}
+
+@keyframes scintille   { 0%, 100% { opacity: 0; transform: scale(0.4); } 50% { opacity: 1; transform: scale(1); } }
+@keyframes derive-lente { from { transform: translateX(-8%); } to { transform: translateX(8%); } }
+@keyframes traverse    { from { transform: translateX(0); } to { transform: translateX(450%); } }
+@keyframes luciole     { 0% { opacity: 0; transform: translate(0, 0); } 30% { opacity: 1; } 70% { opacity: 0.2; } 100% { opacity: 0.9; transform: translate(var(--dx), -2em); } }
+@keyframes vacille     { 0% { opacity: 0.85; } 20% { opacity: 1; } 45% { opacity: 0.75; } 70% { opacity: 0.95; } }
+@keyframes vacille-doux { from { transform: scale(0.94); } to { transform: scale(1.06); } }
+@keyframes ruisselle   { from { transform: translateY(0); } to { transform: translateY(450%); } }
+@keyframes goutte      { 0% { opacity: 0; transform: translate(0, 0); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), 3em); } }
+@keyframes allumage    { 0% { opacity: 0; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+@keyframes respire     { from { opacity: 1; } to { opacity: 0.65; } }
+@keyframes petale      { 0% { opacity: 0; transform: translate(0, 0) rotate(0); } 15% { opacity: 0.9; } 100% { opacity: 0; transform: translate(calc(var(--dx) + 8em), -6em) rotate(300deg); } }
+@keyframes vapeur      { 0% { opacity: 0; transform: translateY(1em) scale(0.6); } 30% { opacity: 0.7; } 100% { opacity: 0; transform: translateY(-3em) scale(1.4, 1.8); } }
+@keyframes reflet-glisse { 0%, 55% { transform: translateX(0) skewX(-20deg); } 100% { transform: translateX(700%) skewX(-20deg); } }
+@keyframes roule       { 0% { transform: translateX(0) rotate(0); } 100% { transform: translateX(4500%) rotate(900deg); } }
+@keyframes onde        { 0% { opacity: 0.8; transform: scale(0.3); } 100% { opacity: 0; transform: scale(1.4); } }
+@keyframes flotte      { from { transform: scaleX(1) skewY(0deg); } to { transform: scaleX(0.85) skewY(-8deg); } }
+@keyframes tourne      { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes ondule      { from { transform: rotate(-5deg); } to { transform: rotate(6deg); } }
+@keyframes volette     { 0% { transform: translate(0, 0); } 33% { transform: translate(calc(var(--dx) * 2), -2em); } 66% { transform: translate(calc(var(--dx) * -1), 1em); } 100% { transform: translate(var(--dx), -1em); } }
+@keyframes grince      { from { transform: rotate(-0.6deg); } to { transform: rotate(0.6deg); } }
+@keyframes rayon       { 0%, 100% { opacity: 0; transform: rotate(20deg) translateX(-30%); } 50% { opacity: 1; transform: rotate(20deg) translateX(30%); } }
+@keyframes respire-rose { from { opacity: 0.4; } to { opacity: 1; } }
+@keyframes lune-leve   { from { transform: translateY(80px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes tombe       { 0% { opacity: 0; transform: translate(0, 0) rotate(0); } 8% { opacity: 0.9; } 50% { transform: translate(var(--dx), 50cqh) rotate(180deg); } 92% { opacity: 0.85; } 100% { opacity: 0; transform: translate(0, 105cqh) rotate(360deg); } }
+@keyframes chaleur     { from { transform: translateY(-4px) scaleY(1); opacity: 0.5; } to { transform: translateY(4px) scaleY(1.4); opacity: 1; } }
+@keyframes traverse-ciel { 0% { transform: translate(0, 0); opacity: 0; } 8% { opacity: 1; } 50% { transform: translate(60cqw, -20px); } 92% { opacity: 1; } 100% { transform: translate(118cqw, 0); opacity: 0; } }
+@keyframes soleil-respire { from { opacity: 0.7; transform: scale(0.92); } to { opacity: 1; transform: scale(1.08); } }
+@keyframes soleil-descend { from { transform: translateY(0); } to { transform: translateY(1.2em); } }
+@keyframes rougeoie    { from { opacity: 0; } to { opacity: 1; } }
+/* Le voilier part du bord droit de sa zone et parcourt 36em (36 % de la largeur de l'image) vers la gauche */
+@keyframes voilier     { 0% { opacity: 0; transform: translateX(0); } 6% { opacity: 0.9; } 94% { opacity: 0.9; } 100% { opacity: 0; transform: translateX(-36em); } }
+/* Le faisceau tourne : pleine longueur d'un côté, s'écrase en passant « vers nous », repart de l'autre côté */
+@keyframes phare       { 0% { transform: scaleX(1); opacity: 0.9; } 25% { transform: scaleX(0.05); opacity: 0.2; } 50% { transform: scaleX(-1); opacity: 0.9; } 75% { transform: scaleX(-0.05); opacity: 0.2; } 100% { transform: scaleX(1); opacity: 0.9; } }
+@keyframes ampoule     { from { opacity: 0.45; transform: scale(0.85); } to { opacity: 1; transform: scale(1.1); } }
+@keyframes chenillard  { 0%, 100% { opacity: 0.3; } 15% { opacity: 1; } 35% { opacity: 0.3; } }
+@keyframes confetti    { 0% { opacity: 0; transform: translate(0, 0) rotate(0) rotateY(0); } 8% { opacity: 0.95; } 90% { opacity: 0.9; } 100% { opacity: 0; transform: translate(var(--dx), 40em) rotate(540deg) rotateY(720deg); } }
+@keyframes note        { 0% { opacity: 0; transform: translate(0, 0) scale(0.6); } 20% { opacity: 0.95; } 100% { opacity: 0; transform: translate(var(--dx), -9em) scale(1.1) rotate(-12deg); } }
+@keyframes filante     { 0% { opacity: 0; transform: rotate(18deg) translateX(0); } 4% { opacity: 1; } 12% { opacity: 0; transform: rotate(18deg) translateX(60cqw); } 100% { opacity: 0; transform: rotate(18deg) translateX(60cqw); } }
+
+
+/* ==========================================================================
+   5. INTERFACE DE L'ACCUEIL  (31 à 45)
+   ========================================================================== */
+
+/* (31) Titre mot par mot : chaque mot est un bloc en ligne (un mot = une animation) */
+.titre-mots .mot { display: inline-block; margin-right: 0.25em; }
+.titre-mots .mot--colle { margin-left: -0.25em; }      /* la virgule colle au mot d'avant */
+.titre-mots .insecable { white-space: nowrap; }
+/* Le trait sous « vis l'instant » : on retire l'espace laissé après le dernier mot */
+.titre-mots em .mot:last-child { margin-right: 0; }
+.titre-mots em { position: relative; display: inline-block; }
+/* (32) « vis l'instant » : un trait se dessine dessous (scaleX de 0 à 1) */
+.titre-mots em::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0.02em;
+  height: 0.08em;
+  border-radius: var(--rayon-pilule);
+  background: var(--couleur-principale);
+  transform-origin: left center;
+}
+
+/* (33) Les cartes de texte montent un peu au survol */
+.intro__carte,
+.ecran--fond .ecran__texte { transition: translate var(--duree-normale) var(--courbe-sortie); }
+/* « translate » (propriété à part) s'additionne au « transform » de l'effet de profondeur (42) au lieu de l'écraser */
+@media (hover: hover) {
+  .intro__carte:hover,
+  .ecran--fond .ecran__texte:hover { translate: 0 -6px; }
+  /* (34) Les boutons grossissent un peu au survol */
+  .accueil .bouton { transition: transform var(--duree-rapide) var(--courbe-sortie), background-color var(--duree-rapide); }
+  .accueil .bouton:hover { transform: scale(1.04); }
+}
+
+/* (35) Flèche « descends » en bas du premier écran */
+.descends {
+  position: absolute;
+  left: 50%;
+  bottom: var(--espace-3);
+  z-index: var(--plan-contenu);
+  display: none;
+  place-items: center;
+  width: var(--cible-min);
+  height: var(--cible-min);
+  margin-left: calc(var(--cible-min) / -2);
+  border-radius: var(--rayon-pilule);
+  background: rgb(255 251 246 / 0.85);
+  color: var(--brun-900);
+  box-shadow: var(--ombre-2);
+}
+@media (min-width: 1024px) { .descends { display: grid; } }
+
+/* (36, 37) Logo : l'épingle tombe et rebondit, le sentier se dessine */
+.logo__epingle { transform-box: fill-box; transform-origin: 50% 100%; }
+.logo__masque { transform-box: fill-box; transform-origin: left center; }
+
+/* (39) Le badge de catégorie apparaît avec un petit rebond */
+/* (41) Les cartes des sorties arrivent l'une après l'autre (voir mouvements) */
+
+
+
+
+/* ==========================================================================
+   6. INDICATEUR DE PROGRESSION SAISONNIER  (38, 100)
+   Les points deviennent l'icône de la saison : fleur, soleil, feuille, flocon,
+   citrouille (Halloween), cadeau (Noël). Décorations coupées = simples points.
+   ========================================================================== */
+[data-saison="printemps"] { --icone-progression: url("decorations/fleur.svg"); }
+[data-saison="ete"]       { --icone-progression: url("decorations/soleil.svg"); }
+[data-saison="automne"]   { --icone-progression: url("decorations/feuille-erable-1.svg"); }
+[data-saison="hiver"]     { --icone-progression: url("decorations/flocon.svg"); }
+[data-saison="halloween"] { --icone-progression: url("decorations/citrouille.svg"); }
+[data-saison="noel"]      { --icone-progression: url("decorations/cadeau.svg"); }
+
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  /* Le sentier : une ligne en pointillés derrière les icônes, comme celle du logo */
+  .progression::before {
+    content: "";
+    position: absolute;
+    left: 50%; top: calc(var(--cible-min) * 0.3); bottom: calc(var(--cible-min) * 0.3);
+    width: 2px; margin-left: -1px;
+    background: repeating-linear-gradient(to bottom, var(--couleur-bordure-forte) 0 3px, transparent 3px 8px);
+    opacity: 0.6;
+  }
+  .progression a { position: relative; }
+  /* L'icône de saison remplace le point */
+  [data-decorations="on"] .progression a::before {
+    width: 16px;
+    height: 16px;
+    border-radius: 0;
+    background: var(--icone-progression) no-repeat center / contain;
+    opacity: 0.45;
+    transition: transform var(--duree-normale) var(--courbe-sortie), opacity var(--duree-normale);
+  }
+  /* (38) Écrans déjà vus : icône « remplie » (pleine opacité) ; écran courant : plus grande */
+  [data-decorations="on"] .progression a.passe::before { opacity: 1; }
+  [data-decorations="on"] .progression a[aria-current="step"]::before { opacity: 1; transform: scale(1.7); background-color: transparent; }
+  .progression a.passe::before { background-color: var(--couleur-texte-doux); }
+
+  /* (100) L'épingle ORIVY glisse le long du sentier jusqu'à l'écran courant */
+  .progression__epingle {
+    position: absolute;
+    left: -14px;
+    top: calc(var(--cible-min) * 0.3 - 9px);
+    width: 14px;
+    height: 18px;
+    background: var(--couleur-principale);
+    clip-path: path("M7 18 C7 18 0 10.5 0 6.5 A7 7 0 0 1 14 6.5 C14 10.5 7 18 7 18 Z");
+    transform: translateY(calc(var(--rang) * var(--cible-min) * 0.6));
+    transition: transform 0.6s cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+}
+
+
+/* ==========================================================================
+   7. MOUVEMENTS DE L'INTERFACE (coupés sous « mouvement réduit »)
+   ========================================================================== */
+@media (prefers-reduced-motion: no-preference) {
+  .titre-mots .mot { animation: mot-apparait 0.6s var(--courbe-sortie) calc(0.15s + var(--i) * 0.09s) both; }
+  .titre-mots em::after { animation: trait-dessine 0.7s var(--courbe-sortie) 1.1s both; }
+  .descends { animation: rebond-bas 1.8s ease-in-out 2s infinite; }
+  .logo__epingle { animation: epingle-tombe 0.9s cubic-bezier(0.34, 1.5, 0.64, 1) 0.2s both; }
+  .logo__masque { animation: trait-dessine 1.2s steps(13, end) 0.7s both; }   /* 13 crans = point par point */
+
+  @supports (animation-timeline: view()) {
+    /* (39) Badge : petit rebond quand l'écran entre */
+    .ecran--cat .badge-cat {
+      animation: badge-rebond linear both;
+      animation-timeline: view();
+      animation-range: entry 30% entry 90%;
+    }
+    /* (41) Cartes des sorties : l'une après l'autre (chacune décalée sur le défilement) */
+    .ecran--sorties .carte-sortie { animation: monte-apparait linear both; animation-timeline: view(); }
+    .ecran--sorties .carte-sortie:nth-child(1) { animation-range: entry 10% entry 60%; }
+    .ecran--sorties .carte-sortie:nth-child(2) { animation-range: entry 25% entry 75%; }
+    .ecran--sorties .carte-sortie:nth-child(3) { animation-range: entry 40% entry 90%; }
+  }
+  /* (42) Profondeur : la carte de texte bouge un peu moins vite que la photo (ordinateur) */
+  @media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+    @supports (animation-timeline: view()) {
+      .ecran--fond .ecran__texte,
+      .ecran--intro .intro__carte {
+        animation: profondeur linear both;
+        animation-timeline: view();
+        animation-range: cover 0% cover 100%;
+      }
+    }
+  }
+}
+
+@keyframes mot-apparait  { from { opacity: 0; transform: translateY(0.4em); } to { opacity: 1; transform: none; } }
+@keyframes trait-dessine { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes rebond-bas    { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
+@keyframes epingle-tombe { 0% { opacity: 0; transform: translateY(-40%); } 60% { opacity: 1; } 100% { transform: none; } }
+@keyframes badge-rebond  { 0% { opacity: 0; transform: scale(0.6); } 70% { opacity: 1; transform: scale(1.12); } 100% { transform: scale(1); } }
+@keyframes monte-apparait { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
+@keyframes profondeur    { from { transform: translateY(40px); } to { transform: translateY(-40px); } }
+
+
+/* ==========================================================================
+   8. ANIMATIONS DES AUTRES PAGES  (61 à 99)
+   ========================================================================== */
+
+/* (63) Cercle du rayon sur la carte : il « respire » */
+/* (64) Point bleu : déjà une onde qui s'élargit (pages.css) */
+
+/* (67) Carte de lieu : la photo s'éclaircit au survol (un voile blanc qui apparaît) */
+.carte-lieu .photo::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: rgb(255 255 255 / 0.18);
+  opacity: 0;
+  transition: opacity var(--duree-normale);
+  pointer-events: none;
+}
+.carte-lieu:hover .photo::after { opacity: 1; }
+
+/* (69) Radar : un balayage qui tourne et une onde, pendant qu'on cherche la position */
+.radar {
+  position: relative;
+  display: inline-block;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  overflow: hidden;
+}
+.radar i {
+  position: absolute; inset: 0;
+  background: conic-gradient(from 0deg, currentColor 0 60deg, transparent 60deg);
+  opacity: 0.6;
+}
+
+/* (72) Le bouton « Rejoins » qui passe à « Inscrit·e ✓ » fait un petit saut */
+/* (73) Les participants arrivent un par un ; (74) la jauge se remplit (voir mouvements) */
+.jauge span { transform-origin: left center; }
+
+/* (75) Confettis */
+.confettis { position: fixed; inset: 0; z-index: var(--plan-notification); pointer-events: none; overflow: hidden; }
+.confettis i {
+  position: absolute;
+  top: -20px;
+  left: var(--x);
+  width: 8px; height: 12px;
+  border-radius: 2px;
+  opacity: 0;
+}
+
+/* (76) Les champs s'illuminent doucement au focus (halo de la couleur principale) */
+.champ__saisie { transition: border-color var(--duree-rapide), box-shadow var(--duree-normale); }
+.champ__saisie:focus-visible { box-shadow: 0 0 0 6px color-mix(in srgb, var(--couleur-principale) 18%, transparent); }
+
+/* (77, 84) Règles du mot de passe : la coche apparaît avec un petit bond */
+/* (78) Un champ en erreur tremble légèrement (voir mouvements) */
+
+/* (80) Anneau tournant autour de l'avatar du profil */
+.anneau-avatar { position: relative; display: inline-grid; place-items: center; padding: 6px; border-radius: 50%; }
+.anneau-avatar::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(var(--couleur-principale), var(--couleur-accent), transparent 70%, var(--couleur-principale));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+}
+
+/* (81) Soleil ou lune dans les réglages */
+.icone-theme { display: inline-grid; color: var(--couleur-principale); }
+
+/* (87) L'onglet actif : sa pastille de fond « glisse » d'un onglet à l'autre
+   (transition de vue : le navigateur anime le même élément entre deux pages) */
+@media (min-width: 1024px) {
+  .entete__nav a[aria-current="page"] { view-transition-name: onglet-actif; }
+}
+.onglets a[aria-current="page"] .icone { view-transition-name: onglet-actif-bas; }
+::view-transition-group(onglet-actif),
+::view-transition-group(onglet-actif-bas) { animation-duration: 0.35s; animation-timing-function: var(--courbe-sortie); }
+
+/* (88) Icônes de la barre du bas : elles s'enfoncent au toucher */
+.onglets a:active .icone { transform: scale(0.82); }
+.onglets .icone { transition: transform var(--duree-rapide) var(--courbe-sortie); }
+
+/* (90) Pastille de notification : une onde qui s'élargit */
+.pastille::after {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background: var(--couleur-principale);
+  opacity: 0;
+  z-index: -1;
+}
+
+/* (91) Squelettes : un reflet lumineux passe dessus */
+.squelette { position: relative; overflow: hidden; }
+.squelette::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / 0.45) 50%, transparent 80%);
+  transform: translateX(-100%);
+}
+
+/* (92) Épingle qui rebondit pendant le chargement */
+.epingle-attente { display: flex; justify-content: center; margin: var(--espace-5) 0; }
+.epingle-attente i {
+  width: 22px; height: 28px;
+  background: var(--couleur-principale);
+  clip-path: path("M11 28 C11 28 0 16 0 10.5 A11 11 0 0 1 22 10.5 C22 16 11 28 11 28 Z");
+}
+
+/* (96) Bouton « retour en haut » */
+.retour-haut {
+  position: fixed;
+  right: var(--marge-page);
+  bottom: calc(var(--hauteur-onglets, 0px) + var(--espace-4));
+  z-index: var(--plan-navigation);
+  display: grid; place-items: center;
+  width: var(--cible-min); height: var(--cible-min);
+  border: 0; border-radius: var(--rayon-pilule);
+  background: var(--couleur-surface); color: var(--couleur-texte);
+  box-shadow: var(--ombre-2);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(16px);
+  pointer-events: none;
+  transition: opacity var(--duree-normale), transform var(--duree-normale) var(--courbe-sortie);
+}
+.retour-haut--visible { opacity: 1; transform: none; pointer-events: auto; }
+/* Sur l'accueil (ordinateur), l'indicateur de progression occupe déjà la droite */
+@media (min-width: 1024px) { .page-accueil .retour-haut, body:has(.accueil) .retour-haut { display: none; } }
+
+/* (97) Barre de lecture : fine ligne sous l'en-tête, remplie selon le défilement */
+.barre-lecture {
+  position: fixed;
+  left: 0; right: 0;
+  top: var(--hauteur-entete);
+  z-index: var(--plan-navigation);
+  height: 3px;
+  background: var(--couleur-principale);
+  transform-origin: left center;
+  transform: scaleX(0);
+  pointer-events: none;
+}
+/* Sans animation liée au défilement : pas de barre (elle resterait vide) */
+@supports not (animation-timeline: scroll()) { .barre-lecture { display: none; } }
+
+
+/* --- Les mouvements (coupés sous « mouvement réduit ») --- */
+@media (prefers-reduced-motion: no-preference) {
+  /* (61) Carte : les épingles tombent du ciel en arrivant ; (62) la choisie rebondit.
+     « translate » est une propriété à part : elle s'ajoute au scale de l'épingle active. */
+  .epingle { animation: epingle-chute 0.6s cubic-bezier(0.34, 1.4, 0.64, 1) both; }
+  .epingle--active { animation: epingle-rebond 0.7s cubic-bezier(0.34, 1.6, 0.64, 1); }
+  .point-lieu { animation: apparait 0.5s ease-out both; }
+  .cercle-rayon { animation: respire-cercle 3s ease-in-out infinite alternate; }
+
+  /* (65) Le tiroir monte avec un léger rebond */
+  .tiroir { transition-timing-function: cubic-bezier(0.34, 1.3, 0.64, 1); }
+
+  @supports (animation-timeline: view()) {
+    /* (66) Les cartes de lieu apparaissent en cascade en défilant */
+    .grille-lieux .carte-lieu {
+      animation: monte-apparait linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+    /* (70) Fil des sorties : la photo se pose en profondeur pendant qu'on glisse */
+    .diapo .photo img {
+      animation: diapo-profondeur linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+    }
+  }
+  /* (97) La barre de lecture suit le défilement de toute la page */
+  @supports (animation-timeline: scroll()) {
+    .barre-lecture { animation: barre-remplit linear both; animation-timeline: scroll(root); }
+  }
+
+  /* (72) Inscription confirmée : petit saut du bouton */
+  .bouton[aria-pressed="true"] { animation: saut 0.45s cubic-bezier(0.34, 1.6, 0.64, 1); }
+  /* (73) Participants un par un */
+  .participants li { animation: monte-apparait 0.45s var(--courbe-sortie) both; }
+  .participants li:nth-child(2) { animation-delay: 0.06s; }
+  .participants li:nth-child(3) { animation-delay: 0.12s; }
+  .participants li:nth-child(4) { animation-delay: 0.18s; }
+  .participants li:nth-child(5) { animation-delay: 0.24s; }
+  .participants li:nth-child(n + 6) { animation-delay: 0.3s; }
+  /* (74) Jauge des places */
+  .jauge span { animation: barre-remplit 1s var(--courbe-sortie) 0.3s both; }
+  /* (75) Confettis */
+  .confettis i { animation: confetti 2.2s cubic-bezier(0.2, 0.6, 0.4, 1) var(--delai) forwards; }
+
+  /* (77, 84) Coche qui apparaît */
+  .exigences li[data-ok="true"] .icone { animation: saut 0.4s cubic-bezier(0.34, 1.6, 0.64, 1); }
+  /* (78) Champ en erreur : il tremble */
+  .champ--erreur .champ__saisie { animation: tremble 0.4s ease-in-out; }
+  /* (79) Aperçu de la sortie : fondu quand il change */
+  .apercu-sortie .carte-sortie { animation: apparait 0.35s ease-out; }
+
+  /* (80) Anneau de l'avatar */
+  .anneau-avatar::before { animation: tourne 8s linear infinite; }
+  /* (81) Soleil / lune qui tourne en apparaissant */
+  .icone-theme { animation: tourne-apparait 0.6s var(--courbe-sortie); }
+
+  /* (88) L'icône de l'onglet choisi fait un petit bond */
+  .onglets a[aria-current="page"] .icone { animation: saut 0.45s cubic-bezier(0.34, 1.6, 0.64, 1); }
+  /* (89) La cloche tinte toutes les quelques secondes quand il y a du nouveau */
+  .bouton--icone:has(.pastille) .icone { transform-origin: 50% 10%; animation: tinte 4s ease-in-out 1s infinite; }
+  /* (90) Pastille */
+  .pastille::after { animation: onde-pastille 2s ease-out infinite; }
+  /* (91) Reflet des squelettes */
+  .squelette::after { animation: reflet-squelette 1.6s ease-in-out infinite; }
+  /* (92) Épingle qui rebondit */
+  .epingle-attente i { animation: rebond-epingle 0.9s cubic-bezier(0.5, 0, 0.5, 1) infinite alternate; }
+  /* (93) Message éphémère : il glisse depuis le bas */
+  .toast { animation: toast-monte 0.4s var(--courbe-sortie); }
+  /* (94) Fenêtre de confirmation : léger zoom à l'ouverture */
+  .fenetre[open] { animation: fenetre-ouvre 0.25s var(--courbe-sortie); }
+  .fenetre[open]::backdrop { animation: apparait 0.25s ease-out; }
+  /* (95) Menu de l'avatar : les lignes arrivent en cascade */
+  .menu-profil__liste li { animation: monte-apparait 0.3s var(--courbe-sortie) both; }
+  .menu-profil__liste li:nth-child(2) { animation-delay: 0.05s; }
+  .menu-profil__liste li:nth-child(3) { animation-delay: 0.1s; }
+  /* (69) Radar */
+  .radar i { animation: tourne 1.2s linear infinite; }
+}
+
+@keyframes epingle-chute   { from { opacity: 0; translate: 0 -40px; } to { opacity: 1; translate: 0 0; } }
+@keyframes epingle-rebond  { 0% { translate: 0 0; } 35% { translate: 0 -14px; } 100% { translate: 0 0; } }
+@keyframes apparait        { from { opacity: 0; } to { opacity: 1; } }
+@keyframes respire-cercle  { from { opacity: 0.55; } to { opacity: 1; } }
+@keyframes diapo-profondeur { 0% { transform: scale(1.08) translateY(-3%); } 100% { transform: scale(1.08) translateY(3%); } }
+@keyframes barre-remplit   { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes saut            { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
+@keyframes confetti        { 0% { opacity: 1; transform: translate(0, 0) rotate(0); } 100% { opacity: 0; transform: translate(var(--dx), 105vh) rotate(var(--tour)); } }
+@keyframes tremble         { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+@keyframes tourne-apparait { from { opacity: 0; transform: rotate(-90deg) scale(0.6); } to { opacity: 1; transform: none; } }
+@keyframes tinte           { 0%, 80%, 100% { transform: rotate(0); } 84% { transform: rotate(14deg); } 88% { transform: rotate(-12deg); } 92% { transform: rotate(8deg); } 96% { transform: rotate(-4deg); } }
+@keyframes onde-pastille   { 0% { opacity: 0.6; transform: scale(1); } 100% { opacity: 0; transform: scale(2.2); } }
+@keyframes reflet-squelette { to { transform: translateX(100%); } }
+@keyframes rebond-epingle  { from { transform: translateY(0); } to { transform: translateY(-14px); } }
+@keyframes toast-monte     { from { opacity: 0; translate: 0 20px; } to { opacity: 1; translate: 0 0; } }
+@keyframes fenetre-ouvre   { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }

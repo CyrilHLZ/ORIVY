@@ -1,0 +1,375 @@
+/* ==========================================================================
+   ORIVY — Design system
+   --------------------------------------------------------------------------
+   Toutes les valeurs de base de l'interface : couleurs, polices, tailles,
+   espacements, rayons, ombres, durées.
+   Règle : dans les maquettes et les composants, on n'écrit JAMAIS une valeur
+   en dur, on utilise une de ces variables.
+
+   Ordre de chargement :
+     1. design-system.css  (ce fichier : valeurs du thème « jour » par défaut)
+     2. themes.css         (étape 4 : aube, crépuscule, nuit redéfinissent les couleurs)
+     3. saisons.css        (étape 5 : les saisons redéfinissent principale et accent)
+
+   Polices à charger dans index.html (une seule requête Google Fonts) :
+   https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght,SOFT@9..144,600..700,100&display=swap
+
+   Points de rupture (les variables CSS ne marchent pas dans @media, on les
+   écrit donc en dur, toujours ces trois-là) :
+     mobile    : CSS de base (dès 320px)
+     tablette  : @media (min-width: 768px)
+     ordinateur: @media (min-width: 1024px)
+   ========================================================================== */
+
+:root {
+  /* ------------------------------------------------------------------------
+     1. Palette brute
+     Les teintes elles-mêmes. On ne s'en sert pas directement dans les
+     composants : on passe par les rôles (section 2), que les thèmes
+     et les saisons peuvent redéfinir.
+     ------------------------------------------------------------------------ */
+  --terracotta-700: #873F22;   /* survol du bouton principal (jour) */
+  --terracotta-600: #A34E2C;   /* principale jour */
+  --terracotta-300: #E58E6A;   /* principale nuit */
+  --sauge-700: #4E6B42;        /* sauge foncée : texte et icônes en sauge */
+  --sauge-500: #6E8F5F;        /* accent jour (éléments d'interface, pas de texte) */
+  --sauge-200: #A9C49A;        /* accent nuit */
+  --framboise-800: #8E1230;    /* survol du bouton danger */
+  --framboise-700: #A8173A;    /* danger jour */
+  --framboise-200: #FF8FA8;    /* danger nuit (étape 4 : écarté de la terracotta de nuit) */
+
+  --argile-50: #FFFBF6;        /* papier */
+  --argile-100: #F6EFE6;       /* lin, fond de page */
+  --argile-200: #EFE5D8;       /* surface en creux : champs, zones grisées */
+  --argile-300: #E6D9CA;       /* bordure décorative */
+  --argile-500: #8E7D6F;       /* bordure forte (contour des champs) — foncée depuis #9C8B7C pour passer 3:1 sur le creux */
+  --brun-600: #6B5D52;         /* texte doux */
+  --brun-900: #2E2622;         /* encre, texte courant */
+  --encre-profonde: #1F1915;   /* texte posé sur une couleur de catégorie claire */
+
+  /* ------------------------------------------------------------------------
+     2. Rôles de couleur (thème « jour » par défaut)
+     C'est ici qu'on pioche dans les composants. themes.css et saisons.css
+     redéfinissent ces variables, jamais la palette brute.
+     ------------------------------------------------------------------------ */
+  /* Fonds et surfaces */
+  --couleur-fond: var(--argile-100);            /* fond de page (+ grain) */
+  --couleur-surface: var(--argile-50);          /* cartes, tiroirs, barre de navigation */
+  --couleur-surface-creux: var(--argile-200);   /* champs, puces de filtre inactives */
+  --couleur-voile: rgb(46 38 34 / 0.45);        /* derrière une fenêtre ou un tiroir */
+
+  /* Textes */
+  --couleur-texte: var(--brun-900);             /* 13,00:1 sur fond */
+  --couleur-texte-doux: var(--brun-600);        /* 5,56:1 sur fond, 5,09:1 sur creux */
+
+  /* Bordures */
+  --couleur-bordure: var(--argile-300);         /* séparateurs décoratifs uniquement */
+  --couleur-bordure-forte: var(--argile-500);   /* contour de champ : 3,84 surface, 3,46 fond, 3,18 creux */
+
+  /* Principale : action principale et identité (jamais sur la carte) */
+  --couleur-principale: var(--terracotta-600);        /* 5,00:1 en texte sur fond */
+  --couleur-principale-survol: var(--terracotta-700);
+  --couleur-sur-principale: var(--argile-50);         /* texte du bouton : 5,53:1 (survol 7,37:1) */
+
+  /* Accent : petites touches, interrupteurs, décorations */
+  --couleur-accent: var(--sauge-500);           /* 3,20 fond, 3,54 surface — éléments d'interface seulement,
+                                                   jamais posé sur --couleur-surface-creux (2,93) */
+  --couleur-accent-texte: var(--sauge-700);     /* 5,25:1, quand l'accent porte du texte */
+  --couleur-sur-accent: var(--argile-50);       /* texte sur un aplat sauge foncée : 5,81:1 */
+
+  /* Danger : toujours avec une icône et un verbe explicite */
+  --couleur-danger: var(--framboise-700);       /* 6,34:1 en texte sur surface */
+  --couleur-danger-survol: var(--framboise-800);
+  --couleur-sur-danger: #FFFFFF;                /* 7,37:1 (survol 9,21:1) */
+
+  /* Succès : on réutilise la sauge foncée, pas de vert de plus */
+  --couleur-succes: var(--sauge-700);
+
+  /* Position de l'utilisateur sur la carte (point bleu, cercle du rayon).
+     Bleu « GPS » universel, volontairement hors palette : on le reconnaît d'instinct. */
+  --couleur-position: #2E6FD6;
+
+  /* Focus clavier : anneau de la couleur principale (5,00:1 sur fond) */
+  --couleur-focus: var(--couleur-principale);
+
+  /* ------------------------------------------------------------------------
+     3. Catégories
+     Teintes du brief, JAMAIS modifiées. Seule la nuit (themes.css) a le droit
+     d'en donner une version plus claire de la même teinte.
+     --cat-xxx-texte : couleur du texte posé SUR la couleur (badge plein),
+     choisie pour dépasser 4,5:1.
+     Règle : une couleur de catégorie n'est jamais utilisée comme couleur de
+     texte sur le fond, et ne porte jamais l'information seule (icône + nom).
+     ------------------------------------------------------------------------ */
+  --cat-monument: #ef6f61;      --cat-monument-texte: var(--encre-profonde);     /* 5,89 */
+  --cat-culture: #b5527a;       --cat-culture-texte: var(--argile-50);           /* 4,58 */
+  --cat-parc: #4f9d69;          --cat-parc-texte: var(--encre-profonde);         /* 5,26 */
+  --cat-promenade: #3c5960;     --cat-promenade-texte: var(--argile-50);         /* 7,31 */
+  --cat-village: #c98a3c;       --cat-village-texte: var(--encre-profonde);      /* 5,95 */
+  --cat-observatoire: #5468c9;  --cat-observatoire-texte: var(--argile-50);      /* 4,85 */
+  --cat-sport: #2a9d8f;         --cat-sport-texte: var(--encre-profonde);        /* 5,23 */
+  --cat-restaurant: #f4a259;    --cat-restaurant-texte: var(--encre-profonde);   /* 8,1  */
+  --cat-bar: #8d5b4c;           --cat-bar-texte: var(--argile-50);               /* 5,46 */
+  --cat-cinema: #6d597a;        --cat-cinema-texte: var(--argile-50);            /* 6,07 */
+  --cat-evenement: #e76f51;     --cat-evenement-texte: var(--encre-profonde);    /* 5,62 */
+  --cat-autre: #6b7280;         --cat-autre-texte: var(--argile-50);             /* 4,69 */
+
+  /* ------------------------------------------------------------------------
+     4. Typographie
+     Fraunces pour les titres (jamais sous 20px), DM Sans pour tout le reste.
+     Échelle de rapport 1,25 sur une base de 16px.
+     ------------------------------------------------------------------------ */
+  --police-titre: "Fraunces", Georgia, "Times New Roman", serif;
+  --police-texte: "DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --taille-xs: 0.8rem;      /* 12,8px : mentions légales, compteurs */
+  --taille-s: 0.875rem;     /* 14px   : métadonnées, badges, légendes */
+  --taille-m: 1rem;         /* 16px   : texte courant, boutons, champs */
+  --taille-l: 1.25rem;      /* 20px   : petit titre (seuil mini de Fraunces) */
+  --taille-xl: 1.5625rem;   /* 25px   : titre de carte, de section mobile */
+  --taille-2xl: 1.953rem;   /* 31px   : titre de page mobile */
+  /* Les grands titres grandissent avec l'écran (clamp = mini, idéal, maxi) */
+  --taille-3xl: clamp(1.953rem, 1.4rem + 2.4vw, 2.441rem);  /* 31 → 39px : titre de page */
+  --taille-4xl: clamp(2.441rem, 1.6rem + 3.6vw, 3.815rem);  /* 39 → 61px : accroche d'accueil */
+
+  --graisse-normale: 400;
+  --graisse-moyenne: 500;
+  --graisse-forte: 700;
+  --graisse-titre: 600;
+
+  --interligne-serre: 1.15;   /* titres */
+  --interligne-normal: 1.5;   /* texte */
+  --interligne-large: 1.65;   /* longs textes (descriptions de lieux) */
+
+  --largeur-lecture: 65ch;    /* largeur maxi d'un paragraphe */
+
+  /* ------------------------------------------------------------------------
+     5. Espacements : multiples de 4px
+     ------------------------------------------------------------------------ */
+  --espace-1: 0.25rem;   /*  4px */
+  --espace-2: 0.5rem;    /*  8px */
+  --espace-3: 0.75rem;   /* 12px */
+  --espace-4: 1rem;      /* 16px : marge latérale mobile */
+  --espace-5: 1.5rem;    /* 24px */
+  --espace-6: 2rem;      /* 32px */
+  --espace-7: 3rem;      /* 48px */
+  --espace-8: 4rem;      /* 64px */
+  --espace-9: 6rem;      /* 96px : grandes sections d'accueil */
+
+  --marge-page: var(--espace-4);     /* agrandie en tablette / ordinateur, plus bas */
+  --largeur-contenu: 72rem;          /* 1152px : largeur maxi du contenu */
+
+  /* Logo : en dessous de cette largeur, on utilise le monogramme */
+  --logo-largeur-min: 140px;
+
+  /* Zone de clic minimale (accessibilité) */
+  --cible-min: 44px;
+
+  /* ------------------------------------------------------------------------
+     6. Rayons
+     ------------------------------------------------------------------------ */
+  --rayon-petit: 12px;     /* champs, petits boutons, vignettes */
+  --rayon-carte: 20px;     /* cartes de lieu, de sortie, d'utilisateur */
+  --rayon-grand: 28px;     /* tiroirs, grandes images, fenêtres */
+  --rayon-pilule: 999px;   /* badges, filtres, bouton « Autour de moi », avatars */
+
+  /* ------------------------------------------------------------------------
+     7. Ombres : douces et teintées brun (jamais gris neutre), 3 niveaux
+     La nuit (themes.css) les redéfinit en quasi-noir verdâtre.
+     ------------------------------------------------------------------------ */
+  --teinte-ombre: 84 52 30;   /* brun chaud, en canaux RGB pour jouer sur l'opacité */
+  --ombre-1: 0 1px 2px rgb(var(--teinte-ombre) / 0.08),
+             0 2px 6px rgb(var(--teinte-ombre) / 0.06);     /* cartes au repos */
+  --ombre-2: 0 2px 4px rgb(var(--teinte-ombre) / 0.08),
+             0 8px 20px rgb(var(--teinte-ombre) / 0.10);    /* survol, barre de navigation */
+  --ombre-3: 0 4px 8px rgb(var(--teinte-ombre) / 0.10),
+             0 18px 40px rgb(var(--teinte-ombre) / 0.16);   /* tiroirs, fenêtres */
+
+  /* ------------------------------------------------------------------------
+     8. Mouvement
+     ------------------------------------------------------------------------ */
+  --duree-rapide: 150ms;      /* survol, appui */
+  --duree-normale: 250ms;     /* ouverture d'un menu, d'un tiroir */
+  --duree-lente: 400ms;       /* apparition d'un bloc */
+  --duree-theme: 1200ms;      /* fondu du changement de thème horaire ou de saison (themes.css) */
+  --courbe-sortie: cubic-bezier(0.2, 0.8, 0.2, 1);   /* démarre vite, se pose en douceur */
+  --courbe-douce: cubic-bezier(0.4, 0, 0.2, 1);      /* aller-retour, transitions de couleur */
+
+  /* ------------------------------------------------------------------------
+     9. Superpositions (z-index)
+     ------------------------------------------------------------------------ */
+  --plan-grain: -1;       /* sous tout le contenu, au-dessus du fond de page */
+  --plan-decor: 0;        /* décorations saisonnières */
+  --plan-contenu: 1;
+  --plan-navigation: 100;
+  --plan-tiroir: 200;
+  --plan-fenetre: 300;
+  --plan-notification: 400;
+
+  /* ------------------------------------------------------------------------
+     10. Grain papier
+     Bruit SVG minuscule, posé sur le fond de page uniquement (body::before).
+     ------------------------------------------------------------------------ */
+  --grain-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  --grain-opacite: 0.035;
+}
+
+/* Marges de page plus larges sur tablette et ordinateur */
+@media (min-width: 768px) {
+  :root { --marge-page: var(--espace-5); }
+}
+@media (min-width: 1024px) {
+  :root { --marge-page: var(--espace-6); }
+}
+
+/* ==========================================================================
+   Base : quelques règles globales, sans style de composant
+   (les composants arrivent à l'étape 7)
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--couleur-fond);
+  color: var(--couleur-texte);
+  font-family: var(--police-texte);
+  font-size: var(--taille-m);
+  font-weight: var(--graisse-normale);
+  line-height: var(--interligne-normal);
+  -webkit-font-smoothing: antialiased;
+  /* Pas de transition de couleur ici : le changement de thème est un fondu
+     d'opacité géré par themes.js + themes.css (View Transitions). */
+}
+
+/* Le grain : un calque fixe, décoratif, qui ne bloque jamais un clic.
+   z-index négatif : il se glisse sous le contenu (le texte reste net)
+   mais reste au-dessus de la couleur de fond. Les cartes, opaques, le masquent. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: var(--plan-grain);
+  pointer-events: none;
+  background-image: var(--grain-image);
+  opacity: var(--grain-opacite);
+}
+
+/* Titres en Fraunces, « adoucie » (axe SOFT) */
+h1, h2, h3 {
+  font-family: var(--police-titre);
+  font-weight: var(--graisse-titre);
+  font-variation-settings: "SOFT" 100;
+  line-height: var(--interligne-serre);
+  margin: 0 0 var(--espace-3);
+  text-wrap: balance;
+}
+h1 { font-size: var(--taille-3xl); }
+h2 { font-size: var(--taille-2xl); }
+h3 { font-size: var(--taille-xl); }
+/* Sous 20px, Fraunces perd sa lisibilité : h4 et plus petits passent en DM Sans */
+h4, h5, h6 {
+  font-family: var(--police-texte);
+  font-weight: var(--graisse-forte);
+  font-size: var(--taille-m);
+  line-height: var(--interligne-normal);
+  margin: 0 0 var(--espace-2);
+}
+
+p {
+  margin: 0 0 var(--espace-4);
+  max-width: var(--largeur-lecture);
+  text-wrap: pretty;
+}
+
+a {
+  color: var(--couleur-principale);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.2em;
+}
+a:hover {
+  color: var(--couleur-principale-survol);
+}
+
+img, svg, video {
+  display: block;
+  max-width: 100%;
+}
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/* Texte indicatif des champs : le gris du navigateur n'est pas assez contrasté */
+::placeholder {
+  color: var(--couleur-texte-doux);   /* 5,09:1 sur le creux */
+  opacity: 1;                          /* Firefox l'estompe par défaut */
+}
+
+/* Focus visible au clavier uniquement (pas au clic de souris) */
+:focus-visible {
+  outline: 3px solid var(--couleur-focus);
+  outline-offset: 2px;
+  border-radius: var(--rayon-petit);
+}
+
+::selection {
+  background: var(--couleur-principale);
+  color: var(--couleur-sur-principale);
+}
+
+/* L'attribut hidden cache TOUJOURS, même si un composant a un display: flex ou grid.
+   Seule exception : le tiroir, qui reste affiché pour pouvoir glisser hors de l'écran. */
+[hidden]:not(.tiroir) { display: none !important; }
+
+/* Texte lu par les lecteurs d'écran mais invisible à l'œil */
+.visuellement-cache {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Préférences de l'utilisateur
+   ========================================================================== */
+
+/* Mouvement réduit : on coupe les animations et on garde de très courts fondus */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duree-rapide: 0ms;
+    --duree-normale: 0ms;
+    --duree-lente: 150ms;
+    --duree-theme: 0ms;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Contraste renforcé : plus de grain, bordures plus marquées */
+@media (prefers-contrast: more) {
+  :root {
+    --grain-opacite: 0;
+    --couleur-bordure: var(--couleur-bordure-forte);
+    --couleur-texte-doux: var(--couleur-texte);
+  }
+}

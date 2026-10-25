@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!--
+    Icône d'application ORIVY (écran d'accueil du téléphone, manifeste PWA).
+    Fond plein sans coins arrondis : le système du téléphone applique son propre masque.
+    Le motif reste dans la zone sûre centrale (cercle de 80% de diamètre).
+  -->
+  <rect width="512" height="512" fill="#A34E2C"/>
+  <g fill="none" stroke="#FFFBF6" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Épingle : cercle de rayon 84 centré en (226, 206), pointe en (226, 386). -->
+    <path stroke-width="34" d="M226 386 L151.7 245.2 A84 84 0 1 1 300.3 245.2 Z"/>
+    <!-- Départ du sentier : trois points. -->
+    <path stroke-width="26" stroke-dasharray="0 46" d="M290 386 H384"/>
+  </g>
+</svg>

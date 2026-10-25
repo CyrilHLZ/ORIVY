@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F6EFE6">
+  <title>Connexion · ORIVY</title>
+  <script src="../themes.js"></script>
+  <script src="../saisons.js"></script>
+  <link rel="icon" href="../logo/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght,SOFT@9..144,600..700,100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../design-system.css">
+  <link rel="stylesheet" href="../themes.css">
+  <link rel="stylesheet" href="../saisons.css">
+  <link rel="stylesheet" href="../composants.css">
+  <link rel="stylesheet" href="pages.css">
+  <style>
+    /* Avant connexion : pas de navigation ni de profil dans l'en-tête */
+    .page-auth .entete__nav, .page-auth .entete__actions { display: none; }
+  </style>
+</head>
+<body data-page="aucune" class="page-auth">
+<main class="auth">
+  <!-- Illustration (ordinateur) -->
+  <div class="auth__illu" aria-hidden="true">
+    <img src="../illustrations/carte-tresor.svg" alt="">
+    <blockquote>Découvre. Vis. Profite.<br><small style="font-family: var(--police-texte); font-size: var(--taille-s); color: var(--couleur-texte-doux)">Des lieux à explorer et des sorties à partager, partout en France.</small></blockquote>
+  </div>
+
+  <div class="auth__panneau">
+    <div class="auth__carte">
+      <div class="onglets-section" role="tablist" aria-label="Connexion ou inscription" style="margin-bottom: var(--espace-6)">
+        <button role="tab" id="o-connexion" aria-selected="true" aria-controls="p-connexion">Connexion</button>
+        <button role="tab" id="o-inscription" aria-selected="false" aria-controls="p-inscription" tabindex="-1">Inscription</button>
+      </div>
+
+      <!-- CONNEXION -->
+      <section class="panneau-onglet" role="tabpanel" id="p-connexion" aria-labelledby="o-connexion">
+        <h1>Content de te revoir !</h1>
+        <p class="texte-doux">Connecte-toi pour retrouver tes sorties et ta bande.</p>
+        <form class="formulaire" id="form-connexion" novalidate>
+          <div class="champ" id="c-email">
+            <label class="champ__label" for="email">Adresse e-mail</label>
+            <input class="champ__saisie" id="email" type="email" autocomplete="email" required placeholder="toi@exemple.fr" aria-describedby="email-erreur">
+            <p class="champ__erreur" id="email-erreur" hidden><svg class="icone" aria-hidden="true"><use href="#i-alerte"/></svg>Vérifie ton adresse e-mail (ex. : toi@exemple.fr).</p>
+          </div>
+          <div class="champ">
+            <div style="display: flex; justify-content: space-between; align-items: baseline">
+              <label class="champ__label" for="mdp">Mot de passe</label>
+              <a href="#" style="font-size: var(--taille-s)">Mot de passe oublié ?</a>
+            </div>
+            <div class="champ__ligne">
+              <svg class="icone" aria-hidden="true"><use href="#i-cadenas"/></svg>
+              <input class="champ__saisie" id="mdp" type="password" autocomplete="current-password" required>
+              <button class="bouton bouton--icone voir-mdp" type="button" aria-label="Afficher le mot de passe" aria-pressed="false" data-cible="mdp"><svg class="icone" aria-hidden="true"><use href="#i-oeil"/></svg></button>
+            </div>
+          </div>
+          <p class="champ__erreur" id="connexion-erreur" role="alert" hidden><svg class="icone" aria-hidden="true"><use href="#i-alerte"/></svg>E-mail ou mot de passe incorrect. Réessaie, ou réinitialise ton mot de passe.</p>
+          <button class="bouton bouton--principal bouton--bloc" type="submit">Connecte-toi</button>
+        </form>
+        <p class="auth__bas" style="margin-top: var(--espace-5)">Pas encore de compte ? <a href="#" data-aller="o-inscription">Inscris-toi, c'est gratuit</a></p>
+      </section>
+
+      <!-- INSCRIPTION -->
+      <section class="panneau-onglet" role="tabpanel" id="p-inscription" aria-labelledby="o-inscription" hidden>
+        <h1>Rejoins la bande</h1>
+        <p class="texte-doux">Deux minutes pour créer ton compte, et c'est parti pour ta première sortie.</p>
+        <form class="formulaire" id="form-inscription" novalidate>
+          <div class="deux-champs">
+            <div class="champ">
+              <label class="champ__label" for="prenom">Prénom</label>
+              <input class="champ__saisie" id="prenom" type="text" autocomplete="given-name" required>
+            </div>
+            <div class="champ">
+              <label class="champ__label" for="ville">Ville</label>
+              <input class="champ__saisie" id="ville" type="text" autocomplete="address-level2" placeholder="Lyon">
+            </div>
+          </div>
+          <div class="champ">
+            <label class="champ__label" for="email2">Adresse e-mail</label>
+            <input class="champ__saisie" id="email2" type="email" autocomplete="email" required placeholder="toi@exemple.fr">
+          </div>
+          <div class="champ">
+            <label class="champ__label" for="mdp2">Mot de passe</label>
+            <div class="champ__ligne">
+              <svg class="icone" aria-hidden="true"><use href="#i-cadenas"/></svg>
+              <input class="champ__saisie" id="mdp2" type="password" autocomplete="new-password" required aria-describedby="exigences">
+              <button class="bouton bouton--icone voir-mdp" type="button" aria-label="Afficher le mot de passe" aria-pressed="false" data-cible="mdp2"><svg class="icone" aria-hidden="true"><use href="#i-oeil"/></svg></button>
+            </div>
+            <ul class="exigences" id="exigences" aria-live="polite">
+              <li data-regle="longueur"><svg class="icone" aria-hidden="true"><use href="#i-cat-autre"/></svg>8 caractères minimum</li>
+              <li data-regle="chiffre"><svg class="icone" aria-hidden="true"><use href="#i-cat-autre"/></svg>Au moins un chiffre</li>
+              <li data-regle="majuscule"><svg class="icone" aria-hidden="true"><use href="#i-cat-autre"/></svg>Au moins une majuscule</li>
+            </ul>
+          </div>
+          <label class="case"><input type="checkbox" required> <span>J'accepte les <a href="#">conditions d'utilisation</a> et la <a href="#">politique de confidentialité</a>.</span></label>
+          <button class="bouton bouton--principal bouton--bloc" type="submit">Crée mon compte</button>
+        </form>
+        <p class="auth__bas" style="margin-top: var(--espace-5)">Déjà inscrit·e ? <a href="#" data-aller="o-connexion">Connecte-toi</a></p>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script>
+  (function () {
+    var $ = function (id) { return document.getElementById(id); };
+    var onglets = [$("o-connexion"), $("o-inscription")];
+    function activer(o) {
+      onglets.forEach(function (x) {
+        var actif = x === o;
+        x.setAttribute("aria-selected", String(actif));
+        x.tabIndex = actif ? 0 : -1;
+        $(x.getAttribute("aria-controls")).hidden = !actif;
+      });
+      document.title = (o.id === "o-connexion" ? "Connexion" : "Inscription") + " · ORIVY";
+    }
+    onglets.forEach(function (o, i) {
+      o.addEventListener("click", function () { activer(o); });
+      o.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight" || e.key === "ArrowLeft") { var autre = onglets[1 - i]; activer(autre); autre.focus(); }
+      });
+    });
+    document.querySelectorAll("[data-aller]").forEach(function (a) {
+      a.addEventListener("click", function (e) { e.preventDefault(); var o = $(a.getAttribute("data-aller")); activer(o); o.focus(); });
+    });
+    if (location.hash === "#inscription") activer($("o-inscription"));
+
+    /* Afficher / masquer le mot de passe */
+    document.querySelectorAll(".voir-mdp").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var champ = $(b.getAttribute("data-cible"));
+        var visible = champ.type === "password";
+        champ.type = visible ? "text" : "password";
+        b.setAttribute("aria-pressed", String(visible));
+        b.setAttribute("aria-label", visible ? "Masquer le mot de passe" : "Afficher le mot de passe");
+        b.querySelector("use").setAttribute("href", visible ? "#i-oeil-barre" : "#i-oeil");
+      });
+    });
+
+    /* Exigences du mot de passe, vérifiées en direct */
+    var REGLES = { longueur: /.{8,}/, chiffre: /\d/, majuscule: /[A-ZÀ-Ý]/ };
+    $("mdp2").addEventListener("input", function () {
+      var v = this.value;
+      document.querySelectorAll("#exigences li").forEach(function (li) {
+        var ok = REGLES[li.getAttribute("data-regle")].test(v);
+        li.setAttribute("data-ok", String(ok));
+        li.querySelector("use").setAttribute("href", ok ? "#i-valider" : "#i-cat-autre");
+      });
+    });
+
+    /* Connexion : démonstration de l'erreur */
+    $("form-connexion").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test($("email").value);
+      $("c-email").classList.toggle("champ--erreur", !emailOk);
+      $("email-erreur").hidden = emailOk;
+      $("email").setAttribute("aria-invalid", String(!emailOk));
+      if (!emailOk) { $("email").focus(); return; }
+      $("connexion-erreur").hidden = false;
+    });
+  })();
+</script>
+<script src="commun.js"></script>
+<script src="../icones/icones.js"></script>
+<script src="../outils/selecteur-apercu.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" aria-hidden="true">
+  <!--
+    Point de vue : une personne assise au bord d'une falaise au coucher du soleil.
+    Couleur de catégorie #5468c9 : la mer au loin.
+    Ciel en bandes à plat (pas de dégradé).
+    Animation (> 480px, sans mouvement réduit) : #soleil descend doucement (12 s, aller-retour),
+    #mouettes planent.
+  -->
+  <style>
+    @media (min-width: 480px) and (prefers-reduced-motion: no-preference) {
+      #soleil { animation: couche 12s ease-in-out infinite alternate; }
+      #mouettes { animation: plane 8s ease-in-out infinite alternate; }
+      @keyframes couche { from { transform: translateY(-12px); } to { transform: translateY(16px); } }
+      @keyframes plane { from { transform: translate(0, 0); } to { transform: translate(40px, -14px); } }
+    }
+  </style>
+  <rect width="800" height="600" fill="#F6DDBF"/>
+  <rect y="0" width="800" height="120" fill="#F2C9A8"/>
+  <rect y="120" width="800" height="100" fill="#F4D3B0"/>
+  <g id="soleil"><circle cx="560" cy="330" r="80" fill="#F6B25E" stroke="#1F1915" stroke-width="3"/></g>
+  <!-- Mer -->
+  <rect y="330" width="800" height="270" fill="#5468c9" stroke="#1F1915" stroke-width="3"/>
+  <path d="M470 370 h180 M500 400 h120 M530 430 h60 M420 470 h80 M640 460 h90" stroke="#F6CF7A" stroke-width="4" stroke-linecap="round"/>
+  <path d="M60 390 h60 M140 420 h40 M250 380 h70 M90 470 h50" stroke="#FFFBF6" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+  <g id="mouettes" fill="none" stroke="#1F1915" stroke-width="3" stroke-linecap="round">
+    <path d="M260 170 q10 -10 20 0 q10 -10 20 0"/><path d="M320 200 q7 -7 14 0 q7 -7 14 0"/>
+  </g>
+  <!-- Falaise blanche, façon Étretat -->
+  <path d="M0 250 C60 240 140 250 210 270 L250 300 L235 600 H0 Z" fill="#EFE6D6" stroke="#1F1915" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M0 250 C60 240 140 250 210 270 L215 290 C150 275 70 268 0 272 Z" fill="#9DB37E" stroke="#1F1915" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M40 330 l20 40 M120 360 l-10 50 M180 320 l14 30 M70 450 l30 30 M160 470 l-6 50" stroke="#1F1915" stroke-width="2" opacity=".4"/>
+  <!-- Arche dans la mer -->
+  <path d="M330 600 V430 C330 360 420 340 440 400 L450 600 H410 V470 C400 440 370 440 365 480 V600 Z" fill="#EFE6D6" stroke="#1F1915" stroke-width="3" stroke-linejoin="round"/>
+  <!-- La personne assise au bord, jambes dans le vide -->
+  <g stroke="#1F1915" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="178" cy="218" r="15" fill="#F4E9D8"/>
+    <path d="M176 233 C178 250 182 262 190 272 L214 274 L222 300 M184 248 L206 262" fill="none"/>
+    <path d="M168 238 C160 250 162 268 176 272 Z" fill="#5468c9"/>
+  </g>
+</svg>

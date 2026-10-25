@@ -1,0 +1,1026 @@
+/* ==========================================================================
+   ORIVY — Composants
+   --------------------------------------------------------------------------
+   Posé après design-system.css, themes.css et saisons.css.
+   Chaque bloc correspond à un futur composant React (nom indiqué en tête).
+   Nommage : .bloc, .bloc__element, .bloc--variante (méthode BEM, en français).
+   Mobile d'abord, puis @media (min-width: 768px) et (min-width: 1024px).
+   Aucune valeur en dur : tout vient des variables, sauf les épaisseurs de trait
+   (1 à 3px), les pourcentages et quelques proportions (0.97 pour l'appui, 0.38
+   pour la taille des initiales).
+   ========================================================================== */
+
+
+/* ==========================================================================
+   0. Utilitaires partagés
+   ========================================================================== */
+
+/* Icône (sprite icones/icones.js) — <Icone /> */
+.icone {
+  width: var(--espace-5);
+  height: var(--espace-5);
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.icone--petite { width: var(--espace-4); height: var(--espace-4); }
+.icone--grande { width: var(--espace-6); height: var(--espace-6); }
+
+/* Couleur d'une catégorie : poser .cat-xxx sur un élément donne --cat et --cat-texte
+   à tout ce qu'il contient (badge, épingle, photo de secours…) */
+.cat-monument     { --cat: var(--cat-monument);     --cat-texte: var(--cat-monument-texte); }
+.cat-culture      { --cat: var(--cat-culture);      --cat-texte: var(--cat-culture-texte); }
+.cat-parc         { --cat: var(--cat-parc);         --cat-texte: var(--cat-parc-texte); }
+.cat-promenade    { --cat: var(--cat-promenade);    --cat-texte: var(--cat-promenade-texte); }
+.cat-village      { --cat: var(--cat-village);      --cat-texte: var(--cat-village-texte); }
+.cat-observatoire { --cat: var(--cat-observatoire); --cat-texte: var(--cat-observatoire-texte); }
+.cat-sport        { --cat: var(--cat-sport);        --cat-texte: var(--cat-sport-texte); }
+.cat-restaurant   { --cat: var(--cat-restaurant);   --cat-texte: var(--cat-restaurant-texte); }
+.cat-bar          { --cat: var(--cat-bar);          --cat-texte: var(--cat-bar-texte); }
+.cat-cinema       { --cat: var(--cat-cinema);       --cat-texte: var(--cat-cinema-texte); }
+.cat-evenement    { --cat: var(--cat-evenement);    --cat-texte: var(--cat-evenement-texte); }
+.cat-autre        { --cat: var(--cat-autre);        --cat-texte: var(--cat-autre-texte); }
+
+/* Conteneur de page */
+.conteneur {
+  width: 100%;
+  max-width: var(--largeur-contenu);
+  margin-inline: auto;
+  padding-inline: var(--marge-page);
+}
+
+/* Titre de section avec lien « Tout voir » */
+.section-titre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espace-3);
+  margin: var(--espace-7) 0 var(--espace-4);
+}
+.section-titre h2 { margin: 0; font-size: var(--taille-xl); }
+.section-titre a { font-size: var(--taille-s); font-weight: var(--graisse-forte); white-space: nowrap; }
+
+.texte-doux { color: var(--couleur-texte-doux); }
+
+
+/* ==========================================================================
+   1. Boutons — <Bouton variante="principal|secondaire|danger|fantome" />
+   ========================================================================== */
+.bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espace-2);
+  min-height: var(--cible-min);
+  padding: 0 var(--espace-5);
+  border: 2px solid transparent;
+  border-radius: var(--rayon-petit);
+  font-weight: var(--graisse-forte);
+  font-size: var(--taille-m);
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--duree-rapide) var(--courbe-douce),
+              transform var(--duree-rapide) var(--courbe-sortie);
+}
+.bouton:active { transform: scale(0.97); }
+.bouton[disabled],
+.bouton[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.bouton--principal { background: var(--couleur-principale); color: var(--couleur-sur-principale); }
+.bouton--principal:hover { background: var(--couleur-principale-survol); color: var(--couleur-sur-principale); }
+
+.bouton--secondaire { background: var(--couleur-surface); color: var(--couleur-texte); border-color: var(--couleur-bordure-forte); }
+.bouton--secondaire:hover { border-color: var(--couleur-texte); color: var(--couleur-texte); }
+
+/* Danger : TOUJOURS en contour (jamais confondu avec le rouge de Noël), avec icône et verbe */
+.bouton--danger { background: var(--couleur-surface); color: var(--couleur-danger); border-color: var(--couleur-danger); }
+.bouton--danger:hover { background: var(--couleur-danger); color: var(--couleur-sur-danger); }
+/* Aplat rouge : réservé au bouton de confirmation dans une fenêtre */
+.bouton--danger-plein { background: var(--couleur-danger); color: var(--couleur-sur-danger); }
+.bouton--danger-plein:hover { background: var(--couleur-danger-survol); color: var(--couleur-sur-danger); }
+
+.bouton--fantome { background: transparent; color: var(--couleur-texte); padding-inline: var(--espace-3); }
+.bouton--fantome:hover { background: var(--couleur-surface-creux); color: var(--couleur-texte); }
+
+.bouton--pilule { border-radius: var(--rayon-pilule); }
+.bouton--bloc { width: 100%; }
+
+/* Bouton rond avec icône seule : aria-label obligatoire */
+.bouton--icone {
+  width: var(--cible-min);
+  padding: 0;
+  border-radius: var(--rayon-pilule);
+  background: transparent;
+  color: var(--couleur-texte);
+  position: relative;
+}
+.bouton--icone:hover { background: var(--couleur-surface-creux); }
+.bouton--icone.bouton--flottant { background: var(--couleur-surface); box-shadow: var(--ombre-2); }
+
+/* Pastille de compteur (notifications non lues) */
+.pastille {
+  position: absolute;
+  top: var(--espace-1);
+  right: var(--espace-1);
+  min-width: var(--espace-4);
+  height: var(--espace-4);
+  padding: 0 var(--espace-1);
+  border-radius: var(--rayon-pilule);
+  background: var(--couleur-principale);
+  color: var(--couleur-sur-principale);
+  font-size: var(--taille-xs);
+  font-weight: var(--graisse-forte);
+  line-height: var(--espace-4);
+  text-align: center;
+  box-shadow: 0 0 0 2px var(--couleur-surface);
+}
+
+
+/* ==========================================================================
+   2. Badges — <BadgeCategorie />, <BadgeDistance />
+   ========================================================================== */
+.badge-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espace-1);
+  padding: var(--espace-1) var(--espace-3) var(--espace-1) var(--espace-2);
+  border-radius: var(--rayon-pilule);
+  background: var(--cat);
+  color: var(--cat-texte);
+  font-size: var(--taille-s);
+  font-weight: var(--graisse-forte);
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.badge-cat .icone { width: var(--espace-4); height: var(--espace-4); }
+
+.badge-distance {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espace-1);
+  padding: var(--espace-1) var(--espace-3) var(--espace-1) var(--espace-2);
+  border-radius: var(--rayon-pilule);
+  background: var(--couleur-surface);
+  color: var(--couleur-texte);
+  font-size: var(--taille-s);
+  font-weight: var(--graisse-forte);
+  box-shadow: var(--ombre-1);
+  white-space: nowrap;
+}
+.badge-distance .icone { width: var(--espace-4); height: var(--espace-4); color: var(--couleur-accent-texte); }
+
+
+/* ==========================================================================
+   3. Filtres — <Puce />, <FiltreRayon />, <BoutonAutourDeMoi />
+   ========================================================================== */
+/* Rangée défilante horizontalement au pouce */
+.puces {
+  display: flex;
+  gap: var(--espace-2);
+  overflow-x: auto;
+  padding: var(--espace-1) var(--marge-page);
+  margin-inline: calc(var(--marge-page) * -1);
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+.puces::-webkit-scrollbar { display: none; }
+
+.puce {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espace-2);
+  min-height: var(--cible-min);
+  padding: 0 var(--espace-4);
+  border-radius: var(--rayon-pilule);
+  border: 1.5px solid var(--couleur-bordure-forte);
+  background: var(--couleur-surface);
+  color: var(--couleur-texte);
+  font-weight: var(--graisse-moyenne);
+  white-space: nowrap;
+  text-decoration: none;   /* une puce peut être un lien */
+  cursor: pointer;
+  scroll-snap-align: start;
+}
+.puce .icone { width: var(--espace-4); height: var(--espace-4); }
+/* Puce de catégorie : l'icône prend la couleur de la catégorie */
+.puce[class*="cat-"] .icone { color: var(--cat); }
+.puce[aria-pressed="true"] {
+  background: var(--couleur-texte);
+  border-color: var(--couleur-texte);
+  color: var(--couleur-fond);
+}
+.puce[class*="cat-"][aria-pressed="true"] {
+  background: var(--cat);
+  border-color: var(--cat);
+  color: var(--cat-texte);
+}
+.puce[class*="cat-"][aria-pressed="true"] .icone { color: currentColor; }
+
+/* Filtre de rayon : groupe de boutons radio, un seul choix */
+.rayon {
+  display: flex;
+  padding: var(--espace-1);
+  gap: var(--espace-1);
+  border-radius: var(--rayon-pilule);
+  background: var(--couleur-surface);
+  border: 1.5px solid var(--couleur-bordure-forte);
+}
+.rayon legend { /* la légende est lue mais cachée */
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
+}
+.rayon label { flex: 1; }
+.rayon input { position: absolute; opacity: 0; pointer-events: none; }
+.rayon span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(var(--cible-min) - var(--espace-2));
+  min-width: var(--cible-min);
+  padding: 0 var(--espace-1);
+  border-radius: var(--rayon-pilule);
+  font-size: var(--taille-s);
+  white-space: nowrap;
+  font-weight: var(--graisse-forte);
+  color: var(--couleur-texte-doux);
+  cursor: pointer;
+}
+.rayon input:checked + span { background: var(--couleur-texte); color: var(--couleur-fond); }
+/* Sans position connue, le rayon n'a pas de sens : on le désactive visiblement */
+.rayon:disabled { opacity: 0.5; }
+.rayon:disabled span { cursor: not-allowed; }
+.rayon input:focus-visible + span { outline: 3px solid var(--couleur-focus); outline-offset: 2px; }
+
+
+/* ==========================================================================
+   4. Avatars — <Avatar taille="s|m|l|xl" />, <PileAvatars />
+   ========================================================================== */
+.avatar {
+  --taille-avatar: var(--cible-min);
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: var(--taille-avatar);
+  height: var(--taille-avatar);
+  border-radius: var(--rayon-pilule);
+  background: var(--avatar-fond, var(--couleur-accent-texte));
+  color: var(--couleur-sur-accent);
+  font-weight: var(--graisse-forte);
+  font-size: calc(var(--taille-avatar) * 0.38);
+  overflow: hidden;
+  text-transform: uppercase;
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar--s  { --taille-avatar: var(--espace-6); }
+.avatar--l  { --taille-avatar: var(--espace-8); }
+.avatar--xl { --taille-avatar: var(--espace-9); }
+/* Couleurs de fond des initiales : on reprend des rôles sûrs (texte clair dessus) */
+.avatar--a { --avatar-fond: var(--couleur-accent-texte); }
+.avatar--b { --avatar-fond: var(--cat-promenade); color: var(--cat-promenade-texte); }
+.avatar--c { --avatar-fond: var(--cat-culture); color: var(--cat-culture-texte); }
+.avatar--d { --avatar-fond: var(--cat-observatoire); color: var(--cat-observatoire-texte); }
+.avatar--e { --avatar-fond: var(--cat-cinema); color: var(--cat-cinema-texte); }
+
+.pile-avatars { display: flex; align-items: center; }
+.pile-avatars .avatar { box-shadow: 0 0 0 2px var(--couleur-surface); }
+.pile-avatars .avatar + .avatar { margin-left: calc(var(--espace-2) * -1); }
+.pile-avatars__reste { margin-left: var(--espace-2); font-size: var(--taille-s); color: var(--couleur-texte-doux); }
+
+
+/* ==========================================================================
+   5. Photo avec repli — <Photo />
+   Si l'image ne charge pas, on voit un aplat de la couleur de catégorie
+   et son icône : jamais de cadre vide.
+   ========================================================================== */
+.photo {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: var(--rayon-carte);
+  background: var(--cat, var(--couleur-surface-creux));
+  color: var(--cat-texte, var(--couleur-texte-doux));
+  aspect-ratio: 4 / 3;
+}
+.photo > .icone { width: var(--espace-7); height: var(--espace-7); opacity: 0.6; }
+.photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+/* ==========================================================================
+   6. Carte de lieu — <CarteLieu />
+   Photo + texte dessous ; badge catégorie et distance posés sur la photo.
+   ========================================================================== */
+.carte-lieu {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espace-3);
+  color: var(--couleur-texte);
+  text-decoration: none;
+}
+.carte-lieu .photo { transition: transform var(--duree-normale) var(--courbe-sortie); }
+.carte-lieu:hover .photo { transform: translateY(calc(var(--espace-1) * -1)); }
+.carte-lieu__haut {
+  position: absolute;
+  top: var(--espace-3);
+  left: var(--espace-3);
+  right: var(--espace-3);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--espace-2);
+  z-index: var(--plan-contenu);
+}
+.carte-lieu__nom {
+  font-family: var(--police-titre);
+  font-weight: var(--graisse-titre);
+  font-variation-settings: "SOFT" 100;
+  font-size: var(--taille-l);
+  line-height: var(--interligne-serre);
+  margin: 0;
+}
+/* Toute la carte est cliquable via le lien du titre (un seul arrêt de tabulation) */
+.carte-lieu__nom a { color: inherit; text-decoration: none; }
+.carte-lieu__nom a::after { content: ""; position: absolute; inset: 0; z-index: var(--plan-contenu); border-radius: var(--rayon-carte); }
+.carte-lieu__nom a:focus-visible { outline: none; }
+.carte-lieu__nom a:focus-visible::after { outline: 3px solid var(--couleur-focus); outline-offset: 3px; }
+.carte-lieu__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-1) var(--espace-3);
+  margin: 0;
+  font-size: var(--taille-s);
+  color: var(--couleur-texte-doux);
+}
+.carte-lieu__meta span { display: inline-flex; align-items: center; gap: var(--espace-1); }
+.carte-lieu__meta .icone { width: var(--espace-4); height: var(--espace-4); }
+
+.grille-lieux {
+  display: grid;
+  gap: var(--espace-6) var(--espace-4);
+  grid-template-columns: 1fr;
+}
+@media (min-width: 768px)  { .grille-lieux { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .grille-lieux { grid-template-columns: repeat(3, 1fr); } }
+
+
+/* ==========================================================================
+   7. Carte de sortie — <CarteSortie />
+   ========================================================================== */
+.carte-sortie {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--espace-3) var(--espace-4);
+  padding: var(--espace-4);
+  background: var(--couleur-surface);
+  border-radius: var(--rayon-carte);
+  box-shadow: var(--ombre-1);
+  color: var(--couleur-texte);
+}
+.carte-sortie__date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: var(--espace-8);
+  height: var(--espace-8);
+  border-radius: var(--rayon-petit);
+  background: var(--couleur-surface-creux);
+  line-height: 1.05;
+}
+.carte-sortie__jour { font-family: var(--police-titre); font-weight: var(--graisse-titre); font-size: var(--taille-xl); }
+.carte-sortie__mois { font-size: var(--taille-xs); font-weight: var(--graisse-forte); text-transform: uppercase; color: var(--couleur-texte-doux); }
+.carte-sortie__corps { display: flex; flex-direction: column; gap: var(--espace-1); min-width: 0; }
+.carte-sortie__titre {
+  font-family: var(--police-titre);
+  font-weight: var(--graisse-titre);
+  font-variation-settings: "SOFT" 100;
+  font-size: var(--taille-l);
+  line-height: var(--interligne-serre);
+  margin: 0;
+}
+.carte-sortie__titre a { color: inherit; text-decoration: none; }
+.carte-sortie__titre a::after { content: ""; position: absolute; inset: 0; border-radius: var(--rayon-carte); }
+.carte-sortie__titre a:focus-visible { outline: none; }
+.carte-sortie__titre a:focus-visible::after { outline: 3px solid var(--couleur-focus); outline-offset: 3px; }
+.carte-sortie__meta { margin: 0; font-size: var(--taille-s); color: var(--couleur-texte-doux); display: flex; flex-wrap: wrap; gap: var(--espace-1) var(--espace-3); }
+.carte-sortie__meta span { display: inline-flex; align-items: center; gap: var(--espace-1); }
+.carte-sortie__meta .icone { width: var(--espace-4); height: var(--espace-4); }
+.carte-sortie__pied {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espace-3);
+  padding-top: var(--espace-3);
+  border-top: 1px solid var(--couleur-bordure);
+}
+/* Le bouton passe au-dessus du lien qui couvre la carte */
+.carte-sortie__pied .bouton { position: relative; z-index: var(--plan-contenu); }
+
+
+/* ==========================================================================
+   8. Carte d'utilisateur — <CarteUtilisateur /> et bouton d'abonnement
+   ========================================================================== */
+.carte-utilisateur {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--espace-3);
+  padding: var(--espace-3) var(--espace-4);
+  background: var(--couleur-surface);
+  border-radius: var(--rayon-carte);
+  box-shadow: var(--ombre-1);
+}
+.carte-utilisateur__nom { margin: 0; font-weight: var(--graisse-forte); }
+.carte-utilisateur__nom a { color: inherit; text-decoration: none; }
+.carte-utilisateur__info { margin: 0; font-size: var(--taille-s); color: var(--couleur-texte-doux); }
+
+/* Bouton d'abonnement : aria-pressed="false" → « Suivre », "true" → « Abonné·e » */
+.bouton-suivre { min-width: calc(var(--espace-9) + var(--espace-4)); padding-inline: var(--espace-4); border-radius: var(--rayon-pilule); }
+.bouton-suivre[aria-pressed="false"] { background: var(--couleur-principale); color: var(--couleur-sur-principale); }
+.bouton-suivre[aria-pressed="true"] { background: var(--couleur-surface); color: var(--couleur-texte); border-color: var(--couleur-bordure-forte); }
+
+
+/* ==========================================================================
+   9. Galerie photos — <Galerie />
+   ========================================================================== */
+.galerie {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--espace-1);
+  border-radius: var(--rayon-carte);
+  overflow: hidden;
+}
+.galerie .photo { border-radius: 0; aspect-ratio: 1; }
+.galerie .photo:first-child { grid-column: span 2; grid-row: span 2; }
+.galerie__plus {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--couleur-voile);
+  color: var(--argile-50);
+  font-weight: var(--graisse-forte);
+  font-size: var(--taille-l);
+  z-index: var(--plan-contenu);
+}
+
+
+/* ==========================================================================
+   10. Commentaires — <FilCommentaires />
+   ========================================================================== */
+.commentaires { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--espace-4); }
+.commentaire { display: grid; grid-template-columns: auto 1fr; gap: var(--espace-3); }
+.commentaire__bulle {
+  padding: var(--espace-3) var(--espace-4);
+  background: var(--couleur-surface);
+  border-radius: var(--rayon-petit) var(--rayon-carte) var(--rayon-carte) var(--rayon-carte);
+  box-shadow: var(--ombre-1);
+}
+.commentaire__auteur { font-weight: var(--graisse-forte); font-size: var(--taille-s); margin: 0 0 var(--espace-1); }
+.commentaire__texte { margin: 0; }
+.commentaire__actions { display: flex; align-items: center; gap: var(--espace-1); margin-top: var(--espace-1); font-size: var(--taille-s); color: var(--couleur-texte-doux); }
+.commentaire__actions .bouton { min-height: var(--cible-min); font-size: var(--taille-s); color: var(--couleur-texte-doux); font-weight: var(--graisse-moyenne); }
+.commentaire__actions .bouton[aria-pressed="true"] { color: var(--couleur-principale); }
+.commentaire__actions .bouton[aria-pressed="true"] .icone { fill: currentColor; }
+
+/* Zone de saisie collée en bas (commentaire, message) */
+.saisie-message {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--espace-2);
+  padding: var(--espace-2);
+  background: var(--couleur-surface);
+  border-radius: var(--rayon-carte);
+  box-shadow: var(--ombre-2);
+}
+.saisie-message textarea {
+  flex: 1;
+  min-height: var(--cible-min);
+  max-height: calc(var(--espace-9) * 1.5);
+  padding: var(--espace-3);
+  border: 0;
+  background: transparent;
+  resize: none;
+}
+.saisie-message textarea:focus-visible { outline: none; }
+.saisie-message:focus-within { outline: 3px solid var(--couleur-focus); outline-offset: 2px; }
+
+
+/* ==========================================================================
+   11. Bulles de message — <BulleMessage moi />
+   ========================================================================== */
+.fil-messages { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--espace-2); }
+.bulle {
+  max-width: 80%;
+  padding: var(--espace-2) var(--espace-4);
+  border-radius: var(--rayon-carte) var(--rayon-carte) var(--rayon-carte) var(--rayon-petit);
+  background: var(--couleur-surface);
+  box-shadow: var(--ombre-1);
+  align-self: flex-start;
+}
+.bulle--moi {
+  align-self: flex-end;
+  background: var(--couleur-principale);
+  color: var(--couleur-sur-principale);
+  border-radius: var(--rayon-carte) var(--rayon-carte) var(--rayon-petit) var(--rayon-carte);
+}
+.bulle p { margin: 0; }
+.bulle__heure { display: block; margin-top: var(--espace-1); font-size: var(--taille-xs); opacity: 0.85; }
+.fil-messages__jour { align-self: center; font-size: var(--taille-xs); color: var(--couleur-texte-doux); margin: var(--espace-3) 0; }
+
+
+/* ==========================================================================
+   12. Notification — <ElementNotification />
+   ========================================================================== */
+.notifs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.notif {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  gap: var(--espace-3);
+  padding: var(--espace-4) var(--espace-3);
+  border-bottom: 1px solid var(--couleur-bordure);
+}
+.notif--non-lue { background: var(--couleur-surface); }
+.notif__texte { margin: 0; }
+.notif__heure { display: block; font-size: var(--taille-xs); color: var(--couleur-texte-doux); margin-top: var(--espace-1); }
+.notif__point {
+  width: var(--espace-3);
+  height: var(--espace-3);
+  margin-top: var(--espace-2);
+  border-radius: var(--rayon-pilule);
+  background: var(--couleur-principale);
+}
+.notif__type {
+  position: relative;
+}
+.notif__type .icone {
+  position: absolute;
+  right: calc(var(--espace-1) * -1);
+  bottom: calc(var(--espace-1) * -1);
+  width: var(--espace-5);
+  height: var(--espace-5);
+  padding: var(--espace-1);
+  border-radius: var(--rayon-pilule);
+  background: var(--couleur-accent-texte);
+  color: var(--couleur-sur-accent);
+  box-shadow: 0 0 0 2px var(--couleur-surface);
+}
+
+
+/* ==========================================================================
+   13. Champs de formulaire — <Champ />
+   ========================================================================== */
+.champ { display: flex; flex-direction: column; gap: var(--espace-2); }
+.champ__label { font-weight: var(--graisse-forte); }
+.champ__aide { font-size: var(--taille-s); color: var(--couleur-texte-doux); margin: 0; }
+.champ__saisie {
+  width: 100%;
+  min-height: var(--cible-min);
+  padding: var(--espace-3) var(--espace-4);
+  border: 1.5px solid var(--couleur-bordure-forte);
+  border-radius: var(--rayon-petit);
+  background: var(--couleur-surface-creux);
+  color: var(--couleur-texte);
+  transition: border-color var(--duree-rapide) var(--courbe-douce);
+}
+.champ__saisie:hover { border-color: var(--couleur-texte-doux); }
+.champ__saisie:focus-visible { outline: 3px solid var(--couleur-focus); outline-offset: 1px; border-color: var(--couleur-focus); }
+textarea.champ__saisie { min-height: calc(var(--espace-9) + var(--espace-6)); resize: vertical; line-height: var(--interligne-normal); }
+select.champ__saisie {
+  appearance: none;
+  padding-right: var(--espace-7);
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - var(--espace-5)) 55%, calc(100% - var(--espace-4)) 55%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+/* Champ avec icône à gauche (recherche, ville) */
+.champ__ligne { position: relative; display: flex; align-items: center; }
+.champ__ligne > .icone { position: absolute; left: var(--espace-3); color: var(--couleur-texte-doux); pointer-events: none; }
+.champ__ligne .champ__saisie { padding-left: calc(var(--espace-4) + var(--espace-6)); }
+.champ__ligne .bouton--icone { position: absolute; right: 0; }
+/* Erreur : bordure + message avec icône (jamais la couleur seule) */
+.champ--erreur .champ__saisie { border-color: var(--couleur-danger); }
+.champ__erreur[hidden] { display: none; }
+.champ__erreur { display: flex; align-items: center; gap: var(--espace-1); margin: 0; font-size: var(--taille-s); font-weight: var(--graisse-moyenne); color: var(--couleur-danger); }
+.champ__erreur .icone { width: var(--espace-4); height: var(--espace-4); }
+.formulaire { display: flex; flex-direction: column; gap: var(--espace-5); }
+
+
+/* ==========================================================================
+   14. Interrupteur de réglage — <Interrupteur />
+   <label class="interrupteur"><span>Texte</span><input type="checkbox" role="switch"></label>
+   ========================================================================== */
+.interrupteur {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espace-4);
+  min-height: var(--cible-min);
+  cursor: pointer;
+}
+.interrupteur__texte { display: flex; flex-direction: column; }
+.interrupteur__texte small { font-size: var(--taille-s); color: var(--couleur-texte-doux); }
+.interrupteur input {
+  appearance: none;
+  position: relative;
+  flex-shrink: 0;
+  width: calc(var(--espace-7) + var(--espace-1));
+  height: var(--espace-6);
+  margin: 0;
+  border-radius: var(--rayon-pilule);
+  background: var(--couleur-bordure-forte);
+  cursor: pointer;
+  transition: background-color var(--duree-rapide) var(--courbe-douce);
+}
+.interrupteur input::after {
+  content: "";
+  position: absolute;
+  top: var(--espace-1);
+  left: var(--espace-1);
+  width: var(--espace-5);
+  height: var(--espace-5);
+  border-radius: var(--rayon-pilule);
+  background: var(--couleur-surface);
+  box-shadow: var(--ombre-1);
+  transition: transform var(--duree-normale) var(--courbe-sortie);
+}
+.interrupteur input:checked { background: var(--couleur-accent); }
+.interrupteur input:checked::after { transform: translateX(calc(var(--espace-4) + var(--espace-1))); }
+
+/* Choix segmenté (Thème : Automatique / Jour / Nuit) : on réutilise la classe .rayon */
+
+
+/* ==========================================================================
+   15. États : vide, chargement, erreur — <EtatVide />, <Chargement />, <EtatErreur />
+   ========================================================================== */
+.etat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--espace-3);
+  padding: var(--espace-7) var(--espace-4);
+}
+.etat[hidden] { display: none; }
+.etat h3 { margin: 0; font-size: var(--taille-l); }
+.etat p { margin: 0 auto; color: var(--couleur-texte-doux); }
+.etat__icone {
+  display: grid;
+  place-items: center;
+  width: var(--espace-8);
+  height: var(--espace-8);
+  border-radius: var(--rayon-pilule);
+  background: var(--couleur-surface-creux);
+  color: var(--couleur-texte-doux);
+}
+.etat--erreur .etat__icone { color: var(--couleur-danger); }
+/* Sans décoration saisonnière (désactivée), on montre l'icône à la place */
+.etat .deco-vide + .etat__icone { display: none; }
+[data-decorations="off"] .etat .deco-vide + .etat__icone { display: grid; }
+
+/* Squelette de chargement : un simple battement d'opacité */
+.squelette {
+  background: var(--couleur-surface-creux);
+  border-radius: var(--rayon-petit);
+  animation: squelette 1.4s var(--courbe-douce) infinite alternate;
+}
+.squelette--photo { aspect-ratio: 4 / 3; border-radius: var(--rayon-carte); }
+.squelette--ligne { height: var(--espace-4); }
+.squelette--court { width: 60%; }
+@keyframes squelette { from { opacity: 1; } to { opacity: 0.45; } }
+
+/* Petit indicateur tournant (dans un bouton « Autour de moi » en attente) */
+.tourne {
+  width: var(--espace-4);
+  height: var(--espace-4);
+  border-radius: var(--rayon-pilule);
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: tourne 0.8s linear infinite;
+}
+@keyframes tourne { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .squelette { animation: none; }
+  .tourne { animation-duration: 2.4s; } /* on garde un mouvement lent pour signaler l'attente */
+}
+
+
+/* ==========================================================================
+   16. Fenêtre de confirmation — <Fenetre /> (balise <dialog>)
+   ========================================================================== */
+.fenetre {
+  width: min(100% - 2 * var(--marge-page), calc(var(--espace-9) * 5));
+  padding: var(--espace-6) var(--espace-5) var(--espace-5);
+  border: 0;
+  border-radius: var(--rayon-grand);
+  background: var(--couleur-surface);
+  color: var(--couleur-texte);
+  box-shadow: var(--ombre-3);
+}
+.fenetre::backdrop { background: var(--couleur-voile); }
+.fenetre h2 { font-size: var(--taille-xl); }
+.fenetre__actions { display: flex; flex-direction: column-reverse; gap: var(--espace-2); margin-top: var(--espace-5); }
+@media (min-width: 768px) { .fenetre__actions { flex-direction: row; justify-content: flex-end; } }
+
+
+/* ==========================================================================
+   17. Tiroir — <Tiroir /> : monte du bas sur mobile, panneau latéral sur ordinateur
+   ========================================================================== */
+.tiroir {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--plan-tiroir);
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: var(--espace-2) var(--marge-page) var(--espace-5);
+  background: var(--couleur-surface);
+  border-radius: var(--rayon-grand) var(--rayon-grand) 0 0;
+  box-shadow: var(--ombre-3);
+  transform: translateY(0);
+  transition: transform var(--duree-normale) var(--courbe-sortie);
+}
+.tiroir[hidden] { display: block; transform: translateY(110%); visibility: hidden; }
+/* Le focus est posé sur le tiroir par le script à l'ouverture : pas d'anneau sur tout le panneau */
+.tiroir:focus { outline: none; }
+.tiroir__poignee {
+  display: block;
+  width: var(--espace-7);
+  height: var(--espace-1);
+  margin: var(--espace-1) auto var(--espace-3);
+  border-radius: var(--rayon-pilule);
+  background: var(--couleur-bordure-forte);
+}
+@media (min-width: 1024px) {
+  .tiroir {
+    left: auto;
+    top: calc(var(--espace-9) - var(--espace-2));
+    right: var(--espace-4);
+    bottom: var(--espace-4);
+    width: calc(var(--espace-9) * 4);
+    max-height: none;
+    border-radius: var(--rayon-grand);
+  }
+  .tiroir[hidden] { transform: translateX(110%); }
+  .tiroir__poignee { display: none; }
+}
+
+
+/* ==========================================================================
+   18. Navigation — <Entete />, <BarreOnglets />
+   Mobile : en-tête simple en haut + barre d'onglets en bas.
+   Ordinateur (≥ 1024px) : tout passe dans la barre du haut.
+   ========================================================================== */
+:root {
+  /* Hauteur FIXE de l'en-tête, bordure comprise : 72 + 1px sur mobile, 88 + 1px sur ordinateur.
+     Elle sert à caler les écrans plein écran (accueil, carte) : elle doit être exacte,
+     d'où une hauteur imposée plutôt que calculée d'après le contenu. */
+  --hauteur-entete: calc(var(--espace-8) + var(--espace-2) + 1px);
+}
+@media (min-width: 1024px) {
+  :root { --hauteur-entete: calc(var(--espace-8) + var(--espace-5) + 1px); }
+}
+.entete {
+  position: sticky;
+  top: 0;
+  z-index: var(--plan-navigation);
+  background: var(--couleur-surface);
+  border-bottom: 1px solid var(--couleur-bordure);
+}
+.entete__interieur {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--espace-2);
+  max-width: var(--largeur-contenu);
+  margin: 0 auto;
+  height: calc(var(--hauteur-entete) - 1px);
+  padding: 0 var(--marge-page);
+}
+.entete__logo { display: flex; align-items: flex-start; color: var(--couleur-texte); margin-right: auto; }
+/* Le logo garde sa largeur minimale de 140px (60px de haut) */
+.entete__logo svg { width: var(--logo-largeur-min); height: auto; }
+.entete__nav { display: none; }
+.entete__actions { position: relative; z-index: var(--plan-contenu); display: flex; align-items: center; gap: var(--espace-1); }
+.entete__profil { display: none; }
+/* La décoration « pend » sous la barre, côté droit : elle ne recouvre jamais un bouton de l'en-tête */
+.entete .deco-coin {
+  top: 100%;
+  right: var(--marge-page);
+  width: var(--espace-7);
+  height: var(--espace-7);
+}
+
+.onglets {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--plan-navigation);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--couleur-surface);
+  border-top: 1px solid var(--couleur-bordure);
+  box-shadow: var(--ombre-2);
+}
+.onglets a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: calc(var(--cible-min) + var(--espace-4));
+  color: var(--couleur-texte-doux);
+  font-size: var(--taille-xs);
+  font-weight: var(--graisse-moyenne);
+  text-decoration: none;
+}
+.onglets a[aria-current="page"] { color: var(--couleur-principale); font-weight: var(--graisse-forte); }
+.onglets a[aria-current="page"] .icone { stroke-width: 2.5; }
+.onglets .icone { width: var(--espace-5); height: var(--espace-5); }
+/* Laisse la place à la barre d'onglets en bas de page */
+.avec-onglets { padding-bottom: calc(var(--cible-min) + var(--espace-7)); }
+
+@media (min-width: 1024px) {
+  .onglets { display: none; }
+  .avec-onglets { padding-bottom: 0; }
+  .entete__logo { margin-right: var(--espace-5); }
+  .entete__logo svg { width: calc(var(--logo-largeur-min) + var(--espace-5)); }   /* 164px, 71px de haut */
+  .entete__nav { display: flex; gap: var(--espace-1); margin-right: auto; }
+  .entete__nav a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--espace-2);
+    min-height: var(--cible-min);
+    padding: 0 var(--espace-3);
+    border-radius: var(--rayon-pilule);
+    color: var(--couleur-texte-doux);
+    font-weight: var(--graisse-moyenne);
+    text-decoration: none;
+  }
+  .entete__nav a:hover { color: var(--couleur-texte); background: var(--couleur-surface-creux); }
+  .entete__nav a[aria-current="page"] { color: var(--couleur-texte); background: var(--couleur-surface-creux); font-weight: var(--graisse-forte); }
+  .entete__nav a[aria-current="page"] .icone { color: var(--couleur-principale); }
+  .entete__profil { display: inline-flex; margin-left: var(--espace-2); border-radius: var(--rayon-pilule); }
+}
+
+
+/* ==========================================================================
+   18 bis. Menu du compte sous l'avatar — <MenuProfil /> (ordinateur)
+   Sur mobile, ce menu et le bouton « Connexion » de l'en-tête sont cachés :
+   l'onglet Profil / Connexion de la barre du bas les remplace.
+   ========================================================================== */
+.menu-profil { position: relative; display: none; }
+.entete__connexion { display: none; }
+
+/* L'avatar est un <button> : on retire le style par défaut du navigateur
+   et on garantit une zone de clic de 44px autour de l'avatar de 32px */
+button.entete__profil {
+  display: grid;
+  place-items: center;
+  width: var(--cible-min);
+  height: var(--cible-min);
+  margin-left: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+button.entete__profil[aria-expanded="true"] .avatar { box-shadow: 0 0 0 3px var(--couleur-principale); }
+
+.menu-profil__liste {
+  position: absolute;
+  top: calc(100% + var(--espace-2));
+  right: 0;
+  z-index: var(--plan-navigation);
+  min-width: calc(var(--espace-9) * 2.2);
+  margin: 0;
+  padding: var(--espace-2);
+  list-style: none;
+  background: var(--couleur-surface);
+  border: 1px solid var(--couleur-bordure);
+  border-radius: var(--rayon-carte);
+  box-shadow: var(--ombre-3);
+}
+.menu-profil__liste .bouton { width: 100%; justify-content: flex-start; font-weight: var(--graisse-moyenne); }
+
+@media (min-width: 1024px) {
+  .menu-profil { display: block; margin-left: var(--espace-2); }
+  .entete__connexion { display: inline-flex; margin-left: var(--espace-2); }
+}
+
+
+/* ==========================================================================
+   19. Carrousel horizontal — <Carrousel /> (sorties de l'accueil mobile)
+   ========================================================================== */
+.carrousel {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 85%;
+  gap: var(--espace-3);
+  overflow-x: auto;
+  padding: var(--espace-1) var(--marge-page) var(--espace-4);
+  margin-inline: calc(var(--marge-page) * -1);
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--marge-page);
+  scrollbar-width: none;
+}
+.carrousel::-webkit-scrollbar { display: none; }
+.carrousel > * { scroll-snap-align: start; }
+@media (min-width: 768px) { .carrousel { grid-auto-columns: 45%; } }
+@media (min-width: 1024px) {
+  .carrousel { grid-auto-flow: row; grid-template-columns: repeat(3, 1fr); overflow: visible; margin: 0; padding: 0; }
+}
+
+
+/* ==========================================================================
+   20. Onglets de section (Profil : Organisées / Passées) — <OngletsSection />
+   ========================================================================== */
+.onglets-section {
+  display: flex;
+  gap: var(--espace-1);
+  border-bottom: 1px solid var(--couleur-bordure);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.onglets-section::-webkit-scrollbar { display: none; }
+.onglets-section button {
+  min-height: var(--cible-min);
+  padding: 0 var(--espace-4);
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: var(--couleur-texte-doux);
+  font-weight: var(--graisse-moyenne);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.onglets-section button[aria-selected="true"] { color: var(--couleur-texte); border-bottom-color: var(--couleur-principale); font-weight: var(--graisse-forte); }
+/* Les onglets peuvent aussi être de vrais liens (ex. /connexion et /inscription) */
+.onglets-section a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--cible-min);
+  padding: 0 var(--espace-4);
+  border-bottom: 3px solid transparent;
+  color: var(--couleur-texte-doux);
+  font-weight: var(--graisse-moyenne);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.onglets-section a[aria-current="page"] { color: var(--couleur-texte); border-bottom-color: var(--couleur-principale); font-weight: var(--graisse-forte); }
+
+
+
+/* ==========================================================================
+   21. Message éphémère — <Toast />
+   ========================================================================== */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--cible-min) + var(--espace-7));
+  z-index: var(--plan-notification);
+  display: flex;
+  align-items: center;
+  gap: var(--espace-2);
+  max-width: calc(100% - 2 * var(--marge-page));
+  padding: var(--espace-3) var(--espace-4);
+  border-radius: var(--rayon-pilule);
+  background: var(--couleur-texte);
+  color: var(--couleur-fond);
+  box-shadow: var(--ombre-3);
+  transform: translateX(-50%);
+  font-weight: var(--graisse-moyenne);
+}
+.toast .icone { color: var(--couleur-fond); }
+/* display: flex ci-dessus l'emporterait sur l'attribut hidden : on le rétablit */
+.toast[hidden] { display: none; }
+@media (min-width: 1024px) { .toast { bottom: var(--espace-6); } }
+
+
+/* ==========================================================================
+   22. Statistiques (profil) — <Stat />
+   ========================================================================== */
+.stats { display: flex; gap: var(--espace-5); }
+.stat { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--couleur-texte); }
+.stat strong { font-family: var(--police-titre); font-size: var(--taille-xl); font-weight: var(--graisse-titre); line-height: 1.1; }
+.stat span { font-size: var(--taille-s); color: var(--couleur-texte-doux); }

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Icônes ORIVY</title>
+  <script src="../themes.js"></script>
+  <script src="../saisons.js"></script>
+  <link rel="icon" href="../logo/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght,SOFT@9..144,600..700,100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../design-system.css">
+  <link rel="stylesheet" href="../themes.css">
+  <link rel="stylesheet" href="../saisons.css">
+  <style>
+    main { max-width: var(--largeur-contenu); margin: 0 auto; padding: var(--espace-6) var(--marge-page) var(--espace-9); }
+    .intro { color: var(--couleur-texte-doux); }
+    .grille { display: grid; gap: var(--espace-2); grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); margin-top: var(--espace-4); }
+    figure {
+      margin: 0; padding: var(--espace-4) var(--espace-2) var(--espace-3);
+      background: var(--couleur-surface); border-radius: var(--rayon-petit);
+      display: flex; flex-direction: column; align-items: center; gap: var(--espace-2);
+      box-shadow: var(--ombre-1);
+    }
+    figcaption { font-size: var(--taille-xs); color: var(--couleur-texte-doux); text-align: center; word-break: break-word; }
+    /* Règle de base des icônes (reprise dans composants.css) */
+    .icone { width: var(--espace-5); height: var(--espace-5); flex-shrink: 0; }
+    .tailles { display: flex; align-items: center; gap: var(--espace-4); }
+    .tailles .icone:nth-child(1) { width: var(--espace-4); height: var(--espace-4); }
+    .tailles .icone:nth-child(3) { width: var(--espace-6); height: var(--espace-6); }
+    .cat { color: var(--c); }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Icônes</h1>
+  <p class="intro">Style Lucide : grille de 24, trait de 2px, bouts arrondis, couleur du texte.
+    Tailles : 16px dans le texte, 24px par défaut, 32px pour la barre d'onglets mobile.
+    Source : <code>icones/icones.js</code> · un fichier par icône dans <code>icones/svg/</code>.</p>
+  <div class="tailles" aria-hidden="true">
+    <svg class="icone"><use href="#i-carte"/></svg>
+    <svg class="icone"><use href="#i-carte"/></svg>
+    <svg class="icone"><use href="#i-carte"/></svg>
+  </div>
+  <h2 style="margin-top: var(--espace-7)">Interface</h2>
+  <div class="grille" id="interface"></div>
+  <h2 style="margin-top: var(--espace-7)">Catégories</h2>
+  <p class="intro">Toujours accompagnées du nom de la catégorie.</p>
+  <div class="grille" id="categories"></div>
+</main>
+<script src="icones.js"></script>
+<script>
+  /* Remplit le catalogue à partir de la liste des icônes */
+  Object.keys(window.ORIVY_ICONES).forEach(function (nom) {
+    var cat = nom.indexOf("cat-") === 0;
+    var f = document.createElement("figure");
+    f.innerHTML = '<svg class="icone' + (cat ? ' cat' : '') + '" aria-hidden="true"' +
+      (cat ? ' style="--c: var(--' + nom + ')"' : '') + '><use href="#i-' + nom + '"/></svg><figcaption>' + nom + "</figcaption>";
+    document.getElementById(cat ? "categories" : "interface").appendChild(f);
+  });
+</script>
+<script src="../outils/selecteur-apercu.js"></script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F6EFE6">
+  <title>Messages · ORIVY</title>
+  <script src="../themes.js"></script>
+  <script src="../saisons.js"></script>
+  <link rel="icon" href="../logo/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght,SOFT@9..144,600..700,100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../design-system.css">
+  <link rel="stylesheet" href="../themes.css">
+  <link rel="stylesheet" href="../saisons.css">
+  <link rel="stylesheet" href="../composants.css">
+  <link rel="stylesheet" href="pages.css">
+</head>
+<body data-page="messages" class="page-messages">
+<main class="conteneur" style="padding-inline: 0">
+  <h1 class="visuellement-cache">Messages</h1>
+  <div class="messagerie" id="messagerie">
+
+    <!-- Liste des conversations -->
+    <section class="liste-conversations" aria-labelledby="t-conversations">
+      <div style="padding: var(--espace-4) var(--marge-page) var(--espace-2)">
+        <h2 id="t-conversations" style="font-size: var(--taille-2xl); margin-bottom: var(--espace-3)">Messages</h2>
+        <div class="champ__ligne">
+          <svg class="icone" aria-hidden="true"><use href="#i-loupe"/></svg>
+          <label class="visuellement-cache" for="cherche-conv">Cherche une conversation</label>
+          <input class="champ__saisie" id="cherche-conv" type="search" placeholder="Cherche une conversation">
+        </div>
+      </div>
+      <ul class="conversations" id="conversations">
+        <li><a href="#" data-conv="ines" class="non-lu" aria-current="true">
+          <span class="avatar avatar--c" aria-hidden="true">IN</span>
+          <div style="min-width: 0"><strong>Inès Nakamura</strong><p>Tu viens toujours dimanche au puy de Dôme ?</p></div>
+          <div><time datetime="2026-10-22T09:12">9:12</time><br><span class="compteur-non-lus" aria-label="2 messages non lus">2</span></div>
+        </a></li>
+        <li><a href="#" data-conv="groupe">
+          <span class="avatar avatar--b" aria-hidden="true">🎬</span>
+          <div style="min-width: 0"><strong>Nuit horreur au Grand Rex</strong><p>Léa : on se retrouve devant à 20h ?</p></div>
+          <div><time datetime="2026-10-21T22:40">hier</time></div>
+        </a></li>
+        <li><a href="#" data-conv="theo">
+          <span class="avatar avatar--d" aria-hidden="true">TM</span>
+          <div style="min-width: 0"><strong>Théo Martin</strong><p>Toi : Merci pour les photos !</p></div>
+          <div><time datetime="2026-10-19">dim.</time></div>
+        </a></li>
+        <li><a href="#" data-conv="nina">
+          <span class="avatar avatar--d" aria-hidden="true">NG</span>
+          <div style="min-width: 0"><strong>Nina Garnier</strong><p>La guinguette rouvre samedi 🎶</p></div>
+          <div><time datetime="2026-10-16">16 oct.</time></div>
+        </a></li>
+      </ul>
+    </section>
+
+    <!-- Conversation ouverte -->
+    <section class="conversation" aria-labelledby="t-conv">
+      <header class="conversation__tete">
+        <button class="bouton bouton--icone bouton-retour" type="button" id="retour" aria-label="Retour aux conversations"><svg class="icone" aria-hidden="true"><use href="#i-retour"/></svg></button>
+        <span class="avatar avatar--s avatar--c" aria-hidden="true">IN</span>
+        <div><h2 id="t-conv" style="font-family: var(--police-texte); font-size: var(--taille-m); margin: 0">Inès Nakamura</h2><p>En ligne</p></div>
+      </header>
+      <div class="conversation__fil">
+        <ul class="fil-messages" id="fil" aria-live="polite">
+          <li class="fil-messages__jour">Hier</li>
+          <li class="bulle"><p>Coucou Camille ! J'organise un lever de soleil au puy de Dôme dimanche, ça te dit ?</p>
+            <a class="carte-partagee cat-promenade" href="sortie.html">
+              <span class="photo"><svg class="icone" aria-hidden="true"><use href="#i-cat-promenade"/></svg><img src="https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=200&q=70" alt="" onerror="this.remove()"></span>
+              <span><strong>Lever de soleil au puy de Dôme</strong><br><small>Dim. 25 oct. · 7h</small></span>
+            </a>
+            <span class="bulle__heure">18:30</span></li>
+          <li class="bulle bulle--moi"><p>Trop bien, je m'inscris 😍 Il faut prévoir quoi ?</p><span class="bulle__heure">18:42</span></li>
+          <li class="bulle"><p>Une frontale, une veste chaude, et ta bonne humeur. Théo peut te prendre en voiture depuis Clermont.</p><span class="bulle__heure">18:45</span></li>
+          <li class="fil-messages__jour">Aujourd'hui</li>
+          <li class="bulle"><p>Tu viens toujours dimanche au puy de Dôme ?</p><span class="bulle__heure">9:12</span></li>
+          <li class="bulle"><p>La météo annonce un ciel dégagé ☀️</p><span class="bulle__heure">9:12</span></li>
+        </ul>
+      </div>
+      <form class="conversation__saisie" id="envoi">
+        <div class="saisie-message">
+          <button class="bouton bouton--icone" type="button" aria-label="Partager une sortie"><svg class="icone" aria-hidden="true"><use href="#i-plus"/></svg></button>
+          <label class="visuellement-cache" for="message">Ton message</label>
+          <textarea id="message" rows="1" placeholder="Écris un message…" required></textarea>
+          <button class="bouton bouton--icone bouton--principal" type="submit" aria-label="Envoyer"><svg class="icone" aria-hidden="true"><use href="#i-envoyer"/></svg></button>
+        </div>
+      </form>
+    </section>
+  </div>
+</main>
+
+<script>
+  /* Mobile : on passe de la liste à la conversation et retour.
+     Ordinateur : les deux sont côte à côte (pages.css). */
+  (function () {
+    var messagerie = document.getElementById("messagerie");
+    document.getElementById("conversations").addEventListener("click", function (e) {
+      var lien = e.target.closest("a");
+      if (!lien) return;
+      e.preventDefault();
+      document.querySelectorAll("#conversations a").forEach(function (a) { a.removeAttribute("aria-current"); });
+      lien.setAttribute("aria-current", "true");
+      lien.classList.remove("non-lu");
+      var compteur = lien.querySelector(".compteur-non-lus");
+      if (compteur) compteur.remove();
+      messagerie.classList.add("messagerie--ouverte");
+      document.getElementById("message").focus();
+    });
+    document.getElementById("retour").addEventListener("click", function () {
+      messagerie.classList.remove("messagerie--ouverte");
+    });
+    /* Envoi d'un message */
+    document.getElementById("envoi").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var champ = document.getElementById("message");
+      var li = document.createElement("li");
+      var d = new Date();
+      li.className = "bulle bulle--moi";
+      li.innerHTML = "<p></p><span class=\"bulle__heure\">" + d.getHours() + ":" + String(d.getMinutes()).padStart(2, "0") + "</span>";
+      li.querySelector("p").textContent = champ.value;
+      document.getElementById("fil").appendChild(li);
+      champ.value = "";
+      li.scrollIntoView({ block: "end" });
+    });
+    /* Entrée envoie, Maj + Entrée va à la ligne */
+    document.getElementById("message").addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); document.getElementById("envoi").requestSubmit(); }
+    });
+    /* Ouvre directement une conversation : messages.html#ouvrir */
+    if (location.hash === "#ouvrir") messagerie.classList.add("messagerie--ouverte");
+  })();
+</script>
+<script src="commun.js"></script>
+<script src="../icones/icones.js"></script>
+<script src="../outils/selecteur-apercu.js"></script>
+</body>
+</html>

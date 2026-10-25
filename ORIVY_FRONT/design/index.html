@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F6EFE6">
+  <title>Design ORIVY</title>
+  <script src="themes.js"></script>
+  <script src="saisons.js"></script>
+  <link rel="icon" href="logo/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght,SOFT@9..144,600..700,100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="design-system.css">
+  <link rel="stylesheet" href="themes.css">
+  <link rel="stylesheet" href="saisons.css">
+  <link rel="stylesheet" href="composants.css">
+  <style>
+    /* Sommaire des livrables du design */
+    main { padding-block: var(--espace-6) var(--espace-9); }
+    .sommaire { display: grid; gap: var(--espace-3); grid-template-columns: repeat(auto-fill, minmax(calc(var(--espace-9) * 2.6), 1fr)); }
+    .sommaire a {
+      display: flex; flex-direction: column; gap: var(--espace-1);
+      padding: var(--espace-4); border-radius: var(--rayon-carte);
+      background: var(--couleur-surface); box-shadow: var(--ombre-1);
+      color: var(--couleur-texte); text-decoration: none;
+      transition: transform var(--duree-rapide) var(--courbe-sortie);
+    }
+    .sommaire a:hover { transform: translateY(calc(var(--espace-1) * -1)); box-shadow: var(--ombre-2); }
+    .sommaire strong { display: flex; align-items: center; gap: var(--espace-2); }
+    .sommaire strong .icone { color: var(--couleur-principale); }
+    .sommaire span { font-size: var(--taille-s); color: var(--couleur-texte-doux); }
+    h2 { font-size: var(--taille-xl); margin-top: var(--espace-7); }
+  </style>
+</head>
+<body data-page="aucune">
+<main class="conteneur">
+  <h1>Design ORIVY</h1>
+  <p class="texte-doux">Tous les livrables, dans l'ordre des étapes. Chaque page a un panneau « Aperçu » (en bas à droite)
+    pour forcer l'heure, la saison et couper les décorations. Le journal des décisions est dans <code>PROGRESSION.md</code>.</p>
+
+  <h2>Fondations</h2>
+  <nav class="sommaire" aria-label="Fondations">
+    <a href="logo/apercu.html"><strong><svg class="icone" aria-hidden="true"><use href="#i-epingle"/></svg>Logo</strong><span>Logotype, monogramme, favicon, icône d'app</span></a>
+    <a href="design-system.html"><strong><svg class="icone" aria-hidden="true"><use href="#i-grille"/></svg>Design system</strong><span>Couleurs, typographie, espacements, rayons, ombres</span></a>
+    <a href="themes.html"><strong><svg class="icone" aria-hidden="true"><use href="#i-soleil"/></svg>Thèmes horaires</strong><span>Aube, jour, crépuscule, nuit</span></a>
+    <a href="saisons.html"><strong><svg class="icone" aria-hidden="true"><use href="#i-etoile"/></svg>Saisons</strong><span>Printemps, été, automne, hiver, Halloween, Noël</span></a>
+    <a href="icones/index.html"><strong><svg class="icone" aria-hidden="true"><use href="#i-image"/></svg>Icônes</strong><span>63 icônes style Lucide</span></a>
+    <a href="composants.html"><strong><svg class="icone" aria-hidden="true"><use href="#i-liste"/></svg>Composants</strong><span>Boutons, cartes, badges, champs, états…</span></a>
+  </nav>
+
+  <h2>Maquettes</h2>
+  <nav class="sommaire" aria-label="Maquettes">
+    <a href="maquettes/accueil.html"><strong><svg class="icone" aria-hidden="true"><use href="#i-accueil"/></svg>Accueil</strong><span>Mobile simple · effet tornade sur ordinateur</span></a>
+    <a href="maquettes/carte.html"><strong><svg class="icone" aria-hidden="true"><use href="#i-carte"/></svg>Carte</strong><span>Leaflet, épingles, rayon, tiroir</span></a>
+    <a href="maquettes/activites.html"><strong><svg class="icone" aria-hidden="true"><use href="#i-autour"/></svg>Lieux</strong><span>Autour de moi, distance, tri</span></a>
+    <a href="maquettes/sorties.html"><strong><svg class="icone" aria-hidden="true"><use href="#i-calendrier"/></svg>Sorties</strong><span>Fil vertical plein écran</span></a>
+    <a href="maquettes/sortie.html"><strong><svg class="icone" aria-hidden="true"><use href="#i-drapeau"/></svg>Détail d'une sortie</strong><span>Inscription, participants, commentaires</span></a>
+    <a href="maquettes/sortie-formulaire.html"><strong><svg class="icone" aria-hidden="true"><use href="#i-plus"/></svg>Créer une sortie</strong><span>Et ?mode=modifier</span></a>
+    <a href="maquettes/profil.html"><strong><svg class="icone" aria-hidden="true"><use href="#i-utilisateur"/></svg>Profil et réglages</strong><span>Et ?u=ines pour un autre profil</span></a>
+    <a href="maquettes/communaute.html"><strong><svg class="icone" aria-hidden="true"><use href="#i-utilisateurs"/></svg>Communauté</strong><span>Fil d'activité, profils à suivre</span></a>
+    <a href="maquettes/messages.html"><strong><svg class="icone" aria-hidden="true"><use href="#i-messages"/></svg>Messages</strong><span>Conversations</span></a>
+    <a href="maquettes/notifications.html"><strong><svg class="icone" aria-hidden="true"><use href="#i-cloche"/></svg>Notifications</strong><span>Inscriptions, abonnés, commentaires</span></a>
+    <a href="maquettes/auth.html"><strong><svg class="icone" aria-hidden="true"><use href="#i-cadenas"/></svg>Connexion</strong><span>Et #inscription</span></a>
+    <a href="maquettes/admin.html"><strong><svg class="icone" aria-hidden="true"><use href="#i-bouclier"/></svg>Admin</strong><span>Gestion des lieux</span></a>
+    <a href="maquettes/404.html"><strong><svg class="icone" aria-hidden="true"><use href="#i-boussole"/></svg>Page 404</strong><span>Ce sentier ne mène nulle part</span></a>
+  </nav>
+</main>
+<script src="maquettes/commun.js"></script>
+<script src="icones/icones.js"></script>
+<script src="outils/selecteur-apercu.js"></script>
+</body>
+</html>

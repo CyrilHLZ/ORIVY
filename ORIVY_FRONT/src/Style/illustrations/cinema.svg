@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" aria-hidden="true">
+  <!--
+    Cinéma : façade Art déco à gradins, ailettes verticales, marquise, enseigne néon « Cinéma ».
+    Couleur de catégorie #6d597a : façade et portes.
+    Animation (> 480px, sans mouvement réduit) : #neon s'allume doucement (3 s) puis respire ;
+    .lampe de la marquise s'allument l'une après l'autre (une seule fois).
+  -->
+  <style>
+    @media (min-width: 480px) and (prefers-reduced-motion: no-preference) {
+      #neon { animation: allumage 3s ease-out both, respire 4s 3s ease-in-out infinite alternate; }
+      .lampe { animation: allumage 1.2s ease-out both; }
+      .lampe:nth-child(2) { animation-delay: .3s; } .lampe:nth-child(3) { animation-delay: .6s; }
+      .lampe:nth-child(4) { animation-delay: .9s; } .lampe:nth-child(5) { animation-delay: 1.2s; }
+      .lampe:nth-child(6) { animation-delay: 1.5s; } .lampe:nth-child(7) { animation-delay: 1.8s; }
+      @keyframes allumage { 0% { opacity: .15; } 60% { opacity: .5; } 100% { opacity: 1; } }
+      @keyframes respire { from { opacity: 1; } to { opacity: .85; } }
+    }
+  </style>
+  <rect width="800" height="600" fill="#E9DCCB"/>
+  <!-- Façade à gradins -->
+  <g stroke="#1F1915" stroke-width="3" stroke-linejoin="round">
+    <path d="M120 600 V200 H200 V150 H280 V100 H520 V150 H600 V200 H680 V600 Z" fill="#6d597a"/>
+    <path d="M330 100 V40 H470 V100" fill="#E2D3BC"/>
+    <path d="M360 40 V100 M400 40 V100 M440 40 V100" fill="none" stroke-width="2"/>
+    <path d="M160 210 V400 M200 160 V400 M600 160 V400 M640 210 V400" fill="none" stroke="#E2D3BC" stroke-width="6"/>
+    <rect x="250" y="130" width="300" height="70" rx="8" fill="#2E2622"/>
+  </g>
+  <!-- Marquise -->
+  <g stroke="#1F1915" stroke-width="3" stroke-linejoin="round">
+    <path d="M110 400 H690 L660 450 H140 Z" fill="#E2D3BC"/>
+    <rect x="200" y="408" width="400" height="30" fill="#FFFBF6"/>
+  </g>
+  <text x="400" y="430" text-anchor="middle" font-family="Georgia, serif" font-size="18" font-weight="bold" fill="#2E2622" letter-spacing="3">CE SOIR · SÉANCE EN VO</text>
+  <g id="lampes" fill="#FFD27A" stroke="#1F1915" stroke-width="2">
+    <circle class="lampe" cx="150" cy="458" r="7"/><circle class="lampe" cx="230" cy="458" r="7"/><circle class="lampe" cx="310" cy="458" r="7"/>
+    <circle class="lampe" cx="400" cy="458" r="7"/><circle class="lampe" cx="490" cy="458" r="7"/><circle class="lampe" cx="570" cy="458" r="7"/>
+    <circle class="lampe" cx="650" cy="458" r="7"/>
+  </g>
+  <!-- Portes et affiches -->
+  <g stroke="#1F1915" stroke-width="3" stroke-linejoin="round">
+    <rect x="300" y="480" width="200" height="120" fill="#3E4A52"/>
+    <path d="M350 480 v120 M400 480 v120 M450 480 v120" fill="none"/>
+    <rect x="170" y="485" width="80" height="110" fill="#E7A6A0"/>
+    <rect x="550" y="485" width="80" height="110" fill="#9CC3CF"/>
+    <circle cx="210" cy="525" r="18" fill="#F6CF7A"/>
+    <path d="M565 570 l25 -40 l25 40 z" fill="#3c5960"/>
+  </g>
+  <!-- Enseigne néon -->
+  <g id="neon">
+    <text x="400" y="180" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="44" fill="none" stroke="#9EE6FF" stroke-width="9" opacity=".35">Cinéma</text>
+    <text x="400" y="180" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="44" fill="#E6F9FF" stroke="#7FD8F5" stroke-width="1.5">Cinéma</text>
+  </g>
+</svg>

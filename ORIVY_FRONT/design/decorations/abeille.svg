@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 14" aria-hidden="true">
+  <!-- Abeille : ambiance de l'été sur les photos. -->
+  <ellipse cx="7" cy="4" rx="4" ry="3" fill="#FFFFFF" opacity=".75"/>
+  <ellipse cx="12" cy="4" rx="4" ry="3" fill="#FFFFFF" opacity=".75"/>
+  <ellipse cx="10" cy="9" rx="7" ry="4.2" fill="#F4C542" stroke="#2E2622" stroke-width="0.8"/>
+  <path d="M8 5.2 V12.8 M11.5 5 V13" stroke="#2E2622" stroke-width="1.6"/>
+  <circle cx="16.5" cy="8.5" r="1" fill="#2E2622"/>
+</svg>

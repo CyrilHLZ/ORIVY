@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="fr" data-theme="jour">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Design system ORIVY</title>
+  <link rel="icon" href="logo/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght,SOFT@9..144,600..700,100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="design-system.css">
+  <style>
+    /* Mise en page de la planche uniquement. Aucune valeur en dur : tout vient des variables. */
+    main {
+      max-width: var(--largeur-contenu);
+      margin: 0 auto;
+      padding: var(--espace-6) var(--marge-page) var(--espace-9);
+    }
+    header { display: flex; flex-direction: column; gap: var(--espace-4); margin-bottom: var(--espace-7); }
+    header img { width: 200px; }
+    section { margin-top: var(--espace-8); }
+    .intro { color: var(--couleur-texte-doux); }
+
+    .grille {
+      display: grid;
+      gap: var(--espace-4);
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+    .nuancier {
+      background: var(--couleur-surface);
+      border-radius: var(--rayon-carte);
+      box-shadow: var(--ombre-1);
+      overflow: hidden;
+    }
+    .nuancier__couleur { height: var(--espace-8); }
+    .nuancier__nom { padding: var(--espace-3); font-size: var(--taille-s); line-height: var(--interligne-serre); }
+    .nuancier__nom code { display: block; color: var(--couleur-texte-doux); font-size: var(--taille-xs); margin-top: var(--espace-1); }
+
+    /* Badges de catégorie (aperçu ; le vrai composant arrive à l'étape 7) */
+    .badges { display: flex; flex-wrap: wrap; gap: var(--espace-2); }
+    .badge {
+      display: inline-flex; align-items: center; gap: var(--espace-1);
+      padding: var(--espace-1) var(--espace-3);
+      border-radius: var(--rayon-pilule);
+      font-size: var(--taille-s);
+      font-weight: var(--graisse-forte);
+      background: var(--badge-fond);
+      color: var(--badge-texte);
+    }
+    .badge::before {
+      content: ""; width: var(--espace-2); height: var(--espace-2);
+      border-radius: var(--rayon-pilule); background: currentColor;
+    }
+
+    .echelle > * { margin: 0 0 var(--espace-3); max-width: none; }
+    .echelle small { display: block; font-family: var(--police-texte); font-size: var(--taille-xs);
+      font-weight: var(--graisse-normale); color: var(--couleur-texte-doux); }
+
+    .espaces { display: flex; flex-direction: column; gap: var(--espace-2); }
+    .espaces div { display: flex; align-items: center; gap: var(--espace-3); font-size: var(--taille-s); }
+    .espaces span { display: block; flex-shrink: 0; height: var(--espace-3); background: var(--couleur-accent); border-radius: var(--rayon-pilule); }
+
+    .boites { display: grid; gap: var(--espace-5); grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .boite {
+      aspect-ratio: 4 / 3;
+      background: var(--couleur-surface);
+      display: grid; place-items: center;
+      font-size: var(--taille-s); color: var(--couleur-texte-doux);
+      border: 1px solid var(--couleur-bordure);
+    }
+
+    .boutons { display: flex; flex-wrap: wrap; gap: var(--espace-3); }
+    .bouton {
+      min-height: var(--cible-min);
+      padding: 0 var(--espace-5);
+      border-radius: var(--rayon-petit);
+      border: 2px solid transparent;
+      font-weight: var(--graisse-forte);
+      cursor: pointer;
+      transition: background-color var(--duree-rapide) var(--courbe-douce);
+    }
+    .bouton--principal { background: var(--couleur-principale); color: var(--couleur-sur-principale); }
+    .bouton--principal:hover { background: var(--couleur-principale-survol); }
+    .bouton--secondaire { background: var(--couleur-surface); color: var(--couleur-texte); border-color: var(--couleur-bordure-forte); }
+    .bouton--danger { background: var(--couleur-danger); color: var(--couleur-sur-danger); }
+    .bouton--danger:hover { background: var(--couleur-danger-survol); }
+    .champ {
+      min-height: var(--cible-min);
+      padding: 0 var(--espace-4);
+      border-radius: var(--rayon-petit);
+      border: 1.5px solid var(--couleur-bordure-forte);
+      background: var(--couleur-surface-creux);
+      width: 100%; max-width: 320px;
+    }
+    .note { font-size: var(--taille-s); color: var(--couleur-texte-doux); margin-top: var(--espace-3); }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <img src="logo/orivy-logotype-jour.svg" alt="ORIVY">
+    <h1>Design system</h1>
+    <p class="intro">Les briques de base d'ORIVY, thème « jour ». Tout ce que tu vois ici vient
+      de variables de <code>design-system.css</code>. Passe au clavier (Tab) sur les boutons
+      pour voir l'anneau de focus.</p>
+  </header>
+
+  <section>
+    <h2>Rôles de couleur</h2>
+    <div class="grille">
+      <div class="nuancier"><div class="nuancier__couleur" style="background: var(--couleur-fond)"></div><div class="nuancier__nom">Fond<code>--couleur-fond</code></div></div>
+      <div class="nuancier"><div class="nuancier__couleur" style="background: var(--couleur-surface)"></div><div class="nuancier__nom">Surface<code>--couleur-surface</code></div></div>
+      <div class="nuancier"><div class="nuancier__couleur" style="background: var(--couleur-surface-creux)"></div><div class="nuancier__nom">Creux<code>--couleur-surface-creux</code></div></div>
+      <div class="nuancier"><div class="nuancier__couleur" style="background: var(--couleur-texte)"></div><div class="nuancier__nom">Texte<code>--couleur-texte</code></div></div>
+      <div class="nuancier"><div class="nuancier__couleur" style="background: var(--couleur-texte-doux)"></div><div class="nuancier__nom">Texte doux<code>--couleur-texte-doux</code></div></div>
+      <div class="nuancier"><div class="nuancier__couleur" style="background: var(--couleur-bordure)"></div><div class="nuancier__nom">Bordure<code>--couleur-bordure</code></div></div>
+      <div class="nuancier"><div class="nuancier__couleur" style="background: var(--couleur-bordure-forte)"></div><div class="nuancier__nom">Bordure forte<code>--couleur-bordure-forte</code></div></div>
+      <div class="nuancier"><div class="nuancier__couleur" style="background: var(--couleur-principale)"></div><div class="nuancier__nom">Principale<code>--couleur-principale</code></div></div>
+      <div class="nuancier"><div class="nuancier__couleur" style="background: var(--couleur-accent)"></div><div class="nuancier__nom">Accent<code>--couleur-accent</code></div></div>
+      <div class="nuancier"><div class="nuancier__couleur" style="background: var(--couleur-accent-texte)"></div><div class="nuancier__nom">Accent texte<code>--couleur-accent-texte</code></div></div>
+      <div class="nuancier"><div class="nuancier__couleur" style="background: var(--couleur-danger)"></div><div class="nuancier__nom">Danger<code>--couleur-danger</code></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Catégories</h2>
+    <div class="badges">
+      <span class="badge" style="--badge-fond: var(--cat-monument); --badge-texte: var(--cat-monument-texte)">Monument</span>
+      <span class="badge" style="--badge-fond: var(--cat-culture); --badge-texte: var(--cat-culture-texte)">Culture</span>
+      <span class="badge" style="--badge-fond: var(--cat-parc); --badge-texte: var(--cat-parc-texte)">Parc</span>
+      <span class="badge" style="--badge-fond: var(--cat-promenade); --badge-texte: var(--cat-promenade-texte)">Promenade</span>
+      <span class="badge" style="--badge-fond: var(--cat-village); --badge-texte: var(--cat-village-texte)">Village</span>
+      <span class="badge" style="--badge-fond: var(--cat-observatoire); --badge-texte: var(--cat-observatoire-texte)">Point de vue</span>
+      <span class="badge" style="--badge-fond: var(--cat-sport); --badge-texte: var(--cat-sport-texte)">Sport</span>
+      <span class="badge" style="--badge-fond: var(--cat-restaurant); --badge-texte: var(--cat-restaurant-texte)">Restaurant</span>
+      <span class="badge" style="--badge-fond: var(--cat-bar); --badge-texte: var(--cat-bar-texte)">Bar</span>
+      <span class="badge" style="--badge-fond: var(--cat-cinema); --badge-texte: var(--cat-cinema-texte)">Cinéma</span>
+      <span class="badge" style="--badge-fond: var(--cat-evenement); --badge-texte: var(--cat-evenement-texte)">Événement</span>
+      <span class="badge" style="--badge-fond: var(--cat-autre); --badge-texte: var(--cat-autre-texte)">Autre</span>
+    </div>
+    <p class="note">Le texte de chaque badge est soit papier, soit encre profonde, selon ce qui dépasse 4,5:1.
+      Le point devant le nom sera remplacé par l'icône de la catégorie à l'étape 6.</p>
+  </section>
+
+  <section class="echelle">
+    <h2>Typographie</h2>
+    <p style="font-family: var(--police-titre); font-size: var(--taille-4xl); font-weight: var(--graisse-titre); font-variation-settings: 'SOFT' 100; line-height: var(--interligne-serre)">Découvre la France<small>Fraunces 600 · --taille-4xl · 39 → 61px</small></p>
+    <h1>Sorties autour de Lyon<small>Fraunces 600 · --taille-3xl · 31 → 39px</small></h1>
+    <h2>Le Puy-en-Velay<small>Fraunces 600 · --taille-2xl · 31px</small></h2>
+    <h3>Pique-nique au parc de la Tête d'Or<small>Fraunces 600 · --taille-xl · 25px</small></h3>
+    <p style="font-family: var(--police-titre); font-size: var(--taille-l); font-weight: var(--graisse-titre); font-variation-settings: 'SOFT' 100">Calanque de Sormiou<small>Fraunces 600 · --taille-l · 20px (minimum pour Fraunces)</small></p>
+    <h4>Participants (8)<small>DM Sans 700 · --taille-m · 16px</small></h4>
+    <p>Rendez-vous samedi à 14h devant l'entrée principale. Prends de bonnes chaussures, on finit par le belvédère.<small>DM Sans 400 · --taille-m · 16px</small></p>
+    <p style="font-size: var(--taille-s); color: var(--couleur-texte-doux)">à 2,3 km · organisée par Inès<small>DM Sans 400 · --taille-s · 14px</small></p>
+    <p style="font-size: var(--taille-xs); color: var(--couleur-texte-doux)">Il y a 3 min<small>DM Sans 400 · --taille-xs · 12,8px</small></p>
+  </section>
+
+  <section>
+    <h2>Espacements</h2>
+    <div class="espaces">
+      <div><span style="width: var(--espace-1)"></span>--espace-1 · 4px</div>
+      <div><span style="width: var(--espace-2)"></span>--espace-2 · 8px</div>
+      <div><span style="width: var(--espace-3)"></span>--espace-3 · 12px</div>
+      <div><span style="width: var(--espace-4)"></span>--espace-4 · 16px</div>
+      <div><span style="width: var(--espace-5)"></span>--espace-5 · 24px</div>
+      <div><span style="width: var(--espace-6)"></span>--espace-6 · 32px</div>
+      <div><span style="width: var(--espace-7)"></span>--espace-7 · 48px</div>
+      <div><span style="width: var(--espace-8)"></span>--espace-8 · 64px</div>
+      <div><span style="width: var(--espace-9)"></span>--espace-9 · 96px</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Rayons et ombres</h2>
+    <div class="boites">
+      <div class="boite" style="border-radius: var(--rayon-petit); box-shadow: var(--ombre-1)">rayon-petit · ombre-1</div>
+      <div class="boite" style="border-radius: var(--rayon-carte); box-shadow: var(--ombre-2)">rayon-carte · ombre-2</div>
+      <div class="boite" style="border-radius: var(--rayon-grand); box-shadow: var(--ombre-3)">rayon-grand · ombre-3</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Premier aperçu des boutons et d'un champ</h2>
+    <div class="boutons">
+      <button class="bouton bouton--principal">Rejoins la sortie</button>
+      <button class="bouton bouton--secondaire">Vois sur la carte</button>
+      <button class="bouton bouton--danger">Supprimer la sortie</button>
+    </div>
+    <p class="note">Hauteur minimale de 44px (--cible-min). Les vrais composants, avec icônes et états, arrivent à l'étape 7.</p>
+    <label for="ville" style="display: block; margin: var(--espace-5) 0 var(--espace-2); font-weight: var(--graisse-moyenne)">Ta ville</label>
+    <input id="ville" class="champ" placeholder="Ex. : Nantes">
+  </section>
+</main>
+</body>
+</html>

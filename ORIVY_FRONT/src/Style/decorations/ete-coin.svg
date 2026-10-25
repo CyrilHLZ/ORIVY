@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" aria-hidden="true">
+  <!-- Coin de l'été : un soleil qui dépasse du coin haut droit, et une hirondelle. -->
+  <g id="rayons" stroke="#E8A92B" stroke-width="3" stroke-linecap="round">
+    <path d="M50 14 H41 M56 32 L49 38 M70 44 L67 53 M88 46 V55"/>
+  </g>
+  <circle id="soleil" cx="82" cy="14" r="26" fill="#F4C542" stroke="#E8A92B" stroke-width="2"/>
+  <path id="hirondelle" d="M22 46 Q28 40 34 45 Q40 40 46 46 Q40 44 34 50 Q28 44 22 46 Z" fill="#3F6F8F"/>
+</svg>

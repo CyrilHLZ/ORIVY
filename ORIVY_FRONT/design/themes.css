@@ -1,0 +1,184 @@
+/* ==========================================================================
+   ORIVY — Thèmes horaires
+   --------------------------------------------------------------------------
+   Posé APRÈS design-system.css. Le thème est choisi par themes.js et écrit
+   sur la balise <html> :  <html data-theme="aube | jour | crepuscule | nuit">
+
+   Le thème horaire gère la LUMINOSITÉ : fond, surfaces, texte, bordures,
+   ombres. La principale et l'accent appartiennent aux saisons (saisons.css) ;
+   on ne les touche ici que pour la nuit, où il faut leur version claire.
+
+   On ne redéfinit que des RÔLES (--couleur-…), jamais la palette brute.
+
+   Sélecteurs [data-theme="…"] plutôt que :root[…] : ça permet aussi de
+   prévisualiser plusieurs thèmes côte à côte dans une même page.
+
+   Tous les couples texte/fond ont été vérifiés (WCAG AA) : voir le journal
+   dans PROGRESSION.md, étape 4.
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   Variables qui DÉPENDENT d'autres variables
+   Une variable écrite avec var(…) est calculée là où elle est déclarée.
+   Si on la laissait seulement sur :root, elle garderait les couleurs du jour
+   même quand un thème change --couleur-principale ou --teinte-ombre.
+   On les redéclare donc sur chaque élément qui porte un thème ou une saison.
+   -------------------------------------------------------------------------- */
+[data-theme],
+[data-saison] {
+  --couleur-focus: var(--couleur-principale);
+  --ombre-1: 0 1px 2px rgb(var(--teinte-ombre) / var(--force-ombre-1)),
+             0 2px 6px rgb(var(--teinte-ombre) / var(--force-ombre-1));
+  --ombre-2: 0 2px 4px rgb(var(--teinte-ombre) / var(--force-ombre-1)),
+             0 8px 20px rgb(var(--teinte-ombre) / var(--force-ombre-2));
+  --ombre-3: 0 4px 8px rgb(var(--teinte-ombre) / var(--force-ombre-2)),
+             0 18px 40px rgb(var(--teinte-ombre) / var(--force-ombre-3));
+}
+
+/* Un bloc thémé IMBRIQUÉ (aperçu côte à côte) se peint lui-même.
+   Pas la balise <html> : si elle avait un fond, celui du <body> ne remonterait
+   plus jusqu'à la fenêtre et recouvrirait le grain (z-index -1). */
+[data-theme]:not(html),
+[data-saison]:not(html) {
+  background-color: var(--couleur-fond);
+  color: var(--couleur-texte);
+}
+
+/* Opacité des ombres, réglable par thème (le jour : valeurs de design-system.css) */
+:root {
+  --force-ombre-1: 0.08;
+  --force-ombre-2: 0.10;
+  --force-ombre-3: 0.16;
+}
+
+
+/* --------------------------------------------------------------------------
+   JOUR (9h – 18h) : le thème de référence
+   Ce sont exactement les valeurs de design-system.css. On les réécrit pour
+   qu'un bloc data-theme="jour" imbriqué dans un autre thème redevienne jour.
+   -------------------------------------------------------------------------- */
+[data-theme="jour"] {
+  --couleur-fond: #F6EFE6;
+  --couleur-surface: #FFFBF6;
+  --couleur-surface-creux: #EFE5D8;
+  --couleur-texte: #2E2622;
+  --couleur-texte-doux: #6B5D52;
+  --couleur-bordure: #E6D9CA;
+  --couleur-bordure-forte: #8E7D6F;
+  --couleur-voile: rgb(46 38 34 / 0.45);
+  --teinte-ombre: 84 52 30;
+  --couleur-meta-navigateur: #F6EFE6;
+}
+
+
+/* --------------------------------------------------------------------------
+   AUBE (6h – 9h) : pêche rosé, lumière douce
+   -------------------------------------------------------------------------- */
+[data-theme="aube"] {
+  --couleur-fond: #F8E9E3;            /* pêche rosé */
+  --couleur-surface: #FFF8F5;
+  --couleur-surface-creux: #F5E5DE;
+  --couleur-texte: #33241F;           /* 12,57:1 sur fond */
+  --couleur-texte-doux: #6E5A52;      /* 5,28:1 sur creux */
+  --couleur-bordure: #EBD6CC;
+  --couleur-bordure-forte: #907A70;   /* 3,29:1 sur creux */
+  --couleur-voile: rgb(51 36 31 / 0.45);
+  --teinte-ombre: 110 58 46;          /* ombre rosée */
+  --couleur-meta-navigateur: #F8E9E3;
+}
+
+
+/* --------------------------------------------------------------------------
+   CRÉPUSCULE (18h – 21h) : doré, plus chaud
+   -------------------------------------------------------------------------- */
+[data-theme="crepuscule"] {
+  --couleur-fond: #F6EAD8;            /* blé doré */
+  --couleur-surface: #FFF8EC;
+  --couleur-surface-creux: #F2E4D0;
+  --couleur-texte: #2E2418;           /* 12,7:1 sur fond */
+  --couleur-texte-doux: #6A5844;      /* 5,43:1 sur creux */
+  --couleur-bordure: #E6D3B6;
+  --couleur-bordure-forte: #8C7A62;   /* 3,31:1 sur creux */
+  --couleur-voile: rgb(46 36 24 / 0.45);
+  --teinte-ombre: 112 72 22;          /* ombre ambrée */
+  --couleur-meta-navigateur: #F6EAD8;
+}
+
+
+/* --------------------------------------------------------------------------
+   NUIT (21h – 6h) : vert forêt profond, jamais de noir pur
+   -------------------------------------------------------------------------- */
+[data-theme="nuit"] {
+  --couleur-fond: #16211C;            /* vert forêt */
+  --couleur-surface: #21302A;         /* mousse sombre : les cartes « montent » vers la lumière */
+  --couleur-surface-creux: #1A2722;   /* champs : plus sombres que la carte qui les porte */
+  --couleur-texte: #EDE6DA;           /* lin : 13,35:1 sur fond */
+  --couleur-texte-doux: #B4AA9C;      /* 6,03:1 sur surface */
+  --couleur-bordure: #2E4038;
+  --couleur-bordure-forte: #6F8579;   /* 3,49:1 sur surface */
+  --couleur-voile: rgb(6 12 9 / 0.65);
+  --teinte-ombre: 4 10 7;             /* quasi-noir verdâtre */
+  --force-ombre-1: 0.30;
+  --force-ombre-2: 0.35;
+  --force-ombre-3: 0.45;
+  --couleur-meta-navigateur: #16211C;
+
+  /* Principale et accent : versions claires par défaut (saisons.css les remplacera) */
+  --couleur-principale: #E58E6A;            /* 5,53:1 sur surface */
+  --couleur-principale-survol: #EFA585;
+  --couleur-sur-principale: #16211C;        /* texte sombre sur bouton clair : 6,63:1 */
+  --couleur-accent: #A9C49A;                /* 7,27:1 sur surface */
+  --couleur-accent-texte: #A9C49A;
+  --couleur-sur-accent: #16211C;            /* 8,71:1 */
+  --couleur-succes: #A9C49A;
+
+  /* Danger : framboise clair, bien distinct de la terracotta de nuit
+     (écart RGB 67, teinte 347° contre 16°) */
+  --couleur-danger: #FF8FA8;                /* 6,41:1 sur surface */
+  --couleur-danger-survol: #FFA8BC;
+  --couleur-sur-danger: #16211C;            /* 7,68:1 */
+
+  /* Catégories : même teinte, plus claire quand c'est nécessaire, pour que
+     - l'icône ou le point coloré passe 3:1 sur la surface de nuit,
+     - le texte encre d'un badge passe 4,5:1.
+     Les catégories déjà claires (monument, parc, village, sport, restaurant,
+     événement) ne changent pas. */
+  --cat-culture: #C06B8D;       --cat-culture-texte: var(--encre-profonde);       /* 4,74 */
+  --cat-promenade: #5F8D98;     --cat-promenade-texte: var(--encre-profonde);     /* 4,76 */
+  --cat-observatoire: #6F80D2;  --cat-observatoire-texte: var(--encre-profonde);  /* 4,71 */
+  --cat-bar: #AE7868;           --cat-bar-texte: var(--encre-profonde);           /* 4,71 */
+  --cat-cinema: #937EA1;        --cat-cinema-texte: var(--encre-profonde);        /* 4,75 */
+  --cat-autre: #7D8492;         --cat-autre-texte: var(--encre-profonde);         /* 4,62 */
+
+  /* Point bleu de position, plus clair pour ressortir sur la carte sombre */
+  --couleur-position: #6FA3FF;
+
+  /* Le grain noir se voit à peine sur fond sombre : on le renforce un peu */
+  --grain-opacite: 0.09;
+
+  /* Les champs de formulaire natifs (dates, barres de défilement) passent en sombre */
+  color-scheme: dark;
+}
+
+
+/* --------------------------------------------------------------------------
+   Changement de thème : fondu enchaîné
+   themes.js utilise l'API View Transitions : le navigateur photographie
+   l'ancien thème puis fait un fondu d'OPACITÉ vers le nouveau.
+   On n'anime donc aucune couleur (règle : seulement transform et opacity).
+   Navigateur sans cette API : le thème change d'un coup, sans gêne.
+   -------------------------------------------------------------------------- */
+/* Changement de thème : fondu lent. (Les changements de page gardent le fondu rapide par défaut.) */
+.vt-theme::view-transition-old(root),
+.vt-theme::view-transition-new(root) {
+  animation-duration: var(--duree-theme);
+  animation-timing-function: var(--courbe-douce);
+}
+/* (98) Thème choisi dans les réglages : le nouveau thème s'étend en cercle depuis le bouton cliqué */
+.vt-vague::view-transition-old(root) { animation: none; }
+.vt-vague::view-transition-new(root) { animation: vague-theme 0.8s var(--courbe-douce) both; }
+@keyframes vague-theme {
+  from { clip-path: circle(0 at var(--vague-x, 50%) var(--vague-y, 50%)); }
+  to   { clip-path: circle(150vmax at var(--vague-x, 50%) var(--vague-y, 50%)); }
+}

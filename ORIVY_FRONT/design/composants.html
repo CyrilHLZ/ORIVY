@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F6EFE6">
+  <title>Composants ORIVY</title>
+  <script src="themes.js"></script>
+  <script src="saisons.js"></script>
+  <link rel="icon" href="logo/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght,SOFT@9..144,600..700,100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="design-system.css">
+  <link rel="stylesheet" href="themes.css">
+  <link rel="stylesheet" href="saisons.css">
+  <link rel="stylesheet" href="composants.css">
+  <style>
+    /* Mise en page du catalogue uniquement */
+    .catalogue { padding-block: var(--espace-6) var(--espace-9); }
+    .catalogue > section { margin-top: var(--espace-8); }
+    .catalogue > section > h2 { padding-bottom: var(--espace-2); border-bottom: 1px solid var(--couleur-bordure); }
+    .demo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espace-3); margin-top: var(--espace-4); }
+    .demo--colonne { flex-direction: column; align-items: stretch; max-width: calc(var(--espace-9) * 5); }
+    .note { font-size: var(--taille-s); color: var(--couleur-texte-doux); margin-top: var(--espace-2); }
+    .surface { background: var(--couleur-surface); border-radius: var(--rayon-carte); padding: var(--espace-4); box-shadow: var(--ombre-1); }
+    .deux { display: grid; gap: var(--espace-5); }
+    @media (min-width: 1024px) { .deux { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body data-page="aucune">
+<main class="conteneur catalogue">
+  <h1>Composants</h1>
+  <p class="texte-doux">Toutes les briques des maquettes, dans <code>composants.css</code>. Chaque bloc deviendra un composant React
+    (nom indiqué dans les commentaires du CSS). L'en-tête en haut et la barre d'onglets en bas (sur mobile)
+    sont eux aussi des composants. Change l'heure et la saison avec le panneau « Aperçu ».</p>
+
+  <!-- 1. Boutons -->
+  <section>
+    <h2>Boutons</h2>
+    <div class="demo">
+      <button class="bouton bouton--principal" type="button">Rejoins la sortie</button>
+      <button class="bouton bouton--secondaire" type="button"><svg class="icone" aria-hidden="true"><use href="#i-carte"/></svg>Vois sur la carte</button>
+      <button class="bouton bouton--danger" type="button"><svg class="icone" aria-hidden="true"><use href="#i-supprimer"/></svg>Supprimer la sortie</button>
+      <button class="bouton bouton--fantome" type="button">Annuler</button>
+      <button class="bouton bouton--principal" type="button" disabled>Complet</button>
+    </div>
+    <div class="demo">
+      <button class="bouton bouton--icone" type="button" aria-label="Partager"><svg class="icone" aria-hidden="true"><use href="#i-partager"/></svg></button>
+      <button class="bouton bouton--icone bouton--flottant" type="button" aria-label="Me localiser"><svg class="icone" aria-hidden="true"><use href="#i-localiser"/></svg></button>
+      <button class="bouton bouton--icone" type="button" aria-label="Notifications, 3 non lues"><svg class="icone" aria-hidden="true"><use href="#i-cloche"/></svg><span class="pastille" aria-hidden="true">3</span></button>
+      <button class="bouton bouton--secondaire bouton--pilule" type="button"><svg class="icone" aria-hidden="true"><use href="#i-autour"/></svg>Autour de moi</button>
+      <button class="bouton bouton--secondaire bouton--pilule" type="button" aria-busy="true"><span class="tourne" aria-hidden="true"></span>Localisation…</button>
+    </div>
+    <p class="note">Le bouton danger est toujours en contour, avec une icône et un verbe. L'aplat rouge est réservé à la confirmation (voir « Fenêtre »).</p>
+  </section>
+
+  <!-- 2. Badges -->
+  <section>
+    <h2>Badges de catégorie et de distance</h2>
+    <div class="demo" id="badges"></div>
+    <div class="demo">
+      <span class="badge-distance"><svg class="icone" aria-hidden="true"><use href="#i-autour"/></svg>à 800 m</span>
+      <span class="badge-distance"><svg class="icone" aria-hidden="true"><use href="#i-autour"/></svg>à 2,3 km</span>
+      <span class="badge-distance"><svg class="icone" aria-hidden="true"><use href="#i-autour"/></svg>à 47 km</span>
+    </div>
+  </section>
+
+  <!-- 3. Filtres -->
+  <section>
+    <h2>Filtres</h2>
+    <div class="puces" role="group" aria-label="Catégories">
+      <button class="puce" type="button" aria-pressed="true">Tout</button>
+      <button class="puce cat-parc" type="button" aria-pressed="false"><svg class="icone" aria-hidden="true"><use href="#i-cat-parc"/></svg>Parcs</button>
+      <button class="puce cat-culture" type="button" aria-pressed="true"><svg class="icone" aria-hidden="true"><use href="#i-cat-culture"/></svg>Musées</button>
+      <button class="puce cat-promenade" type="button" aria-pressed="false"><svg class="icone" aria-hidden="true"><use href="#i-cat-promenade"/></svg>Randonnées</button>
+      <button class="puce cat-restaurant" type="button" aria-pressed="false"><svg class="icone" aria-hidden="true"><use href="#i-cat-restaurant"/></svg>Restaurants</button>
+      <button class="puce cat-bar" type="button" aria-pressed="false"><svg class="icone" aria-hidden="true"><use href="#i-cat-bar"/></svg>Bars</button>
+    </div>
+    <div class="demo demo--colonne">
+      <fieldset class="rayon">
+        <legend>Rayon de recherche</legend>
+        <label><input type="radio" name="rayon" value="1"><span>1 km</span></label>
+        <label><input type="radio" name="rayon" value="5"><span>5 km</span></label>
+        <label><input type="radio" name="rayon" value="10" checked><span>10 km</span></label>
+        <label><input type="radio" name="rayon" value="25"><span>25 km</span></label>
+        <label><input type="radio" name="rayon" value="50"><span>50 km</span></label>
+      </fieldset>
+      <p class="note">Filtre de rayon : de vrais boutons radio (flèches du clavier), zones de 44px de large au minimum.</p>
+    </div>
+  </section>
+
+  <!-- 4. Cartes de lieu -->
+  <section>
+    <h2>Carte de lieu</h2>
+    <div class="grille-lieux">
+      <article class="carte-lieu cat-parc">
+        <div class="photo">
+          <svg class="icone" aria-hidden="true"><use href="#i-cat-parc"/></svg>
+          <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=700&q=75" alt="Allée ombragée sous de grands arbres" loading="lazy">
+        </div>
+        <div class="carte-lieu__haut">
+          <span class="badge-cat"><svg class="icone" aria-hidden="true"><use href="#i-cat-parc"/></svg>Parc</span>
+          <span class="badge-distance"><svg class="icone" aria-hidden="true"><use href="#i-autour"/></svg>à 2,3 km</span>
+        </div>
+        <h3 class="carte-lieu__nom"><a href="maquettes/carte.html">Parc de la Tête d'Or</a></h3>
+        <p class="carte-lieu__meta">
+          <span>Lyon</span>
+          <span><svg class="icone" aria-hidden="true"><use href="#i-etoile"/></svg>4,7</span>
+          <span><svg class="icone" aria-hidden="true"><use href="#i-calendrier"/></svg>3 sorties prévues</span>
+        </p>
+      </article>
+      <article class="carte-lieu cat-village">
+        <div class="photo">
+          <svg class="icone" aria-hidden="true"><use href="#i-cat-village"/></svg>
+          <img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=700&q=75" alt="Maison au bord d'un lac au pied des montagnes" loading="lazy">
+        </div>
+        <div class="carte-lieu__haut">
+          <span class="badge-cat"><svg class="icone" aria-hidden="true"><use href="#i-cat-village"/></svg>Village</span>
+          <span class="badge-distance"><svg class="icone" aria-hidden="true"><use href="#i-autour"/></svg>à 34 km</span>
+        </div>
+        <h3 class="carte-lieu__nom"><a href="maquettes/carte.html">Annecy, vieille ville</a></h3>
+        <p class="carte-lieu__meta"><span>Haute-Savoie</span><span><svg class="icone" aria-hidden="true"><use href="#i-etoile"/></svg>4,8</span></p>
+      </article>
+      <article class="carte-lieu cat-cinema">
+        <div class="photo">
+          <svg class="icone" aria-hidden="true"><use href="#i-cat-cinema"/></svg>
+          <!-- Exemple de repli : pas de photo, on voit la couleur et l'icône de la catégorie -->
+        </div>
+        <div class="carte-lieu__haut">
+          <span class="badge-cat"><svg class="icone" aria-hidden="true"><use href="#i-cat-cinema"/></svg>Cinéma</span>
+          <span class="badge-distance"><svg class="icone" aria-hidden="true"><use href="#i-autour"/></svg>à 800 m</span>
+        </div>
+        <h3 class="carte-lieu__nom"><a href="maquettes/carte.html">Le Grand Rex</a></h3>
+        <p class="carte-lieu__meta"><span>Paris 2e</span><span><svg class="icone" aria-hidden="true"><use href="#i-etoile"/></svg>4,5</span></p>
+      </article>
+    </div>
+    <p class="note">Toute la carte est cliquable par le lien du titre (un seul arrêt au clavier). Sans photo, la catégorie prend le relais.</p>
+  </section>
+
+  <!-- 5. Carte de sortie + utilisateur -->
+  <section>
+    <h2>Carte de sortie et carte d'utilisateur</h2>
+    <div class="deux">
+      <article class="carte-sortie">
+        <div class="carte-sortie__date" aria-hidden="true"><span class="carte-sortie__jour">25</span><span class="carte-sortie__mois">oct.</span></div>
+        <div class="carte-sortie__corps">
+          <span class="badge-cat cat-promenade" style="align-self: flex-start"><svg class="icone" aria-hidden="true"><use href="#i-cat-promenade"/></svg>Randonnée</span>
+          <h3 class="carte-sortie__titre"><a href="maquettes/sortie.html">Lever de soleil au puy de Dôme</a></h3>
+          <p class="carte-sortie__meta">
+            <span><svg class="icone" aria-hidden="true"><use href="#i-horloge"/></svg>Dim. 25 oct. · 7h</span>
+            <span><svg class="icone" aria-hidden="true"><use href="#i-epingle"/></svg>Orcines · à 12 km</span>
+          </p>
+        </div>
+        <div class="carte-sortie__pied">
+          <div class="pile-avatars" aria-label="8 inscrits">
+            <span class="avatar avatar--s avatar--b" aria-hidden="true">IN</span>
+            <span class="avatar avatar--s avatar--c" aria-hidden="true">TM</span>
+            <span class="avatar avatar--s avatar--d" aria-hidden="true">LB</span>
+            <span class="pile-avatars__reste" aria-hidden="true">+5</span>
+          </div>
+          <button class="bouton bouton--principal" type="button">Rejoins</button>
+        </div>
+      </article>
+      <div class="demo demo--colonne" style="margin-top: 0">
+        <div class="carte-utilisateur">
+          <span class="avatar avatar--c" aria-hidden="true">IN</span>
+          <div>
+            <p class="carte-utilisateur__nom"><a href="maquettes/profil.html">Inès Nakamura</a></p>
+            <p class="carte-utilisateur__info">Lyon · 14 sorties organisées</p>
+          </div>
+          <button class="bouton bouton-suivre" type="button" aria-pressed="false">Suivre</button>
+        </div>
+        <div class="carte-utilisateur">
+          <span class="avatar avatar--d" aria-hidden="true">TM</span>
+          <div>
+            <p class="carte-utilisateur__nom"><a href="maquettes/profil.html">Théo Martin</a></p>
+            <p class="carte-utilisateur__info">Bordeaux · amateur de guinguettes</p>
+          </div>
+          <button class="bouton bouton-suivre" type="button" aria-pressed="true">Abonné·e</button>
+        </div>
+        <div class="demo">
+          <span class="avatar avatar--s avatar--a" aria-hidden="true">CL</span>
+          <span class="avatar avatar--b" aria-hidden="true">YB</span>
+          <span class="avatar avatar--l avatar--c" aria-hidden="true">AK</span>
+          <span class="avatar avatar--xl avatar--e" aria-hidden="true">MR</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Social -->
+  <section>
+    <h2>Galerie, commentaires, messages, notifications</h2>
+    <div class="deux">
+      <div class="demo--colonne">
+        <div class="galerie">
+          <div class="photo cat-observatoire"><img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=700&q=75" alt="Ciel étoilé au-dessus d'un paysage" loading="lazy"></div>
+          <div class="photo cat-promenade"><img src="https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=400&q=75" alt="Randonneurs sur un sentier de montagne" loading="lazy"></div>
+          <div class="photo cat-parc"><img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=400&q=75" alt="Sous-bois lumineux" loading="lazy"></div>
+          <div class="photo cat-village"><img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=400&q=75" alt="Chalet au bord d'un lac" loading="lazy"></div>
+          <div class="photo cat-restaurant"><img src="https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=400&q=75" alt="Terrasse animée le soir" loading="lazy"></div>
+          <a class="photo cat-monument" href="maquettes/sortie.html" aria-label="Voir les 12 photos"><img src="https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=400&q=75" alt="" loading="lazy"><span class="galerie__plus" aria-hidden="true">+7</span></a>
+        </div>
+        <ul class="commentaires" style="margin-top: var(--espace-5)">
+          <li class="commentaire">
+            <span class="avatar avatar--s avatar--b" aria-hidden="true">YB</span>
+            <div>
+              <div class="commentaire__bulle">
+                <p class="commentaire__auteur">Yanis B.</p>
+                <p class="commentaire__texte">Je prends le thermos de café, qui ramène les croissants ?</p>
+              </div>
+              <div class="commentaire__actions">
+                <span>il y a 12 min</span>
+                <button class="bouton bouton--fantome" type="button" aria-pressed="true"><svg class="icone icone--petite" aria-hidden="true"><use href="#i-coeur"/></svg>4</button>
+                <button class="bouton bouton--fantome" type="button">Répondre</button>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="demo--colonne">
+        <div class="surface">
+          <ul class="fil-messages">
+            <li class="fil-messages__jour">Aujourd'hui</li>
+            <li class="bulle"><p>Salut ! Tu viens toujours dimanche au puy de Dôme ?</p><span class="bulle__heure">9:12</span></li>
+            <li class="bulle bulle--moi"><p>Oui, je serai au parking à 6h45 🙂</p><span class="bulle__heure">9:14</span></li>
+          </ul>
+        </div>
+        <div class="saisie-message" style="margin-top: var(--espace-3)">
+          <label class="visuellement-cache" for="msg">Ton message</label>
+          <textarea id="msg" rows="1" placeholder="Écris un message…"></textarea>
+          <button class="bouton bouton--icone bouton--principal" type="button" aria-label="Envoyer"><svg class="icone" aria-hidden="true"><use href="#i-envoyer"/></svg></button>
+        </div>
+        <ul class="notifs surface" style="margin-top: var(--espace-4); padding: 0; overflow: hidden">
+          <li class="notif notif--non-lue">
+            <span class="notif__type"><span class="avatar avatar--c" aria-hidden="true">IN</span><svg class="icone" aria-hidden="true"><use href="#i-calendrier"/></svg></span>
+            <p class="notif__texte"><strong>Inès</strong> s'est inscrite à ta sortie « Lever de soleil au puy de Dôme ».<span class="notif__heure">il y a 5 min</span></p>
+            <span class="notif__point"><span class="visuellement-cache">Non lue</span></span>
+          </li>
+          <li class="notif">
+            <span class="notif__type"><span class="avatar avatar--d" aria-hidden="true">TM</span><svg class="icone" aria-hidden="true"><use href="#i-suivre"/></svg></span>
+            <p class="notif__texte"><strong>Théo</strong> te suit désormais.<span class="notif__heure">hier</span></p>
+            <span></span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Formulaire -->
+  <section>
+    <h2>Champs de formulaire et réglages</h2>
+    <div class="deux">
+      <form class="formulaire" onsubmit="return false">
+        <div class="champ">
+          <label class="champ__label" for="titre">Titre de la sortie</label>
+          <input class="champ__saisie" id="titre" type="text" placeholder="Ex. : Pique-nique au bord de l'Erdre">
+        </div>
+        <div class="champ">
+          <label class="champ__label" for="ville">Ta ville</label>
+          <div class="champ__ligne">
+            <svg class="icone" aria-hidden="true"><use href="#i-loupe"/></svg>
+            <input class="champ__saisie" id="ville" type="search" placeholder="Nantes, Lille, Marseille…">
+          </div>
+        </div>
+        <div class="champ champ--erreur">
+          <label class="champ__label" for="date">Date</label>
+          <input class="champ__saisie" id="date" type="date" aria-invalid="true" aria-describedby="date-erreur">
+          <p class="champ__erreur" id="date-erreur"><svg class="icone" aria-hidden="true"><use href="#i-alerte"/></svg>Choisis une date à venir.</p>
+        </div>
+        <div class="champ">
+          <label class="champ__label" for="categorie">Catégorie</label>
+          <select class="champ__saisie" id="categorie"><option>Randonnée</option><option>Parc</option><option>Restaurant</option></select>
+        </div>
+      </form>
+      <div class="surface">
+        <label class="interrupteur">
+          <span class="interrupteur__texte">Décorations saisonnières<small>Citrouilles, flocons, fleurs…</small></span>
+          <input type="checkbox" role="switch" checked>
+        </label>
+        <label class="interrupteur">
+          <span class="interrupteur__texte">Notifications de nouveaux abonnés</span>
+          <input type="checkbox" role="switch">
+        </label>
+        <fieldset class="rayon" style="margin-top: var(--espace-4)">
+          <legend>Thème</legend>
+          <label><input type="radio" name="theme" checked><span>Automatique</span></label>
+          <label><input type="radio" name="theme"><span>Jour</span></label>
+          <label><input type="radio" name="theme"><span>Nuit</span></label>
+        </fieldset>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. États -->
+  <section>
+    <h2>États vide, chargement, erreur</h2>
+    <div class="deux">
+      <div class="surface etat">
+        <span class="deco-vide" aria-hidden="true"></span>
+        <span class="etat__icone" aria-hidden="true"><svg class="icone icone--grande"><use href="#i-calendrier"/></svg></span>
+        <h3>Aucune sortie par ici</h3>
+        <p>Pas encore de sortie prévue dans ce rayon. Et si tu lançais la première ?</p>
+        <a class="bouton bouton--principal" href="maquettes/sortie-formulaire.html"><svg class="icone" aria-hidden="true"><use href="#i-plus"/></svg>Crée une sortie</a>
+      </div>
+      <div class="surface etat etat--erreur">
+        <span class="etat__icone" aria-hidden="true"><svg class="icone icone--grande"><use href="#i-alerte"/></svg></span>
+        <h3>Oups, la carte ne charge pas</h3>
+        <p>Vérifie ta connexion, puis réessaie.</p>
+        <button class="bouton bouton--secondaire" type="button"><svg class="icone" aria-hidden="true"><use href="#i-rafraichir"/></svg>Réessaie</button>
+      </div>
+    </div>
+    <div class="grille-lieux" style="margin-top: var(--espace-5)" aria-busy="true" aria-label="Chargement des lieux">
+      <div><div class="squelette squelette--photo"></div><div class="squelette squelette--ligne" style="margin-top: var(--espace-3)"></div><div class="squelette squelette--ligne squelette--court" style="margin-top: var(--espace-2)"></div></div>
+      <div><div class="squelette squelette--photo"></div><div class="squelette squelette--ligne" style="margin-top: var(--espace-3)"></div><div class="squelette squelette--ligne squelette--court" style="margin-top: var(--espace-2)"></div></div>
+      <div><div class="squelette squelette--photo"></div><div class="squelette squelette--ligne" style="margin-top: var(--espace-3)"></div><div class="squelette squelette--ligne squelette--court" style="margin-top: var(--espace-2)"></div></div>
+    </div>
+  </section>
+
+  <!-- 9. Fenêtre et toast -->
+  <section>
+    <h2>Fenêtre de confirmation, tiroir et message éphémère</h2>
+    <div class="demo">
+      <button class="bouton bouton--danger" type="button" onclick="document.getElementById('confirmer').showModal()"><svg class="icone" aria-hidden="true"><use href="#i-supprimer"/></svg>Supprimer la sortie</button>
+      <button class="bouton bouton--secondaire" type="button" onclick="var t=document.getElementById('tiroir'); t.hidden=!t.hidden">Ouvre le tiroir</button>
+    </div>
+    <dialog class="fenetre" id="confirmer" aria-labelledby="confirmer-titre">
+      <h2 id="confirmer-titre">Supprimer cette sortie ?</h2>
+      <p>Les 8 inscrits seront prévenus. Cette action est définitive.</p>
+      <form class="fenetre__actions" method="dialog">
+        <button class="bouton bouton--secondaire" value="non">Garder la sortie</button>
+        <button class="bouton bouton--danger-plein" value="oui"><svg class="icone" aria-hidden="true"><use href="#i-supprimer"/></svg>Oui, supprimer</button>
+      </form>
+    </dialog>
+    <aside class="tiroir" id="tiroir" hidden aria-label="Exemple de tiroir">
+      <span class="tiroir__poignee" aria-hidden="true"></span>
+      <h3>Un tiroir</h3>
+      <p class="texte-doux">Il monte du bas sur mobile et devient un panneau latéral sur ordinateur.</p>
+      <button class="bouton bouton--secondaire bouton--bloc" type="button" onclick="document.getElementById('tiroir').hidden=true">Ferme</button>
+    </aside>
+    <div class="toast" role="status" style="position: static; transform: none; margin-top: var(--espace-4); display: inline-flex"><svg class="icone" aria-hidden="true"><use href="#i-valider"/></svg>Tu es inscrit·e à la sortie</div>
+  </section>
+</main>
+
+<script>
+  /* Badges des 12 catégories */
+  [["monument","Monument"],["culture","Musée"],["parc","Parc"],["promenade","Randonnée"],["village","Village"],["observatoire","Point de vue"],
+   ["sport","Sport"],["restaurant","Restaurant"],["bar","Bar"],["cinema","Cinéma"],["evenement","Événement"],["autre","Autre"]].forEach(function (c) {
+    document.getElementById("badges").insertAdjacentHTML("beforeend",
+      '<span class="badge-cat cat-' + c[0] + '"><svg class="icone" aria-hidden="true"><use href="#i-cat-' + c[0] + '"/></svg>' + c[1] + "</span>");
+  });
+  /* Boutons d'abonnement et filtres : bascule de l'état */
+  document.querySelectorAll(".bouton-suivre, .puce").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var actif = b.getAttribute("aria-pressed") === "true";
+      b.setAttribute("aria-pressed", String(!actif));
+      if (b.classList.contains("bouton-suivre")) b.textContent = actif ? "Suivre" : "Abonné·e";
+    });
+  });
+</script>
+<script src="maquettes/commun.js"></script>
+<script src="icones/icones.js"></script>
+<script src="outils/selecteur-apercu.js"></script>
+</body>
+</html>

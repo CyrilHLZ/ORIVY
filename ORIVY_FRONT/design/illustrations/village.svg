@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" aria-hidden="true">
+  <!--
+    Village : ruelle en pierre, volets colorés, un chat sur un muret.
+    Couleur de catégorie #c98a3c : volets et porte.
+    Animation (> 480px, sans mouvement réduit) : #queue du chat se balance (3 s).
+  -->
+  <style>
+    @media (min-width: 480px) and (prefers-reduced-motion: no-preference) {
+      #queue { transform-box: fill-box; transform-origin: 0% 100%; animation: balance 3s ease-in-out infinite alternate; }
+      @keyframes balance { from { transform: rotate(-10deg); } to { transform: rotate(12deg); } }
+    }
+  </style>
+  <rect width="800" height="600" fill="#F4E9D8"/>
+  <!-- Maison de gauche -->
+  <g stroke="#1F1915" stroke-width="3" stroke-linejoin="round">
+    <path d="M0 600 V140 L120 80 L290 150 V600 Z" fill="#E2D3BC"/>
+    <path d="M-10 146 L120 72 L300 156" fill="none" stroke-width="5"/>
+    <rect x="60" y="200" width="60" height="80" fill="#3E4A52"/>
+    <rect x="30" y="200" width="30" height="80" fill="#c98a3c"/><rect x="120" y="200" width="30" height="80" fill="#c98a3c"/>
+    <rect x="180" y="210" width="56" height="74" fill="#3E4A52"/>
+    <rect x="152" y="210" width="28" height="74" fill="#7FA6A0"/><rect x="236" y="210" width="28" height="74" fill="#7FA6A0"/>
+    <path d="M70 600 V440 a40 40 0 0 1 80 0 V600" fill="#c98a3c"/>
+    <rect x="180" y="330" width="60" height="70" fill="#3E4A52"/>
+    <rect x="176" y="398" width="68" height="16" fill="#C9A06A"/>
+  </g>
+  <g fill="#E0803A" stroke="#1F1915" stroke-width="2"><circle cx="190" cy="392" r="7"/><circle cx="210" cy="388" r="7"/><circle cx="230" cy="392" r="7"/></g>
+  <!-- Maison de droite -->
+  <g stroke="#1F1915" stroke-width="3" stroke-linejoin="round">
+    <path d="M520 600 V170 L650 110 L800 160 V600 Z" fill="#EADBC3"/>
+    <path d="M510 176 L650 102 L810 164" fill="none" stroke-width="5"/>
+    <rect x="580" y="220" width="56" height="76" fill="#3E4A52"/>
+    <rect x="552" y="220" width="28" height="76" fill="#c98a3c"/><rect x="636" y="220" width="28" height="76" fill="#c98a3c"/>
+    <rect x="700" y="230" width="50" height="70" fill="#3E4A52"/>
+    <rect x="590" y="360" width="56" height="76" fill="#3E4A52"/>
+    <rect x="562" y="360" width="28" height="76" fill="#B57A9C"/><rect x="646" y="360" width="28" height="76" fill="#B57A9C"/>
+  </g>
+  <!-- Ruelle pavée qui file vers le fond -->
+  <path d="M290 600 L360 330 H450 L520 600 Z" fill="#D9C2A0" stroke="#1F1915" stroke-width="3" stroke-linejoin="round"/>
+  <g stroke="#1F1915" stroke-width="2" opacity=".55" fill="none">
+    <path d="M300 560 H510 M313 510 H497 M325 465 H485 M336 425 H474 M346 390 H464 M354 358 H456"/>
+    <path d="M360 560 L372 510 M420 560 L416 510 M470 560 L460 510 M380 465 L386 425 M430 465 L428 425"/>
+  </g>
+  <!-- Clocher au fond -->
+  <g stroke="#1F1915" stroke-width="3" stroke-linejoin="round">
+    <rect x="378" y="220" width="54" height="110" fill="#E2D3BC"/>
+    <path d="M370 222 L405 160 L440 222 Z" fill="#7A8C99"/>
+    <path d="M405 160 v-24 M396 146 h18" fill="none"/>
+    <path d="M396 270 v-16 a9 9 0 0 1 18 0 v16 z" fill="#3E4A52"/>
+  </g>
+  <!-- Muret et chat -->
+  <rect x="290" y="500" width="160" height="50" fill="#CDB99B" stroke="#1F1915" stroke-width="3"/>
+  <path d="M290 525 H450 M330 500 v25 M380 525 v25 M420 500 v25" stroke="#1F1915" stroke-width="2"/>
+  <g stroke="#1F1915" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M330 500 C330 470 345 455 365 455 C385 455 395 470 395 500 Z" fill="#2E2622"/>
+    <path d="M378 462 C378 440 400 432 410 445 C418 455 412 468 398 470 Z" fill="#2E2622"/>
+    <path d="M386 440 l4 -12 l8 10 M402 440 l8 -10 l2 12" fill="#2E2622"/>
+    <path id="queue" d="M332 498 C315 490 312 470 322 456" fill="none" stroke-width="6"/>
+  </g>
+  <g fill="#F6CF7A"><circle cx="395" cy="452" r="2.5"/><circle cx="405" cy="452" r="2.5"/></g>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+  <!-- Cadeau : icône de l'indicateur de progression à Noël. -->
+  <rect x="3" y="9" width="18" height="13" rx="1.5" fill="#C12C15" stroke="#7E1D0E" stroke-width="1"/>
+  <rect x="2" y="6.5" width="20" height="4" rx="1" fill="#D8402A" stroke="#7E1D0E" stroke-width="1"/>
+  <path d="M12 6.5 V22" stroke="#E8BE5A" stroke-width="2.4"/>
+  <path d="M12 6.5 C10 2 5.5 2.5 6.5 5 C7.2 6.6 10 6.6 12 6.5 C14 6.6 16.8 6.6 17.5 5 C18.5 2.5 14 2 12 6.5 Z" fill="#E8BE5A" stroke="#9C7426" stroke-width="0.8"/>
+</svg>

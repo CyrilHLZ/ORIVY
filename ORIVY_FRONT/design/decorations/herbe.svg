@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 60" preserveAspectRatio="none" aria-hidden="true">
+  <!-- Touffe d'herbes hautes (premier plan de la randonnée), elle ondule depuis sa base. -->
+  <g fill="#B9A456" opacity=".9">
+    <path d="M9 60 C8 40 5 22 2 4 C7 22 11 40 11.5 60 Z"/>
+    <path d="M11 60 C12 42 15 24 18 8 C14 26 13 44 13 60 Z" fill="#9C8C44"/>
+    <path d="M10 60 C10 45 9.5 30 10 14 C11 30 11.5 45 12 60 Z" fill="#C9B565"/>
+  </g>
+</svg>

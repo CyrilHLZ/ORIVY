@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F6EFE6">
+  <title>Thèmes horaires ORIVY</title>
+  <!-- Le script des thèmes en premier : il pose data-theme avant l'affichage -->
+  <script src="themes.js"></script>
+  <link rel="icon" href="logo/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght,SOFT@9..144,600..700,100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="design-system.css">
+  <link rel="stylesheet" href="themes.css">
+  <style>
+    /* Mise en page de l'aperçu uniquement, en variables */
+    main {
+      max-width: var(--largeur-contenu);
+      margin: 0 auto;
+      padding: var(--espace-6) var(--marge-page) var(--espace-9);
+    }
+    .intro { color: var(--couleur-texte-doux); }
+    .colonnes {
+      display: grid;
+      gap: var(--espace-4);
+      margin-top: var(--espace-6);
+    }
+    @media (min-width: 768px) { .colonnes { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 1280px) { .colonnes { grid-template-columns: repeat(4, 1fr); } }
+
+    .theme {
+      border-radius: var(--rayon-grand);
+      padding: var(--espace-5) var(--espace-4);
+      display: flex; flex-direction: column; gap: var(--espace-4);
+      position: relative;
+      isolation: isolate;   /* le grain de l'aperçu reste dans la colonne */
+      overflow: hidden;
+    }
+    .theme::before {      /* grain, comme sur la vraie page */
+      content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+      background-image: var(--grain-image); opacity: var(--grain-opacite);
+    }
+    .theme__tete { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--espace-2); }
+    .theme__tete svg { width: var(--logo-largeur-min); }
+    .theme__nom { font-size: var(--taille-s); color: var(--couleur-texte-doux); }
+
+    .carte {
+      background: var(--couleur-surface);
+      border-radius: var(--rayon-carte);
+      box-shadow: var(--ombre-2);
+      overflow: hidden;
+    }
+    .carte__image {
+      aspect-ratio: 16 / 9;
+      background: var(--cat-parc);   /* emplacement de la photo */
+    }
+    .carte__corps { padding: var(--espace-4); display: flex; flex-direction: column; gap: var(--espace-2); }
+    .carte__corps h3 { font-size: var(--taille-l); margin: 0; }
+    .meta { font-size: var(--taille-s); color: var(--couleur-texte-doux); margin: 0; }
+    .distance { color: var(--couleur-accent-texte); font-weight: var(--graisse-forte); }
+
+    .badge {
+      align-self: flex-start;
+      display: inline-flex; align-items: center; gap: var(--espace-1);
+      padding: var(--espace-1) var(--espace-3);
+      border-radius: var(--rayon-pilule);
+      font-size: var(--taille-s); font-weight: var(--graisse-forte);
+      background: var(--badge-fond); color: var(--badge-texte);
+    }
+    .badges { display: flex; flex-wrap: wrap; gap: var(--espace-1); }
+    .point { width: var(--espace-3); height: var(--espace-3); border-radius: var(--rayon-pilule); background: var(--point); }
+    .points { display: flex; gap: var(--espace-2); align-items: center; font-size: var(--taille-xs); color: var(--couleur-texte-doux); }
+
+    .boutons { display: flex; flex-wrap: wrap; gap: var(--espace-2); }
+    .bouton {
+      min-height: var(--cible-min); padding: 0 var(--espace-4);
+      border-radius: var(--rayon-petit); border: 2px solid transparent;
+      font-weight: var(--graisse-forte); cursor: pointer;
+    }
+    .bouton--principal { background: var(--couleur-principale); color: var(--couleur-sur-principale); }
+    .bouton--principal:hover { background: var(--couleur-principale-survol); }
+    .bouton--secondaire { background: var(--couleur-surface); color: var(--couleur-texte); border-color: var(--couleur-bordure-forte); }
+    .bouton--danger { background: var(--couleur-danger); color: var(--couleur-sur-danger); }
+
+    .champ {
+      min-height: var(--cible-min); width: 100%;
+      padding: 0 var(--espace-4);
+      border-radius: var(--rayon-petit);
+      border: 1.5px solid var(--couleur-bordure-forte);
+      background: var(--couleur-surface-creux);
+    }
+    .interrupteur { display: flex; align-items: center; gap: var(--espace-3); font-size: var(--taille-s); }
+    .interrupteur span {
+      width: var(--cible-min); height: var(--espace-5); border-radius: var(--rayon-pilule);
+      background: var(--couleur-accent); position: relative; flex-shrink: 0;
+    }
+    .interrupteur span::after {
+      content: ""; position: absolute; top: var(--espace-1); right: var(--espace-1);
+      width: var(--espace-4); height: var(--espace-4); border-radius: var(--rayon-pilule);
+      background: var(--couleur-surface);
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Thèmes horaires</h1>
+  <p class="intro">Les quatre ambiances de la journée, côte à côte, avec les mêmes éléments.
+    La page elle-même suit l'heure réelle : utilise le panneau en bas à droite pour la forcer
+    et voir le fondu enchaîné.</p>
+
+  <div class="colonnes" id="colonnes"></div>
+
+  <!-- Modèle d'une colonne, cloné 4 fois par le petit script plus bas -->
+  <template id="modele">
+    <section class="theme">
+      <div class="theme__tete">
+        <svg viewBox="0 0 260 112" role="img" aria-label="ORIVY">
+          <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="var(--couleur-principale)" stroke-width="10" d="M40 100 L19.1 62.8 A24 24 0 1 1 60.9 62.8 Z"/>
+            <path stroke="currentColor" stroke-width="6" stroke-dasharray="0 12" d="M54 100 H198"/>
+            <path stroke="currentColor" stroke-width="10" d="M84 78 V24 H100 A15 15 0 0 1 100 54 H84 M100 54 L116 78 M136 24 V78 M154 24 L174 78 L194 24"/>
+            <path stroke="currentColor" stroke-width="10" d="M214 24 L232 51 L250 24 M232 51 V86 Q232 100 212 100"/>
+          </g>
+        </svg>
+        <span class="theme__nom"></span>
+      </div>
+
+      <article class="carte">
+        <div class="carte__image" role="img" aria-label="Photo du parc de la Tête d'Or"></div>
+        <div class="carte__corps">
+          <span class="badge" style="--badge-fond: var(--cat-parc); --badge-texte: var(--cat-parc-texte)">Parc</span>
+          <h3>Parc de la Tête d'Or</h3>
+          <p class="meta">Lyon · <span class="distance">à 2,3 km</span></p>
+          <p class="meta">Pique-nique samedi 14h · 8 inscrits</p>
+          <div class="boutons">
+            <button class="bouton bouton--principal" type="button">Rejoins la sortie</button>
+            <button class="bouton bouton--secondaire" type="button">Vois sur la carte</button>
+          </div>
+        </div>
+      </article>
+
+      <input class="champ" type="text" placeholder="Tape ta ville" aria-label="Ta ville">
+
+      <label class="interrupteur"><span aria-hidden="true"></span>Décorations saisonnières</label>
+
+      <div class="badges">
+        <span class="badge" style="--badge-fond: var(--cat-culture); --badge-texte: var(--cat-culture-texte)">Culture</span>
+        <span class="badge" style="--badge-fond: var(--cat-promenade); --badge-texte: var(--cat-promenade-texte)">Promenade</span>
+        <span class="badge" style="--badge-fond: var(--cat-observatoire); --badge-texte: var(--cat-observatoire-texte)">Point de vue</span>
+        <span class="badge" style="--badge-fond: var(--cat-bar); --badge-texte: var(--cat-bar-texte)">Bar</span>
+        <span class="badge" style="--badge-fond: var(--cat-cinema); --badge-texte: var(--cat-cinema-texte)">Cinéma</span>
+        <span class="badge" style="--badge-fond: var(--cat-autre); --badge-texte: var(--cat-autre-texte)">Autre</span>
+      </div>
+
+      <div class="points" aria-hidden="true">
+        <span class="point" style="--point: var(--cat-promenade)"></span>
+        <span class="point" style="--point: var(--cat-bar)"></span>
+        <span class="point" style="--point: var(--cat-cinema)"></span>
+        <span class="point" style="--point: var(--cat-observatoire)"></span>
+        icônes de catégorie sur la surface
+      </div>
+
+      <div class="boutons">
+        <button class="bouton bouton--danger" type="button">Supprimer la sortie</button>
+      </div>
+    </section>
+  </template>
+</main>
+
+<script>
+  /* Clone le modèle pour chaque thème et pose data-theme sur la colonne */
+  [["aube", "Aube · 6h–9h"], ["jour", "Jour · 9h–18h"], ["crepuscule", "Crépuscule · 18h–21h"], ["nuit", "Nuit · 21h–6h"]]
+    .forEach(function (t) {
+      var colonne = document.getElementById("modele").content.cloneNode(true);
+      colonne.querySelector(".theme").setAttribute("data-theme", t[0]);
+      colonne.querySelector(".theme__nom").textContent = t[1];
+      document.getElementById("colonnes").appendChild(colonne);
+    });
+</script>
+<script src="outils/selecteur-apercu.js"></script>
+</body>
+</html>

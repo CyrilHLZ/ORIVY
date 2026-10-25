@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F6EFE6">
+  <title>Page introuvable · ORIVY</title>
+  <script src="../themes.js"></script>
+  <script src="../saisons.js"></script>
+  <link rel="icon" href="../logo/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght,SOFT@9..144,600..700,100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../design-system.css">
+  <link rel="stylesheet" href="../themes.css">
+  <link rel="stylesheet" href="../saisons.css">
+  <link rel="stylesheet" href="../composants.css">
+  <link rel="stylesheet" href="pages.css">
+  <style>
+    /* L'épingle perdue se balance doucement (transform uniquement) */
+    .illu-404 #epingle-perdue { transform-box: fill-box; transform-origin: 50% 100%; animation: hesite 3s var(--courbe-douce) infinite alternate; }
+    @keyframes hesite { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
+    @media (prefers-reduced-motion: reduce) { .illu-404 #epingle-perdue { animation: none; } }
+  </style>
+</head>
+<body data-page="aucune">
+<main class="page-404">
+  <span class="deco-vide" aria-hidden="true"></span>
+  <!-- Illustration en ligne : elle suit les couleurs du thème et de la saison -->
+  <svg class="illu-404" viewBox="0 0 400 220" aria-hidden="true">
+    <!-- Le sentier en pointillés… -->
+    <path d="M20 200 C80 200 90 150 150 150 C210 150 200 110 250 105" fill="none" stroke="var(--couleur-texte)" stroke-width="6" stroke-linecap="round" stroke-dasharray="0 18"/>
+    <!-- …qui s'arrête net : un point d'interrogation flotte au bout -->
+    <text x="300" y="70" font-family="Fraunces, Georgia, serif" font-size="56" font-weight="600" fill="var(--couleur-accent-texte)">?</text>
+    <g id="epingle-perdue">
+      <path d="M262 102 L242 68 A24 24 0 1 1 282 68 Z" fill="var(--couleur-surface)" stroke="var(--couleur-principale)" stroke-width="9" stroke-linejoin="round"/>
+    </g>
+  </svg>
+  <h1>Oups, ce sentier ne mène nulle part</h1>
+  <p>La page que tu cherches a peut-être déménagé, ou n'a jamais existé. Pas de panique : il reste plein d'endroits à découvrir.</p>
+  <div class="ligne-actions">
+    <a class="bouton bouton--principal" href="accueil.html"><svg class="icone" aria-hidden="true"><use href="#i-accueil"/></svg>Retourne à l'accueil</a>
+    <a class="bouton bouton--secondaire" href="carte.html"><svg class="icone" aria-hidden="true"><use href="#i-carte"/></svg>Explore la carte</a>
+  </div>
+</main>
+<script src="commun.js"></script>
+<script src="../icones/icones.js"></script>
+<script src="../outils/selecteur-apercu.js"></script>
+</body>
+</html>

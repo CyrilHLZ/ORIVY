@@ -1,122 +1,183 @@
-import { useEffect, useState } from 'react';
-import { getMapData } from '../../../Services/api.js';
-import '../../Styles/Main/Pages.css';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useLieux } from '../../../Hooks/useLieux.js';
+import { LISTE_CATEGORIES } from '../../../Constants/categories.js';
+import { demanderPosition, distanceKm, trouverVille } from '../../../Utils/proximite.js';
+import Bouton from '../../../Composants/Bouton.jsx';
+import Icone from '../../../Composants/Icone.jsx';
+import CarteLieu from '../../../Composants/CarteLieu.jsx';
+import { Champ } from '../../../Composants/Formulaire.jsx';
+import { ChoixSegmente, OPTIONS_RAYON, Puce, Puces } from '../../../Composants/Filtres.jsx';
+import { Chargement, EtatErreur, EtatVide } from '../../../Composants/Etats.jsx';
 
-const activityCategories = [
-    { id: 'all', label: 'Toutes les idées' },
-    { id: 'restaurant', label: 'Restaurants' },
-    { id: 'bar', label: 'Bars' },
-    { id: 'cinema', label: 'Cinémas' },
-    { id: 'monument', label: 'Monuments' },
-    { id: 'village', label: 'Meilleurs villages' },
-    { id: 'promenade', label: 'Promenades' },
-    { id: 'parc', label: 'Parcs et jardins' },
-    { id: 'sport', label: 'Activités sportives' },
-    { id: 'evenement', label: 'Événements' },
-    { id: 'culture', label: 'Culture' },
-    { id: 'observatoire', label: 'Observatoires' },
-    { id: 'autre', label: 'Autres' },
-].sort((first, second) => first.label.localeCompare(second.label, 'fr'));
+/*
+ * Page Activités / lieux (maquette design/maquettes/activites.html).
+ * Sans position : tous les lieux, triés du plus récent au plus ancien.
+ * Avec position (GPS ou ville tapée) : distance sur chaque carte, filtre de
+ * rayon actif, tri « plus proche » par défaut.
+ */
+const ActivitePage = () => {
+    const { lieux, chargement, erreur, recharger } = useLieux();
 
-const categoryImages = {
-    autre: 'https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=900&q=80',
-    culture: 'https://images.unsplash.com/photo-1564399579883-451a5d44ec08?auto=format&fit=crop&w=900&q=80',
-    monument: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=900&q=80',
-    observatoire: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=900&q=80',
-    parc: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=900&q=80',
-    promenade: 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=900&q=80',
-    restaurant: 'https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=900&q=80',
-    village: 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=900&q=80',
-};
+    // La catégorie est dans l'adresse (?cat=parc) : on peut partager un lien filtré,
+    // et les boutons de l'accueil « Vois les parcs » arrivent directement filtrés
+    const [parametres, setParametres] = useSearchParams();
+    const cat = parametres.get('cat');
+    const choisirCategorie = (cle) => setParametres(cle ? { cat: cle } : {});
 
-const activitePage = () => {
-    const [selectedCategory, setSelectedCategory] = useState('all');
-    const [activities, setActivities] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [position, setPosition] = useState(null);   // { lat, lng, nom }
+    const [rayon, setRayon] = useState(25);
+    const [tri, setTri] = useState('recent');
+    const [localisation, setLocalisation] = useState(false);   // demande GPS en cours
+    const [alerte, setAlerte] = useState(null);
+    const [ville, setVille] = useState('');
+    const champVille = useRef(null);
 
-    useEffect(() => {
-        getMapData()
-            .then(({ pointsInteret, activites }) => setActivities([
-                ...pointsInteret.map((point) => ({
-                    id: `point-${point.id}`,
-                    nom: point.nom,
-                    description: point.description,
-                    categorie: point.type,
-                    lieu: point.adresse,
-                    latitude: point.latitude,
-                    longitude: point.longitude,
-                    imageUrl: point.imageUrl || categoryImages[point.type] || categoryImages.autre,
-                })),
-                ...activites.map((activity) => ({
-                    ...activity,
-                    categorie: activity.categorie,
-                    imageUrl: activity.imageUrl || categoryImages[activity.categorie] || categoryImages.autre,
-                })),
-            ]))
-            .catch(() => setError('Les activités sont momentanément indisponibles.'))
-            .finally(() => setLoading(false));
-    }, []);
+    // Affichage par paquets : 765 cartes d'un coup ralentiraient la page (surtout sur mobile)
+    const PAQUET = 24;
+    const [affiches, setAffiches] = useState(PAQUET);
+    // Quand un filtre change, on repart du premier paquet
+    useEffect(() => { setAffiches(PAQUET); }, [cat, position, rayon, tri]);
 
-    const visibleActivities = selectedCategory === 'all' ? activities : activities.filter(({ categorie }) => categorie === selectedCategory);
+    const definirPosition = (pos, nom) => {
+        setPosition({ ...pos, nom });
+        setAlerte(null);
+        setTri('proche');
+    };
+
+    /* « Autour de moi » : la position n'est demandée QUE sur ce clic */
+    const autourDeMoi = async () => {
+        setLocalisation(true);
+        try {
+            definirPosition(await demanderPosition(), 'de toi');
+        } catch (e) {
+            setAlerte(e.message);
+            champVille.current?.focus();
+        } finally {
+            setLocalisation(false);
+        }
+    };
+
+    /* Position refusée (ou par choix) : on tape une ville */
+    const chercherVille = (event) => {
+        event.preventDefault();
+        const trouvee = trouverVille(ville);
+        if (trouvee) definirPosition(trouvee, `de ${trouvee.nom}`);
+        else setAlerte(`On ne connaît pas encore « ${ville} ». Essaie une grande ville voisine.`);
+    };
+
+    /*
+     * La liste affichée est CALCULÉE à partir des lieux et des filtres.
+     * useMemo : on ne refait le calcul que si l'un d'eux change (pas à chaque frappe ailleurs).
+     */
+    const resultats = useMemo(() => {
+        const liste = lieux
+            .filter((l) => !cat || l.categorie === cat)
+            .map((l) => ({
+                lieu: l,
+                km: position && l.latitude != null ? distanceKm(position.lat, position.lng, l.latitude, l.longitude) : null,
+            }))
+            .filter((x) => !position || (x.km != null && x.km <= rayon));
+
+        return liste.sort((a, b) => {
+            if (tri === 'proche' && position) return a.km - b.km;
+            if (tri === 'note') return (b.lieu.note ?? 0) - (a.lieu.note ?? 0);
+            return b.lieu.idNum - a.lieu.idNum;   // plus récent : identifiant le plus grand
+        });
+    }, [lieux, cat, position, rayon, tri]);
+
+    // « Mieux noté » n'est proposé que si le back envoie des notes
+    const notesDisponibles = lieux.some((l) => l.note != null);
+    const n = resultats.length;
+    const compte = position
+        ? `${n} lieu${n > 1 ? 'x' : ''} à moins de ${rayon} km ${position.nom}`
+        : `${n} lieu${n > 1 ? 'x' : ''} partout en France`;
 
     return (
-        <main className="page-shell activities-page">
-            <header className="page-heading activities-heading">
-                <p className="eyebrow">Le carnet ORIVY</p>
-                <h1>Des idées pour sortir</h1>
-                <p className="page-intro">Trouvez une nouvelle adresse, une sortie ou un lieu à explorer.</p>
-            </header>
-            <section className="category-browser" aria-labelledby="category-browser-title">
-                <div className="category-browser-heading">
-                    <p className="eyebrow">Explorer par envie</p>
-                    <h2 id="category-browser-title">Que voulez-vous découvrir ?</h2>
-                    <p>Choisissez une catégorie pour affiner votre sélection.</p>
+        <main className="conteneur page-activites">
+            <h1 className="page-titre">Lieux à découvrir</h1>
+            <p className="page-intro">Monuments, parcs, randonnées, bonnes tables : trouve ta prochaine sortie près de chez toi.</p>
+
+            {/* Système de proximité */}
+            <section className="proximite" aria-label="Où chercher">
+                <div className="proximite__position">
+                    <Bouton variante="secondaire" pilule icone={localisation ? undefined : 'autour'}
+                            onClick={autourDeMoi} disabled={localisation} aria-busy={localisation}>
+                        {localisation && <span className="radar" aria-hidden="true"><i /></span>}
+                        {localisation ? 'Localisation…' : 'Autour de moi'}
+                    </Bouton>
+                    <form role="search" onSubmit={chercherVille} style={{ flex: '1 1 calc(var(--espace-9) * 2)' }}>
+                        <Champ ref={champVille} label="Ou tape une ville" cacherLabel icone="epingle" type="search"
+                               placeholder="Ou tape une ville : Lyon, Lille…" autoComplete="address-level2"
+                               value={ville} onChange={(e) => setVille(e.target.value)} />
+                    </form>
                 </div>
-                <nav className="category-grid" aria-label="Catégories d’activités">
-                    {activityCategories.map((category) => (
-                        <button className={`category-card ${selectedCategory === category.id ? 'is-active' : ''}`} key={category.id} onClick={() => setSelectedCategory(category.id)} type="button">
-                            <span>{category.label}</span>
-                        </button>
-                    ))}
-                </nav>
-            </section>
-            <section className="activity-section" aria-live="polite">
-                <div className="section-heading">
-                    <div><p className="eyebrow">Sélection locale</p><h2>À découvrir maintenant</h2></div>
-                    <span className="result-count">{visibleActivities.length} activités</span>
-                </div>
-                <div className="activity-category-rows">
-                    {loading && <p>Chargement des activités...</p>}
-                    {error && <p role="alert">{error}</p>}
-                    {!loading && !error && activityCategories.filter(({ id }) => id !== 'all').map((category) => {
-                        const categoryActivities = visibleActivities.filter(({ categorie }) => categorie === category.id);
-                        if (selectedCategory !== 'all' && selectedCategory !== category.id) return null;
-                        return <section className="activity-category-row" key={category.id}>
-                            <div className="category-row-heading"><h3>{category.label}</h3><span>{categoryActivities.length} lieux</span></div>
-                            <div className="activity-grid">
-                                {categoryActivities.map((activity) => (
-                                    <article className="activity-card" key={activity.id}>
-                                        <div className={`activity-card-art art-${activity.categorie}`}><img src={activity.imageUrl} alt={activity.nom} loading="lazy" /><span>{activity.categorie.toUpperCase()}</span></div>
-                                        <div className="activity-card-content">
-                                            <span className="card-meta">{activity.lieu || activity.categorie}</span>
-                                            <h3>{activity.nom}</h3>
-                                            <p>{activity.description || 'Une activité à découvrir dans votre région.'}</p>
-                                            {activity.latitude && activity.longitude && <div className="card-map-links">
-                                                <a className="card-link" href={`https://www.google.com/maps/search/?api=1&query=${activity.latitude},${activity.longitude}`} rel="noreferrer" target="_blank">Google Maps <span aria-hidden="true">↗</span></a>
-                                                <a className="card-link" href={`https://waze.com/ul?ll=${activity.latitude}%2C${activity.longitude}&navigate=yes`} rel="noreferrer" target="_blank">Waze <span aria-hidden="true">↗</span></a>
-                                            </div>}
-                                        </div>
-                                    </article>
-                                ))}
-                            </div>
-                        </section>;
-                    })}
-                    {!loading && !error && visibleActivities.length === 0 && <p>Aucune activité ne correspond à ce filtre.</p>}
+                <div className="proximite__reglages">
+                    <ChoixSegmente nom="rayon" legende="Rayon de recherche" valeur={rayon} onChange={setRayon}
+                                   options={OPTIONS_RAYON} desactive={!position} />
+                    <label className="tri">
+                        Trier par
+                        <select className="champ__saisie" value={tri} onChange={(e) => setTri(e.target.value)}>
+                            {position && <option value="proche">Plus proche</option>}
+                            {notesDisponibles && <option value="note">Mieux noté</option>}
+                            <option value="recent">Plus récent</option>
+                        </select>
+                    </label>
                 </div>
             </section>
+
+            {/* Position refusée ou ville inconnue */}
+            {alerte && (
+                <p className="alerte-position" role="alert"><Icone nom="info" />{alerte}</p>
+            )}
+
+            <Puces label="Catégories">
+                <Puce actif={!cat} onClick={() => choisirCategorie(null)}>Tout</Puce>
+                {LISTE_CATEGORIES.filter((c) => c.cle !== 'autre').map((c) => (
+                    <Puce key={c.cle} cle={c.cle} actif={cat === c.cle} onClick={() => choisirCategorie(c.cle)}>
+                        {c.pluriel}
+                    </Puce>
+                ))}
+            </Puces>
+
+            <div className="resultats-tete">
+                {/* aria-live : le nouveau nombre est annoncé quand un filtre change */}
+                <p aria-live="polite">{!chargement && !erreur && compte}</p>
+                <Bouton variante="fantome" icone="carte" vers="/carte">Vois sur la carte</Bouton>
+            </div>
+
+            {chargement && <Chargement nombre={6} label="Chargement des lieux" />}
+            {erreur && <EtatErreur message={erreur} onReessayer={recharger} />}
+
+            {!chargement && !erreur && n > 0 && (
+                <div className="grille-lieux">
+                    {resultats.slice(0, affiches).map(({ lieu, km }) => <CarteLieu key={lieu.id} lieu={lieu} km={km} />)}
+                </div>
+            )}
+
+            {!chargement && !erreur && n > affiches && (
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--espace-6)' }}>
+                    <Bouton variante="secondaire" onClick={() => setAffiches(affiches + PAQUET)}>
+                        Voir plus de lieux ({n - affiches} restants)
+                    </Bouton>
+                </div>
+            )}
+
+            {!chargement && !erreur && n === 0 && (
+                position && rayon < 50 ? (
+                    <EtatVide icone="epingle" titre="Rien dans ce rayon"
+                              action={<Bouton variante="secondaire" onClick={() => setRayon(50)}>Passer à 50 km</Bouton>}>
+                        Aucun lieu à moins de {rayon} km. Élargis le rayon, ou change de catégorie.
+                    </EtatVide>
+                ) : (
+                    <EtatVide icone="epingle" titre="Aucun lieu ici pour l'instant"
+                              action={<Bouton variante="secondaire" onClick={() => choisirCategorie(null)}>Voir toutes les catégories</Bouton>}>
+                        Cette catégorie n'a pas encore de lieu. Reviens bientôt !
+                    </EtatVide>
+                )
+            )}
         </main>
     );
 };
 
-export default activitePage;
+export default ActivitePage;

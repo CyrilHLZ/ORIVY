@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Logo ORIVY</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght,SOFT@9..144,600,100&display=swap" rel="stylesheet">
+  <style>
+    /* Variables provisoires, reprises du journal (étape 1).
+       Elles déménageront dans design-system.css à l'étape 3. */
+    :root {
+      --couleur-principale: #A34E2C;
+      --fond: #F6EFE6;
+      --surface: #FFFBF6;
+      --texte: #2E2622;
+      --texte-doux: #6B5D52;
+      --bordure: #E6D9CA;
+      --nuit-fond: #16211C;
+      --nuit-surface: #21302A;
+      --nuit-texte: #EDE6DA;
+      --nuit-principale: #E58E6A;
+      --danger: #A8173A;
+      --police-titre: "Fraunces", Georgia, serif;
+      --police-texte: "DM Sans", system-ui, sans-serif;
+      --rayon-carte: 20px;
+      --espace: 16px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--fond);
+      color: var(--texte);
+      font: 400 1rem/1.5 var(--police-texte);
+    }
+    main { max-width: 1100px; margin: 0 auto; padding: var(--espace); }
+    h1, h2 { font-family: var(--police-titre); font-weight: 600; font-variation-settings: "SOFT" 100; }
+    h1 { font-size: 2rem; margin: 1.5rem 0 .25rem; }
+    h2 { font-size: 1.375rem; margin: 2.5rem 0 1rem; }
+    p { margin: 0 0 1rem; color: var(--texte-doux); max-width: 60ch; }
+    .grille { display: grid; gap: var(--espace); }
+    .planche {
+      border-radius: var(--rayon-carte);
+      padding: calc(var(--espace) * 2);
+      display: flex; flex-direction: column; align-items: flex-start; gap: var(--espace);
+      background: var(--surface);
+      border: 1px solid var(--bordure);
+    }
+    .planche--nuit { background: var(--nuit-fond); color: var(--nuit-texte); border-color: var(--nuit-surface); }
+    .planche--nuit .legende { color: var(--nuit-texte); opacity: .8; }
+    .planche--principale { background: var(--couleur-principale); border: 0; }
+    .legende { font-size: .875rem; color: var(--texte-doux); }
+    .logotype { width: 100%; max-width: 320px; height: auto; }
+    .rangee { display: flex; flex-wrap: wrap; align-items: flex-end; gap: calc(var(--espace) * 1.5); }
+    .rangee figure { margin: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+    /* Zone de protection : un espace libre égal au rayon de l'épingle tout autour. */
+    .protection { outline: 2px dashed var(--couleur-principale); outline-offset: 0; padding: 12px; }
+    .interdits li { margin-bottom: .5rem; }
+    .interdits strong { color: var(--danger); }
+    @media (min-width: 768px) {
+      main { padding: calc(var(--espace) * 2); }
+      h1 { font-size: 2.75rem; }
+      .grille--2 { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Logo ORIVY</h1>
+  <p>Une épingle de carte qui fait le O, et un sentier en pointillés qui part de sa pointe
+     pour rejoindre le pied du Y. On pose un lieu, on trace le chemin jusqu'à la sortie.</p>
+
+  <h2>Logotype</h2>
+  <div class="grille grille--2">
+    <div class="planche">
+      <img class="logotype" src="orivy-logotype-jour.svg" alt="ORIVY">
+      <span class="legende">Jour : lettres encre #2E2622, épingle terracotta #A34E2C</span>
+    </div>
+    <div class="planche planche--nuit">
+      <img class="logotype" src="orivy-logotype-nuit.svg" alt="ORIVY">
+      <span class="legende">Nuit : lettres lin #EDE6DA, épingle terracotta claire #E58E6A</span>
+    </div>
+  </div>
+
+  <h2>Tailles</h2>
+  <p>En dessous de 140px de large, les points du sentier se brouillent : on passe au monogramme.</p>
+  <div class="planche">
+    <div class="rangee">
+      <figure><img src="orivy-logotype-jour.svg" width="240" alt="ORIVY, 240px"><figcaption class="legende">240px (en-tête ordinateur)</figcaption></figure>
+      <figure><img src="orivy-logotype-jour.svg" width="160" alt="ORIVY, 160px"><figcaption class="legende">160px</figcaption></figure>
+      <figure><img src="orivy-logotype-jour.svg" width="140" alt="ORIVY, 140px"><figcaption class="legende">140px (minimum)</figcaption></figure>
+      <figure><img src="orivy-monogramme-jour.svg" width="40" alt="ORIVY, monogramme"><figcaption class="legende">en dessous : monogramme</figcaption></figure>
+    </div>
+  </div>
+
+  <h2>Monogramme, favicon et icône</h2>
+  <div class="grille grille--2">
+    <div class="planche">
+      <div class="rangee">
+        <figure><img src="orivy-monogramme-jour.svg" width="96" alt="Monogramme ORIVY"><figcaption class="legende">96px</figcaption></figure>
+        <figure><img src="orivy-monogramme-jour.svg" width="48" alt="Monogramme ORIVY"><figcaption class="legende">48px</figcaption></figure>
+        <figure><img src="orivy-monogramme-jour.svg" width="24" alt="Monogramme ORIVY"><figcaption class="legende">24px (mini)</figcaption></figure>
+      </div>
+    </div>
+    <div class="planche planche--nuit">
+      <div class="rangee">
+        <figure><img src="orivy-monogramme-nuit.svg" width="96" alt="Monogramme ORIVY"><figcaption class="legende">96px</figcaption></figure>
+        <figure><img src="orivy-monogramme-nuit.svg" width="48" alt="Monogramme ORIVY"><figcaption class="legende">48px</figcaption></figure>
+        <figure><img src="orivy-monogramme-nuit.svg" width="24" alt="Monogramme ORIVY"><figcaption class="legende">24px</figcaption></figure>
+      </div>
+    </div>
+    <div class="planche">
+      <div class="rangee">
+        <figure><img src="favicon.svg" width="48" alt="Favicon ORIVY"><figcaption class="legende">48px</figcaption></figure>
+        <figure><img src="favicon.svg" width="32" alt="Favicon ORIVY"><figcaption class="legende">32px</figcaption></figure>
+        <figure><img src="favicon.svg" width="16" alt="Favicon ORIVY"><figcaption class="legende">16px (onglet)</figcaption></figure>
+      </div>
+      <span class="legende">Favicon : épingle seule, crème sur terracotta.</span>
+    </div>
+    <div class="planche">
+      <div class="rangee">
+        <figure><img src="icone-app.svg" width="120" alt="Icône d'application ORIVY" style="border-radius: 27px"><figcaption class="legende">masque iOS</figcaption></figure>
+        <figure><img src="icone-app.svg" width="120" alt="Icône d'application ORIVY" style="border-radius: 50%"><figcaption class="legende">masque rond Android</figcaption></figure>
+      </div>
+    </div>
+  </div>
+
+  <h2>Zone de protection</h2>
+  <p>Autour du logo, on laisse un espace libre au moins égal au rayon de l'épingle
+     (environ un dixième de la largeur du logotype). Aucun texte ni bord ne doit y entrer.</p>
+  <div class="planche">
+    <img class="protection" src="orivy-logotype-jour.svg" width="240" alt="ORIVY avec sa zone de protection">
+  </div>
+
+  <h2>À ne pas faire</h2>
+  <ul class="interdits">
+    <li><strong>Ne pas</strong> déformer, incliner ni changer l'espacement des lettres.</li>
+    <li><strong>Ne pas</strong> colorer l'épingle avec une couleur de catégorie : elle se confondrait avec les épingles de la carte.</li>
+    <li><strong>Ne pas</strong> retirer le sentier du logotype : sans lui, le pied du Y est incompris. On utilise plutôt le monogramme.</li>
+    <li><strong>Ne pas</strong> poser le logo sur une photo chargée sans voile sombre ou clair dessous.</li>
+    <li><strong>Ne pas</strong> ajouter d'ombre, de lueur ni d'effet néon.</li>
+  </ul>
+</main>
+</body>
+</html>
