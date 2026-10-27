@@ -8,3 +8,4 @@ export const getSortieById = (sortieId) => apiRequest(`/sorties/${sortieId}`);
 export const inscriptionSortie = (sortieId) => apiRequest(`/sorties/${sortieId}/inscription`, { method: 'POST' });
 export const desinscriptionSortie = (sortieId) => apiRequest(`/sorties/${sortieId}/inscription`, { method: 'DELETE' });
 export const searchSorties = (query) => apiRequest(`/sorties/search?query=${encodeURIComponent(query)}`);
+export const getSortiesMembre = (utilisateurId) => apiRequest(`/sorties/membre/${utilisateurId}`);

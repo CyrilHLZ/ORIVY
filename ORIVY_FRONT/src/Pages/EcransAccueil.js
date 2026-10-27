@@ -5,7 +5,7 @@
  * fond : photo plein écran (facultatif) ; sinon, l'illustration au trait (illu) dans un cadre.
  * cadrage : point de la photo à garder visible (object-position).
  * carte   : où poser la carte de texte sur ordinateur, pour ne cacher ni les gens ni le sujet
- * ambiance : animation posée sur la photo : "lumiere" (défaut), "feuilles" ou "oiseaux".
+ * ambiance : animation posée sur la photo : "lumiere" (défaut), "grains", "feuilles" ou "oiseaux".
  * ratio   : largeur / hauteur de la photo.
  * effets  : animations posées sur des points précis de la photo, en % DE L'IMAGE
  *           (voir PhotoAnimee.jsx). Les numéros renvoient à la liste des 100 propositions.
@@ -33,14 +33,18 @@ import fondPointDeVue from '../Style/fonds/point-de-vue.jpg';
 import fondBar from '../Style/fonds/bar.jpg';
 import fondCinema from '../Style/fonds/cinema.jpg';
 import fondEvenement from '../Style/fonds/evenement.jpg';
+// Fonds des pages connexion / inscription (fournis par l'utilisateur le 2026-10-25 : tout le monde de dos)
+import fondConnexion from '../Style/fonds/connexion.jpg';
+import fondInscription from '../Style/fonds/inscription.jpg';
 
 export const ECRANS = [
     { cle: 'culture', illu: musee, fond: fondMusee, ratio: 1672 / 941,
       effets: [
-        { type: 'lampes', points: [{ x: 3.3, y: 60.6, t: 3 }, { x: 69.7, y: 52, t: 4 }, { x: 89.2, y: 15, t: 7 }, { x: 98, y: 64, t: 3 }] }, // (8)
+        { type: 'soleil', x: 39.2, y: 58, t: 12 },                                    // au fond de l'allée, entre la fontaine et le couple
+        { type: 'lampes', points: [{ x: 69.7, y: 52, t: 4 }, { x: 89.2, y: 15, t: 7 }] }, // (8) aucun halo sur les bords gauche et droit
         { type: 'petales', x: 0, y: 76, l: 24, h: 20 },                               // (9) hortensias
         { type: 'fenetres', points: [{ x: 60, y: 32 }, { x: 66, y: 26 }, { x: 74, y: 22 }, { x: 79, y: 22 }, { x: 74, y: 32 }, { x: 79, y: 32 }] }, // (51)
-      ], cadrage: '72% 60%', alt: 'Place parisienne au coucher du soleil, fontaine et façade haussmannienne marquée Musée', badge: 'Musées & culture', titre: 'Laisse-toi surprendre',
+      ], cadrage: '72% 60%', ambiance: 'feuilles', alt: 'Place parisienne au coucher du soleil, fontaine et façade haussmannienne marquée Musée', badge: 'Musées & culture', titre: 'Laisse-toi surprendre',
       texte: "Des grands musées parisiens aux petites collections de province, il y a toujours une salle qui t'attend.", bouton: 'Vois les musées sur la carte' },
     { cle: 'parc', illu: parc, fond: fondParc, ratio: 1672 / 941,
       effets: [
@@ -49,6 +53,11 @@ export const ECRANS = [
         { type: 'lampes', points: [{ x: 1.1, y: 27.8, t: 6 }, { x: 96.7, y: 26, t: 6 }] }, // (24)
         { type: 'papillons', x: 12, y: 68, l: 16, h: 14 },                            // (27) au-dessus de la lavande
         { type: 'papillons', x: 74, y: 68, l: 14, h: 14 },
+        { type: 'pollen', x: 31, y: 84, l: 38, h: 16, n: 14 },                        // grains dorés sur le chemin : au premier plan, large…
+        { type: 'pollen', x: 38, y: 70, l: 24, h: 14, n: 10 },                        // … puis de plus en plus étroit…
+        { type: 'pollen', x: 44, y: 58, l: 12, h: 12, n: 6 },                         // … jusqu'au bassin
+        { type: 'miroir', x: 41, y: 54, l: 18, h: 7 },                                // le ciel doré dans le bassin
+        { type: 'statues', points: [{ x: 7.5, y: 50, t: 5 }, { x: 90.5, y: 49, t: 5 }, { x: 23.5, y: 49.5 }, { x: 78, y: 49.5 }, { x: 33, y: 50.5 }, { x: 65.5, y: 50.5 }] },
         { type: 'fenetres', points: [{ x: 42, y: 43.5 }, { x: 47, y: 43.5 }, { x: 56, y: 43.5 }, { x: 61, y: 43.5 }, { x: 44, y: 48 }, { x: 58, y: 48 }] }, // (51) le château la nuit
       ], cadrage: '50% 60%', carte: 'haut-droite', alt: "Couple main dans la main dans l'allée d'un jardin à la française, bassin, statues et château au coucher du soleil", badge: 'Parcs & jardins', titre: 'Respire au vert',
       texte: 'Une pelouse, un grand arbre, un pique-nique entre amis : le bonheur tient parfois à peu de chose.', bouton: 'Vois les parcs sur la carte' },
@@ -93,7 +102,7 @@ export const ECRANS = [
         { type: 'neon', x: 75, y: 3, l: 24.5, h: 20 },                                // (14) enseigne ORIVY
         { type: 'lampes', points: [{ x: 12, y: 30.6, t: 6 }] },
         { type: 'fenetres', points: [{ x: 2, y: 21 }, { x: 11.6, y: 21 }, { x: 2.5, y: 43 }, { x: 11.6, y: 43 }, { x: 62, y: 33 }] }, // (51)
-      ], cadrage: '62% 60%', alt: 'Couple en terrasse du bistrot Chez Orivy, place parisienne au coucher du soleil', badge: 'Restaurants', titre: 'Mets les pieds sous la table',
+      ], cadrage: '62% 60%', ambiance: 'feuilles', alt: 'Couple en terrasse du bistrot Chez Orivy, place parisienne au coucher du soleil', badge: 'Restaurants', titre: 'Mets les pieds sous la table',
       texte: 'Bistrots de quartier, tables de chef et crêperies : partage un bon repas à plusieurs.', bouton: 'Vois les restaurants sur la carte' },
     { cle: 'bar', illu: bar, fond: fondBar, ratio: 1672 / 941,
       effets: [
@@ -104,7 +113,7 @@ export const ECRANS = [
         { type: 'flamme', x: 7.3, y: 77.9 },                                          // (11) bougies
         { type: 'flamme', x: 50.1, y: 85 },
         { type: 'fenetres', points: [{ x: 76, y: 46 }, { x: 82, y: 44 }, { x: 88, y: 47 }, { x: 93, y: 43 }] }, // (51)
-      ], cadrage: '55% 55%', carte: 'bas-droite', alt: "Couple attablé à la terrasse d'une guinguette au bord du fleuve, pont et cathédrale au coucher du soleil", badge: 'Bars', titre: 'Trinque en terrasse',
+      ], cadrage: '55% 55%', carte: 'bas-droite', ambiance: 'feuilles', alt: "Couple attablé à la terrasse d'une guinguette au bord du fleuve, pont et cathédrale au coucher du soleil", badge: 'Bars', titre: 'Trinque en terrasse',
       texte: 'Guinguettes au bord de l\'eau, bars à vin, toits-terrasses : profite de la soirée avec ta bande.', bouton: 'Vois les bars sur la carte' },
     { cle: 'cinema', illu: cinema, fond: fondCinema, ratio: 1365 / 768,
       effets: [
@@ -115,7 +124,6 @@ export const ECRANS = [
         ] },                                                                           // la marquise
         { type: 'reflet', x: 76.5, y: 64, l: 8.5, h: 20 },                            // (13) la lumière glisse sur l'affiche
         { type: 'lampes', points: [{ x: 87, y: 10.2, t: 9 }, { x: 12.1, y: 51.4, t: 4 }, { x: 18.7, y: 67.7, t: 2.5 }, { x: 5.9, y: 68.4, t: 2.5 }, { x: 22.3, y: 69.7, t: 2 }] },
-        { type: 'reflets', x: 0, y: 86, l: 70, h: 14, n: 12 },                        // les pavés mouillés
         { type: 'fenetres', points: [{ x: 58.6, y: 39 }, { x: 63, y: 37.8 }, { x: 67.4, y: 39 }, { x: 43.2, y: 35 }, { x: 46.2, y: 35 }] }, // (51)
       ], cadrage: '50% 50%', carte: 'haut-gauche', ambiance: 'feuilles', alt: "Couple devant la façade illuminée d'un grand cinéma parisien, pavés mouillés et ciel orangé", badge: 'Cinémas', titre: 'Fais-toi une toile',
       texte: 'Salles Art déco, cinémas de quartier, séances en plein air : le grand écran, c\'est mieux ensemble.', bouton: 'Vois les cinémas sur la carte' },
@@ -137,9 +145,7 @@ export const ECRANS = [
       texte: 'Fêtes de village, festivals, marchés de Noël : ne rate plus rien de ce qui se passe près de toi.', bouton: 'Vois les événements sur la carte' },
     { cle: 'monument', illu: monument, fond: fondMonument, ratio: 1376 / 768,
       effets: [
-        { type: 'reflets', x: 3, y: 62, l: 52, h: 32, n: 14 },                       // reflets sur l'étang
         { type: 'ondes', points: [{ x: 24, y: 90 }, { x: 30.5, y: 93 }] },            // (16, 17)
-        { type: 'drapeaux', points: [{ x: 23.9, y: 24.7 }, { x: 29.8, y: 24 }, { x: 67.4, y: 19.5 }, { x: 77.3, y: 20.8 }] }, // (18)
         { type: 'lampes', points: [{ x: 96.5, y: 49, t: 6 }] },                       // (19)
         { type: 'hirondelles', x: 52, y: 20 },                                        // (20)
       ], cadrage: '50% 45%', alt: "Château fort aux tours coiffées d'ardoise au bord d'un étang, au coucher du soleil", badge: 'Monuments', titre: 'Remonte le temps',
@@ -149,11 +155,51 @@ export const ECRANS = [
 /* L'arbre du parc suit la saison : parc.svg#printemps, #automne, #hiver (été = sans fragment) */
 /* Premier écran : la photo du lac (1 à 5) */
 export const EFFETS_LAC = [
-    { type: 'reflets', x: 72, y: 45, l: 14, h: 32, n: 14 },                          // (1) reflet du soleil
-    { type: 'reflets', x: 35, y: 50, l: 30, h: 20, n: 6 },
     { type: 'brume', x: 34, y: 34, l: 16, h: 14 },                                   // (2) pied de la cascade
     { type: 'nuages', x: 30, y: 2, l: 70, h: 20 },                                   // (3)
     { type: 'flamme', x: 43, y: 80.5 },                                              // (5) lanterne
 ];
 
 export const FRAGMENT_ARBRE = { printemps: '#printemps', ete: '', automne: '#automne', halloween: '#automne', hiver: '#hiver', noel: '#hiver' };
+
+/*
+ * Fonds des pages connexion et inscription (CadreAuth.jsx). Même principe que ECRANS :
+ * effets en % DE L'IMAGE. La droite des deux photos est calme : c'est là que se pose la carte.
+ */
+export const FONDS_AUTH = {
+    // Connexion : la bande retrouve ses amis à la guinguette du bord de mer
+    '/connexion': { fond: fondConnexion, ratio: 1672 / 941, cadrage: '30% 60%',
+      effets: [
+        { type: 'nuages', x: 30, y: 3, l: 70, h: 25 },
+        { type: 'soleil', x: 77.9, y: 43.8, t: 10 },
+        { type: 'miroir', x: 74, y: 47, l: 8, h: 22 },                               // le chemin du soleil sur la mer
+        { type: 'guirlande', points: [
+            { x: 21, y: 24.5 }, { x: 25, y: 27 }, { x: 29, y: 28.5 }, { x: 33, y: 30 }, { x: 37, y: 31 },
+            { x: 41, y: 32 }, { x: 44.5, y: 32.5 }, { x: 47.5, y: 33.5 }, { x: 50, y: 35 },
+        ] },
+        { type: 'lampes', points: [{ x: 9.5, y: 22, t: 2.5 }, { x: 14, y: 29.5, t: 3.5 }, { x: 18, y: 29.2, t: 2.5 }, { x: 23, y: 33, t: 3.5 }, { x: 26.5, y: 34, t: 2.5 }, { x: 31.5, y: 34.5, t: 3 }] }, // les lampions
+        { type: 'flamme', x: 39.8, y: 70.5 },                                         // les lanternes posées au sol…
+        { type: 'flamme', x: 8.5, y: 64.5 },
+        { type: 'flamme', x: 51, y: 47 },                                             // … et une bougie sur une table
+        { type: 'voilier', x: 58, y: 44.5, l: 42, h: 3.5 },
+        { type: 'phare', x: 57, y: 39 },                                              // la nuit, au bout de la pointe
+        { type: 'hirondelles', x: 86, y: 20, echelle: 0.6 },                          // des mouettes
+        { type: 'herbes', x: 50, y: 82, l: 50, h: 18 },
+      ] },
+    // Inscription : un ami court pour rejoindre la bande, sur le chemin au-dessus de la rivière
+    '/inscription': { fond: fondInscription, ratio: 1672 / 941, cadrage: '30% 60%',
+      effets: [
+        { type: 'nuages', x: 30, y: 2, l: 70, h: 22 },
+        { type: 'soleil', x: 85.2, y: 37.2, t: 11 },
+        { type: 'miroir', x: 81, y: 52, l: 7, h: 6 },                                 // le soleil dans la rivière
+        { type: 'lampes', points: [{ x: 4.4, y: 17.5, t: 6 }] },                      // la lanterne de la guinguette
+        { type: 'guirlande', points: [{ x: 10, y: 40.5 }, { x: 13, y: 41 }, { x: 16, y: 41.5 }, { x: 19, y: 41.5 }, { x: 22, y: 42 }, { x: 25, y: 42.5 }] },
+        { type: 'pollen', x: 10, y: 72, l: 30, h: 26, n: 12 },                        // grains dorés sur le chemin
+        { type: 'pollen', x: 18, y: 60, l: 16, h: 12, n: 6 },
+        { type: 'herbes', x: 55, y: 82, l: 45, h: 18 },
+        { type: 'fleurs', points: [{ x: 82, y: 96 }, { x: 88, y: 92 }, { x: 94, y: 95 }] }, // la lavande
+        { type: 'papillons', x: 60, y: 60, l: 18, h: 14 },
+        { type: 'hirondelles', x: 37, y: 22, echelle: 0.6 },                          // autour du château
+        { type: 'fenetres', points: [{ x: 30, y: 33 }, { x: 33.5, y: 32 }, { x: 37, y: 31 }] },
+      ] },
+};

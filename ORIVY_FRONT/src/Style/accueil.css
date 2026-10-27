@@ -384,23 +384,46 @@
   mix-blend-mode: screen;
   opacity: 0.6;
 }
-/* Grains de lumière : petits points dorés qui montent en oscillant */
-/* Les <i> de l'ambiance servent aux feuilles et aux oiseaux (grains de lumière retirés le 2026-10-24) :
-   ici, seulement leur position, leur durée et leur balancement, chacun le sien */
+/* Les <i> de l'ambiance servent aux grains, aux feuilles et aux oiseaux :
+   ici, seulement leur position, leur durée et leur balancement, chacun le sien.
+   nth-of-type (et pas nth-child) : le <span> du halo, posé avant, ne décale pas le compte */
 .ambiance i { position: absolute; opacity: 0; }
-.ambiance i:nth-child(1)  { left: 6%;  --duree: 13s; --delai: 0s;   --x: 18px; }
-.ambiance i:nth-child(2)  { left: 14%; --duree: 17s; --delai: -6s;  --x: -14px; }
-.ambiance i:nth-child(3)  { left: 23%; --duree: 15s; --delai: -2s;  --x: 22px; }
-.ambiance i:nth-child(4)  { left: 31%; --duree: 19s; --delai: -11s; --x: -20px; }
-.ambiance i:nth-child(5)  { left: 40%; --duree: 14s; --delai: -4s;  --x: 16px; }
-.ambiance i:nth-child(6)  { left: 49%; --duree: 18s; --delai: -9s;  --x: -18px; }
-.ambiance i:nth-child(7)  { left: 57%; --duree: 16s; --delai: -1s;  --x: 24px; }
-.ambiance i:nth-child(8)  { left: 66%; --duree: 20s; --delai: -13s; --x: -16px; }
-.ambiance i:nth-child(9)  { left: 74%; --duree: 15s; --delai: -7s;  --x: 14px; }
-.ambiance i:nth-child(10) { left: 83%; --duree: 17s; --delai: -3s;  --x: -22px; }
+.ambiance i:nth-of-type(1) { left: 6%;  --duree: 13s; --delai: 0s;   --x: 18px; }
+.ambiance i:nth-of-type(2) { left: 14%; --duree: 17s; --delai: -6s;  --x: -14px; }
+.ambiance i:nth-of-type(3) { left: 23%; --duree: 15s; --delai: -2s;  --x: 22px; }
+.ambiance i:nth-of-type(4) { left: 31%; --duree: 19s; --delai: -11s; --x: -20px; }
+.ambiance i:nth-of-type(5) { left: 40%; --duree: 14s; --delai: -4s;  --x: 16px; }
+.ambiance i:nth-of-type(6) { left: 49%; --duree: 18s; --delai: -9s;  --x: -18px; }
+.ambiance i:nth-of-type(7) { left: 57%; --duree: 16s; --delai: -1s;  --x: 24px; }
+.ambiance i:nth-of-type(8) { left: 66%; --duree: 20s; --delai: -13s; --x: -16px; }
+.ambiance i:nth-of-type(9) { left: 74%; --duree: 15s; --delai: -7s;  --x: 14px; }
+.ambiance i:nth-of-type(10) { left: 83%; --duree: 17s; --delai: -3s;  --x: -22px; }
+
+/* Grains de lumière (le parc) : petits points dorés qui montent du bas en oscillant */
+.ambiance--grains i {
+  bottom: -2%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgb(255 226 160);
+  box-shadow: 0 0 6px 2px rgb(255 200 120 / 0.6);
+}
+.ambiance--grains i:nth-of-type(3n) { width: 3px; height: 3px; }
+/* 10 grains de plus, glissés entre les 10 premiers, pour un parc plus lumineux */
+.ambiance--grains i:nth-of-type(11) { left: 10%; --duree: 16s; --delai: -8s;  --x: -16px; }
+.ambiance--grains i:nth-of-type(12) { left: 19%; --duree: 21s; --delai: -15s; --x: 20px; }
+.ambiance--grains i:nth-of-type(13) { left: 27%; --duree: 14s; --delai: -5s;  --x: -12px; }
+.ambiance--grains i:nth-of-type(14) { left: 36%; --duree: 18s; --delai: -12s; --x: 18px; }
+.ambiance--grains i:nth-of-type(15) { left: 45%; --duree: 15s; --delai: -3s;  --x: -24px; }
+.ambiance--grains i:nth-of-type(16) { left: 53%; --duree: 20s; --delai: -10s; --x: 14px; }
+.ambiance--grains i:nth-of-type(17) { left: 62%; --duree: 17s; --delai: -6s;  --x: -18px; }
+.ambiance--grains i:nth-of-type(18) { left: 70%; --duree: 13s; --delai: -14s; --x: 22px; }
+.ambiance--grains i:nth-of-type(19) { left: 79%; --duree: 19s; --delai: -2s;  --x: -14px; }
+.ambiance--grains i:nth-of-type(20) { left: 92%; --duree: 16s; --delai: -9s;  --x: 16px; }
 
 @media (prefers-reduced-motion: no-preference) {
   .ambiance__halo { animation: halo-respire 14s ease-in-out infinite alternate; }
+  .ambiance--grains i { animation: grain-monte var(--duree) linear var(--delai) infinite; }
 }
 /* Sous mouvement réduit : le halo reste fixe, les grains disparaissent */
 @media (prefers-reduced-motion: reduce) {
@@ -409,6 +432,13 @@
 @keyframes halo-respire {
   from { transform: translate(0, 0);     opacity: 0.45; }
   to   { transform: translate(-12%, 6%); opacity: 0.8; }
+}
+@keyframes grain-monte {
+  0%   { transform: translate(0, 0);                 opacity: 0; }
+  15%  { opacity: 0.9; }
+  50%  { transform: translate(var(--x), -45vh); }
+  85%  { opacity: 0.7; }
+  100% { transform: translate(calc(var(--x) * -1), -90vh); opacity: 0; }
 }
 /* L'écran d'accueil : l'ambiance sous la carte de texte */
 .ecran--intro .intro__carte { position: relative; z-index: var(--plan-contenu); }

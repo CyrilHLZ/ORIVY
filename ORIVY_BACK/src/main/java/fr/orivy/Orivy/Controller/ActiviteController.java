@@ -3,7 +3,6 @@ package fr.orivy.Orivy.Controller;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,7 +19,6 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*")
 public class ActiviteController {
 
     private final ActiviteService activiteService;

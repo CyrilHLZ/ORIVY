@@ -9,14 +9,14 @@ import { dateLisible, jourDuMois, lireDate, moisCourt } from '../Utils/dates.js'
 /*
  * <CarteSortie sortie={sortie} km={12} onRejoindre={…} />
  *
- * sortie : objet du back { id, nom, categorie, dateDebut, lieu, inscrits? (liste de personnes), nombreInscrits? }
+ * sortie : objet du back { id, nom, categorie, dateDebut, lieu, participants? (liste de personnes) }
  * onRejoindre : si fourni, affiche le bouton « Rejoins » (sinon, rien : ex. sortie passée)
  * inscrit     : vrai si l'utilisateur est déjà inscrit (le bouton change)
  */
 const CarteSortie = ({ sortie, km, onRejoindre, inscrit = false }) => {
     const date = lireDate(sortie.dateDebut);
-    const personnes = sortie.inscrits || [];
-    const total = sortie.nombreInscrits ?? personnes.length;
+    const personnes = sortie.participants || [];
+    const total = personnes.length;
 
     return (
         <article className="carte-sortie">

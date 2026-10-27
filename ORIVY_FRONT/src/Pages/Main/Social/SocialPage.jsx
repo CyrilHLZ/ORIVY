@@ -19,7 +19,7 @@ import { EtatErreur, EtatVide } from '../../../Composants/Etats.jsx';
  * Le CSS fait tout le travail (pages.css, section 14) : le HTML est le même.
  *
  * Données du back utilisées : { id, nom, description, categorie, dateDebut, lieu }.
- * Affichés automatiquement s'ils arrivent un jour : imageUrl, organisateur, inscrits, nombreMax.
+ * Affichés automatiquement s'ils arrivent un jour : imageUrl, nombreMax.
  */
 
 /* Le prochain week-end (samedi 0h → dimanche 23h59), ou celui en cours */
@@ -45,7 +45,7 @@ const partager = async (sortie, signaler) => {
 const DiapoSortie = ({ sortie, premiere, inscrit, onRejoindre, onPartager }) => {
     const cat = categorie(sortie.categorie);
     const titreId = `sortie-${sortie.id}`;
-    const nbInscrits = sortie.inscrits?.length;
+    const nbInscrits = sortie.participants?.length;
 
     return (
         <article className={`diapo cat-${cat.cle}`} aria-labelledby={titreId}>
@@ -97,12 +97,11 @@ const DiapoSortie = ({ sortie, premiere, inscrit, onRejoindre, onPartager }) => 
 
 const SocialPage = () => {
     const navigate = useNavigate();
-    const { isAuthenticated } = useAuth();
+    const { user, isAuthenticated } = useAuth();
     const [sorties, setSorties] = useState([]);
     const [chargement, setChargement] = useState(true);
     const [erreur, setErreur] = useState(null);
     const [filtre, setFiltre] = useState('tout');
-    const [inscriptions, setInscriptions] = useState([]);   // ids des sorties rejointes pendant la visite
     const [message, setMessage] = useState(null);
 
     const charger = () => {
@@ -151,8 +150,9 @@ const SocialPage = () => {
     const rejoindre = async (sortie) => {
         if (!isAuthenticated) { navigate('/connexion'); return; }
         try {
-            await inscriptionSortie(sortie.id);
-            setInscriptions((liste) => [...liste, sortie.id]);
+            // Le back renvoie la sortie à jour : on la remplace dans la liste
+            const aJour = await inscriptionSortie(sortie.id);
+            setSorties((liste) => liste.map((s) => (s.id === aJour.id ? aJour : s)));
             setMessage("C'est noté, à bientôt !");
         } catch (e) {
             setMessage(e.message || "L'inscription n'a pas fonctionné. Réessaie plus tard.");
@@ -201,7 +201,7 @@ const SocialPage = () => {
                                 key={sortie.id}
                                 sortie={sortie}
                                 premiere={i === 0}
-                                inscrit={inscriptions.includes(sortie.id)}
+                                inscrit={sortie.participants?.some((p) => p.id === user?.id) ?? false}
                                 onRejoindre={rejoindre}
                                 onPartager={(s) => partager(s, setMessage)}
                             />

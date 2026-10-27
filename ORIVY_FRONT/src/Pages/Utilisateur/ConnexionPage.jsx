@@ -82,7 +82,7 @@ const ConnexionPage = () => {
                 </Bouton>
             </form>
 
-            <p className="auth__bas" style={{ marginTop: 'var(--espace-5)' }}>
+            <p className="auth__bas">
                 Pas encore de compte ? <Link to="/inscription">Inscris-toi, c'est gratuit</Link>
             </p>
         </CadreAuth>

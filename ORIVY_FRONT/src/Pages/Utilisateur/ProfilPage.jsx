@@ -8,14 +8,17 @@ import Icone from '../../Composants/Icone.jsx';
 import { Champ, Interrupteur } from '../../Composants/Formulaire.jsx';
 import { ChoixSegmente } from '../../Composants/Filtres.jsx';
 import { EtatErreur } from '../../Composants/Etats.jsx';
+import { getSortiesMembre } from '../../Services/Sortie/SortieService.js';
+import CarteSortie from '../../Composants/CarteSortie.jsx';
+
 
 /*
  * Profil (maquette design/maquettes/profil.html).
  *   /profil       → mon profil : modification, réglages, compte
  *   /profil/:id   → le profil d'un autre membre (lecture seule)
  *
- * N'affiche que ce que le back sait fournir : identité et ville.
- * (Pas encore de bio, d'abonnés ni de sorties par membre dans le back.)
+ * Affiche l'identité, la ville, la bio et les sorties (organisées / rejointes) du membre.
+ * (Pas encore d'abonnés ni de photo dans le back.)
  */
 
 const OPTIONS_THEME = [
@@ -61,7 +64,7 @@ const Reglages = () => {
 /* ---- Formulaire de modification du profil ---- */
 const ModifierProfil = ({ profil, onEnregistre, onAnnuler }) => {
     const [valeurs, setValeurs] = useState({
-        prenom: profil.prenom ?? '', nom: profil.nom ?? '', ville: profil.ville ?? '', numeroTelephone: profil.numeroTelephone ?? '',
+        prenom: profil.prenom ?? '', nom: profil.nom ?? '', ville: profil.ville ?? '', numeroTelephone: profil.numeroTelephone ?? '', bio: profil.bio ?? '',
     });
     const [erreur, setErreur] = useState(null);
     const [enCours, setEnCours] = useState(false);
@@ -89,6 +92,8 @@ const ModifierProfil = ({ profil, onEnregistre, onAnnuler }) => {
                 <Champ label="Nom" name="nom" autoComplete="family-name" value={valeurs.nom} onChange={changer} />
             </div>
             <Champ label="Ville" name="ville" autoComplete="address-level2" placeholder="Lyon" value={valeurs.ville} onChange={changer} />
+            <Champ label="Bio" name="bio" multiligne rows={3} maxLength={500} value={valeurs.bio} onChange={changer}
+                   aide="Quelques mots sur toi, visibles par les autres membres." />
             <Champ label="Téléphone" name="numeroTelephone" type="tel" autoComplete="tel" value={valeurs.numeroTelephone} onChange={changer}
                    aide="Facultatif. Il n'est pas affiché aux autres membres." />
             <p className="champ__aide">Ton e-mail ({profil.email}) ne se modifie pas ici.</p>
@@ -128,6 +133,15 @@ const ProfilPage = () => {
             .catch(() => (estMoi && user ? setProfil(user) : setErreur("Ce profil n'existe pas.")));
     }, [idProfil]); // eslint-disable-line react-hooks/exhaustive-deps
 
+    // Sorties organisées et rejointes par ce membre
+    const [sorties, setSorties] = useState({ organisees: [], rejointes: [] });
+    useEffect(() => {
+        if (!idProfil) return;
+        getSortiesMembre(idProfil)
+            .then(setSorties)
+            .catch(() => {});   // sans sorties, le profil reste utilisable
+    }, [idProfil]);
+
     useEffect(() => {
         if (!message) return undefined;
         const minuteur = setTimeout(() => setMessage(null), 4000);
@@ -162,6 +176,8 @@ const ProfilPage = () => {
                                     <Icone nom="epingle" taille="petite" />{profil.ville}
                                 </p>
                             )}
+                            {/* pre-line : garde les retours à la ligne tapés par le membre */}
+                            {profil.bio && <p style={{ margin: 0, whiteSpace: 'pre-line' }}>{profil.bio}</p>}
                             {estMoi && !edition && (
                                 <div className="ligne-actions">
                                     <Bouton variante="secondaire" icone="modifier" onClick={() => setEdition(true)}>Modifier le profil</Bouton>
@@ -177,10 +193,27 @@ const ProfilPage = () => {
 
                     <section className="encart" aria-labelledby="t-sorties" style={{ marginTop: 'var(--espace-5)' }}>
                         <h2 id="t-sorties" style={{ fontSize: 'var(--taille-xl)' }}>{estMoi ? 'Tes sorties' : 'Ses sorties'}</h2>
-                        <p className="texte-doux">
-                            Bientôt ici : les sorties organisées et passées{estMoi ? '' : ` de ${profil.prenom || 'ce membre'}`}.
-                            En attendant, retrouve toutes les sorties à venir.
-                        </p>
+                        {sorties.organisees.length > 0 && (
+                            <>
+                                <h3>Organisées</h3>
+                                <div className="carrousel">
+                                    {sorties.organisees.map((s) => <CarteSortie key={s.id} sortie={s} />)}
+                                </div>
+                            </>
+                        )}
+                        {sorties.rejointes.length > 0 && (
+                            <>
+                                <h3>Rejointes</h3>
+                                <div className="carrousel">
+                                    {sorties.rejointes.map((s) => <CarteSortie key={s.id} sortie={s} />)}
+                                </div>
+                            </>
+                        )}
+                        {sorties.organisees.length === 0 && sorties.rejointes.length === 0 && (
+                            <p className="texte-doux">
+                                {estMoi ? "Tu n'as pas encore de sortie." : `${profil.prenom || 'Ce membre'} n'a pas encore de sortie.`}
+                            </p>
+                        )}
                         <div className="ligne-actions">
                             <Bouton variante="secondaire" icone="calendrier" vers="/sorties">Voir les sorties</Bouton>
                             {estMoi && <Bouton icone="plus" vers="/sorties/creation">Crée une sortie</Bouton>}

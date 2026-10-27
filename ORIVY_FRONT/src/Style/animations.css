@@ -123,6 +123,32 @@
   mix-blend-mode: screen;
 }
 
+/* Statues : même lueur que les réverbères, mais plus douce et plus lente à s'allumer */
+.effet--statue i {
+  width: var(--taille); height: var(--taille);
+  margin: calc(var(--taille) / -2) 0 0 calc(var(--taille) / -2);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 214 140 / 0.55), rgb(255 180 90 / 0.18) 50%, rgb(255 180 90 / 0));
+  mix-blend-mode: screen;
+}
+
+/* Pollen : petits grains dorés qui montent des fleurs en se balançant */
+.effet--pollen i {
+  width: 0.3em; height: 0.3em; border-radius: 50%;
+  background: rgb(255 226 160);
+  box-shadow: 0 0 0.4em 0.12em rgb(255 200 120 / 0.6);
+  opacity: 0;
+}
+
+/* Miroir : le ciel doré qui se reflète dans le bassin (deux nappes qui ondulent à contretemps) */
+.effet--miroir i {
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 210 130 / 0.5), rgb(255 170 80 / 0.15) 55%, rgb(255 170 80 / 0));
+  mix-blend-mode: screen;
+}
+.effet--miroir i:nth-child(2) { inset: 20% 15%; --delai: -3s; }
+
 /* (51) Fenêtres qui s'allument la nuit seulement */
 .effet--fenetre { display: none; }
 [data-theme="nuit"] .effet--fenetre { display: block; }
@@ -414,6 +440,9 @@
   .effet--ruissellement i { animation: ruisselle calc(var(--duree) * 0.35) linear var(--delai) infinite; }
   .effet--gouttes i { animation: goutte calc(var(--duree) * 0.5) ease-out var(--delai) infinite; }
   .effet--lampe i { animation: allumage 1.2s ease-out calc(var(--ordre) * 0.6s) both, respire 4s ease-in-out calc(1.2s + var(--ordre) * 0.6s) infinite alternate; }
+  .effet--statue i { animation: allumage 2s ease-out calc(var(--ordre) * 0.9s) both, respire 5s ease-in-out calc(2s + var(--ordre) * 0.9s) infinite alternate; }
+  .effet--pollen i { animation: pollen var(--duree) ease-in-out var(--delai) infinite; }
+  .effet--miroir i { animation: miroir 6s ease-in-out var(--delai, 0s) infinite alternate; }
   .effet--fenetre i { animation: allumage 1s ease-out calc(var(--ordre) * 0.9s) forwards; }
   .effet--petales i { animation: petale var(--duree) ease-in-out var(--delai) infinite; }
   .effet--vapeur i { animation: vapeur 3.9s ease-out var(--delai, 0s) infinite; }
@@ -466,6 +495,8 @@
 @keyframes goutte      { 0% { opacity: 0; transform: translate(0, 0); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), 3em); } }
 @keyframes allumage    { 0% { opacity: 0; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 @keyframes respire     { from { opacity: 1; } to { opacity: 0.65; } }
+@keyframes pollen      { 0% { opacity: 0; transform: translate(0, 0); } 25% { opacity: 0.9; } 100% { opacity: 0; transform: translate(var(--dx), -5em); } }
+@keyframes miroir      { from { opacity: 0.55; transform: scaleX(0.9); } to { opacity: 1; transform: scaleX(1.08); } }
 @keyframes petale      { 0% { opacity: 0; transform: translate(0, 0) rotate(0); } 15% { opacity: 0.9; } 100% { opacity: 0; transform: translate(calc(var(--dx) + 8em), -6em) rotate(300deg); } }
 @keyframes vapeur      { 0% { opacity: 0; transform: translateY(1em) scale(0.6); } 30% { opacity: 0.7; } 100% { opacity: 0; transform: translateY(-3em) scale(1.4, 1.8); } }
 @keyframes reflet-glisse { 0%, 55% { transform: translateX(0) skewX(-20deg); } 100% { transform: translateX(700%) skewX(-20deg); } }

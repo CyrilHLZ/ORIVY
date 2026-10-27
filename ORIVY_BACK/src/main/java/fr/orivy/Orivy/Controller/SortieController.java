@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,17 +12,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import fr.orivy.Orivy.DTO.SortieDto;
+import fr.orivy.Orivy.DTO.SortiesMembre;
 import fr.orivy.Orivy.Model.Sortie;
 import fr.orivy.Orivy.Service.SortieService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/sorties")
-@CrossOrigin(origins = "*")
 public class SortieController {
 
     private final SortieService sortieService;
@@ -44,12 +43,12 @@ public class SortieController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public SortieDto creerSortie(@RequestBody Sortie sortie, @AuthenticationPrincipal Jwt jwt) {
+    public SortieDto creerSortie(@Valid @RequestBody Sortie sortie, @AuthenticationPrincipal Jwt jwt) {
         return SortieDto.depuis(sortieService.creerSortie(sortie, idDe(jwt)));
     }
 
     @PutMapping("/{id}")
-    public SortieDto modifierSortie(@PathVariable Long id, @RequestBody Sortie sortie, @AuthenticationPrincipal Jwt jwt) {
+    public SortieDto modifierSortie(@PathVariable Long id, @Valid @RequestBody Sortie sortie, @AuthenticationPrincipal Jwt jwt) {
         return SortieDto.depuis(sortieService.modifierSortie(id, sortie, idDe(jwt), estAdmin(jwt)));
     }
 
@@ -59,15 +58,16 @@ public class SortieController {
         sortieService.supprimerSortie(id, idDe(jwt), estAdmin(jwt));
     }
 
-    // utilisateurId deviendra obligatoire quand Utilisateur sera une vraie entité
+    // On inscrit toujours l'appelant lui-même : l'id vient du jeton.
+    // La sortie mise à jour est renvoyée pour que le front rafraîchisse les participants.
     @PostMapping("/{id}/inscription")
-    public void inscription(@PathVariable Long id, @RequestParam(required = false) Long utilisateurId) {
-        sortieService.inscrireUtilisateurASortie(id, utilisateurId);
+    public SortieDto inscription(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        return SortieDto.depuis(sortieService.inscrire(id, idDe(jwt)));
     }
 
     @DeleteMapping("/{id}/inscription")
-    public void desinscription(@PathVariable Long id, @RequestParam(required = false) Long utilisateurId) {
-        sortieService.desinscrireUtilisateurDeSortie(id, utilisateurId);
+    public SortieDto desinscription(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        return SortieDto.depuis(sortieService.desinscrire(id, idDe(jwt)));
     }
 
     private Long idDe(Jwt jwt) {
@@ -76,5 +76,12 @@ public class SortieController {
 
     private boolean estAdmin(Jwt jwt) {
         return "admin".equalsIgnoreCase(jwt.getClaimAsString("role"));
+    }
+
+    @GetMapping("/membre/{id}")
+    public SortiesMembre sortiesDuMembre(@PathVariable Long id) {
+        return new SortiesMembre(
+            sortieService.getSortiesOrganisees(id).stream().map(SortieDto::depuis).toList(),
+            sortieService.getSortiesRejointes(id).stream().map(SortieDto::depuis).toList());
     }
 }

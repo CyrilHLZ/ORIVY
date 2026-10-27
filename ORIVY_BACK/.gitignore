@@ -35,3 +35,6 @@ build/
 ### Base H2 locale (données, pas du code) ###
 /data/
 *.trace.db
+
+### Secrets (clé JWT) ###
+.env

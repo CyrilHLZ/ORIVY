@@ -88,7 +88,7 @@ const InscriptionPage = () => {
                 </Bouton>
             </form>
 
-            <p className="auth__bas" style={{ marginTop: 'var(--espace-5)' }}>
+            <p className="auth__bas">
                 Déjà inscrit·e ? <Link to="/connexion">Connecte-toi</Link>
             </p>
         </CadreAuth>

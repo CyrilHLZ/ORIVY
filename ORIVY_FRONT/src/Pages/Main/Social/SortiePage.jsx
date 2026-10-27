@@ -19,7 +19,7 @@ import Confettis from '../../../Composants/Confettis.jsx';
  * Mobile : bouton d'inscription collé en bas. Ordinateur : encart à droite qui suit le défilement.
  *
  * Données du back : { id, nom, description, categorie, dateDebut, lieu, latitude, longitude }.
- * Affichés s'ils arrivent : imageUrl, organisateur, participants, nombreMax.
+ * Affichés s'ils arrivent : imageUrl, nombreMax.
  * Commentaires : GET /api/sortie/{id}/commentaires et POST /api/commentaires.
  */
 
@@ -44,7 +44,6 @@ const SortiePage = () => {
 
     const [sortie, setSortie] = useState(null);
     const [erreur, setErreur] = useState(null);
-    const [inscrit, setInscrit] = useState(false);
     const [enCours, setEnCours] = useState(false);
     const [commentaires, setCommentaires] = useState([]);
     const [texte, setTexte] = useState('');
@@ -88,14 +87,16 @@ const SortiePage = () => {
     const cat = categorie(sortie.categorie);
     const participants = sortie.participants || [];
     const placesRestantes = sortie.nombreMax ? Math.max(0, sortie.nombreMax - participants.length) : null;
-    // Modifier / supprimer : l'organisateur, un admin, ou (tant que le back n'a pas d'organisateur) tout membre connecté
-    const peutGerer = isAdmin || (sortie.organisateur ? sortie.organisateur.id === user?.id : isAuthenticated);
+    const peutGerer = isAdmin || sortie.organisateur?.id === user?.id;
+    // Inscrit = présent dans la liste renvoyée par le back (vrai aussi après un rechargement)
+    const inscrit = participants.some((p) => p.id === user?.id);
 
     const basculerInscription = async () => {
         setEnCours(true);
         try {
-            if (inscrit) { await desinscriptionSortie(id); setInscrit(false); setMessage('Tu t\'es désinscrit·e de la sortie.'); }
-            else { await inscriptionSortie(id); setInscrit(true); setFete((n) => n + 1); setMessage("C'est noté, à bientôt !"); }
+            // Le back renvoie la sortie à jour : participants et avatars se rafraîchissent
+            if (inscrit) { setSortie(await desinscriptionSortie(id)); setMessage('Tu t\'es désinscrit·e de la sortie.'); }
+            else { setSortie(await inscriptionSortie(id)); setFete((n) => n + 1); setMessage("C'est noté, à bientôt !"); }
         } catch (e) {
             setMessage(e.message || "Ça n'a pas fonctionné. Réessaie plus tard.");
         } finally {
@@ -107,7 +108,8 @@ const SortiePage = () => {
         event.preventDefault();
         if (!texte.trim()) return;
         try {
-            const nouveau = await createCommentaire({ auteur: nomDe(user), contenu: texte.trim(), cibleType: 'sortie', cibleId: Number(id) });
+            // L'auteur n'est pas envoyé : le back le lit dans le jeton
+            const nouveau = await createCommentaire({ contenu: texte.trim(), cibleType: 'sortie', cibleId: Number(id) });
             // On ajoute la réponse du back à la liste (sans tout recharger)
             setCommentaires((liste) => [...liste, nouveau]);
             setTexte('');
@@ -206,11 +208,11 @@ const SortiePage = () => {
                             <ul className="commentaires" aria-live="polite">
                                 {commentaires.map((c) => (
                                     <li className="commentaire" key={c.id}>
-                                        {/* « Yanis Benali » → prénom + nom, pour des initiales « YB » */}
-                                        <Avatar personne={{ prenom: c.auteur?.split(' ')[0], nom: c.auteur?.split(' ')[1] }} taille="s" />
+                                        {/* auteur = { id, prenom, nom, ville }, ou null pour les anciens commentaires */}
+                                        <Avatar personne={c.auteur ?? {}} taille="s" />
                                         <div>
                                             <div className="commentaire__bulle">
-                                                <p className="commentaire__auteur">{c.auteur}</p>
+                                                <p className="commentaire__auteur">{nomDe(c.auteur)}</p>
                                                 <p className="commentaire__texte" style={{ whiteSpace: 'pre-line' }}>{c.contenu}</p>
                                             </div>
                                             {c.dateCreation && <div className="commentaire__actions"><span>{ilYa(c.dateCreation)}</span></div>}

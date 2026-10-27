@@ -3,7 +3,6 @@ package fr.orivy.Orivy.Controller;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,33 +14,27 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import fr.orivy.Orivy.Model.ActiviteCarte;
-import fr.orivy.Orivy.Model.Commentaire;
 import fr.orivy.Orivy.Model.PointInteret;
 import fr.orivy.Orivy.Model.Promenade;
 import fr.orivy.Orivy.Repository.ActiviteCarteRepository;
-import fr.orivy.Orivy.Repository.CommentaireRepository;
 import fr.orivy.Orivy.Repository.PointInteretRepository;
 import fr.orivy.Orivy.Repository.PromenadeRepository;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*")
 public class CarteController {
 
     private final PointInteretRepository pointInteretRepository;
     private final PromenadeRepository promenadeRepository;
     private final ActiviteCarteRepository activiteRepository;
-    private final CommentaireRepository commentaireRepository;
 
     public CarteController(PointInteretRepository pointInteretRepository,
             PromenadeRepository promenadeRepository,
-            ActiviteCarteRepository activiteRepository,
-            CommentaireRepository commentaireRepository) {
+            ActiviteCarteRepository activiteRepository) {
         this.pointInteretRepository = pointInteretRepository;
         this.promenadeRepository = promenadeRepository;
         this.activiteRepository = activiteRepository;
-        this.commentaireRepository = commentaireRepository;
     }
 
     @GetMapping("/carte")
@@ -89,19 +82,6 @@ public class CarteController {
     @PostMapping("/promenades")
     public Promenade creerPromenade(@Valid @RequestBody Promenade promenade) {
         return promenadeRepository.save(promenade);
-    }
-
-    @GetMapping("/{cibleType}/{cibleId}/commentaires")
-    public List<Commentaire> commentaires(@PathVariable String cibleType, @PathVariable Long cibleId) {
-        return commentaireRepository.findByCibleTypeAndCibleId(cibleType, cibleId);
-    }
-
-    @PostMapping("/commentaires")
-    public Commentaire creerCommentaire(@Valid @RequestBody Commentaire commentaire) {
-        if (commentaire.getCibleType() == null || commentaire.getCibleType().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Le type de cible est obligatoire");
-        }
-        return commentaireRepository.save(commentaire);
     }
 
     public record CarteResponse(List<PointInteret> pointsInteret, List<Promenade> promenades,

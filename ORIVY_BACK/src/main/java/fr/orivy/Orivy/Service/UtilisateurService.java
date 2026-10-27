@@ -65,6 +65,7 @@ public class UtilisateurService {
         utilisateurExistant.setVille(utilisateur.getVille());
         utilisateurExistant.setCodePostal(utilisateur.getCodePostal());
         utilisateurExistant.setPays(utilisateur.getPays());
+        utilisateurExistant.setBio(utilisateur.getBio());
         return utilisateurRepository.save(utilisateurExistant);
     }
 

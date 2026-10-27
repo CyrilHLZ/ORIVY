@@ -43,15 +43,16 @@ const useSaison = () => {
  * Ambiance animée posée sur les photos (purement décorative, aria-hidden).
  * type :
  *   "lumiere"  → halo doré qui respire (sans grains de lumière, retirés le 2026-10-24)
+ *   "grains"   → le même halo, avec des petits grains dorés qui montent (le parc)
  *   "feuilles" → feuilles d'érable orange qui tombent des arbres
  *   "oiseaux"  → une volée d'oiseaux qui traverse le ciel en battant des ailes
  * Aucun zoom : la photo reste à sa taille, donc aussi nette que possible.
  */
 const Ambiance = ({ type = 'lumiere' }) => (
     <div className={`ambiance ambiance--${type}`} aria-hidden="true">
-        {type === 'lumiere' && <span className="ambiance__halo" />}
+        {(type === 'lumiere' || type === 'grains') && <span className="ambiance__halo" />}
         {/* Pour les oiseaux, <i> traverse le ciel et <b> bat des ailes : deux rythmes différents */}
-        {type !== 'lumiere' && Array.from({ length: type === 'oiseaux' ? 7 : 10 }, (_, i) => (
+        {type !== 'lumiere' && Array.from({ length: { oiseaux: 7, grains: 20 }[type] ?? 10 }, (_, i) => (
             <i key={i}>{type === 'oiseaux' && <b />}</i>
         ))}
     </div>

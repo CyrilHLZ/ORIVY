@@ -515,11 +515,47 @@
 /* ==========================================================================
    18. CONNEXION / INSCRIPTION
    ========================================================================== */
-.auth { display: grid; min-height: calc(100svh - var(--hauteur-entete)); }
-.auth__illu { display: none; }
-.auth__panneau { display: flex; flex-direction: column; justify-content: center; padding: var(--espace-6) var(--marge-page) var(--espace-8); }
-.auth__carte { width: 100%; max-width: calc(var(--espace-9) * 4.6); margin: 0 auto; }
-.auth__carte h1 { font-size: var(--taille-2xl); }
+.auth {
+  position: relative;
+  isolation: isolate;          /* la photo (z-index -1) reste derrière la carte, pas derrière la page */
+  display: grid;
+  place-items: center;
+  min-height: calc(100svh - var(--hauteur-entete));
+  padding: var(--espace-6) var(--marge-page) var(--espace-8);
+  overflow: hidden;
+}
+.auth__photo { z-index: -1; }
+/* Un voile sombre léger : la carte se détache, la photo reste chaude */
+.auth::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(to right, rgb(22 17 13 / 0.05), rgb(22 17 13 / 0.35));
+  pointer-events: none;
+}
+/* Verre dépoli clair : mêmes couleurs que les autres cartes, donc lisible dans tous les thèmes */
+.auth__carte {
+  width: 100%;
+  max-width: calc(var(--espace-9) * 4.6);
+  padding: var(--espace-6);
+  background: color-mix(in srgb, var(--couleur-surface) 86%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgb(255 255 255 / 0.35);
+  border-radius: var(--rayon-grand);
+  box-shadow: 0 20px 50px rgb(0 0 0 / 0.25);
+}
+.auth__carte .onglets-section { margin-bottom: var(--espace-4); }
+.auth__carte h1 { font-size: var(--taille-2xl); margin-bottom: var(--espace-1); }
+.auth__carte h1 + .texte-doux { margin-top: 0; margin-bottom: var(--espace-4); }
+.auth__bas { margin-top: var(--espace-4); margin-bottom: 0; }
+/* Formulaire plus serré que sur les autres pages : l'inscription tient dans l'écran, sans descendre */
+.auth__carte .formulaire { gap: var(--espace-3); }
+.auth__carte .champ { gap: var(--espace-1); }
+.auth__carte .exigences { grid-template-columns: 1fr 1fr; column-gap: var(--espace-4); }
+/* La signature, en blanc sur la photo : seulement sur ordinateur, où il y a la place */
+.auth__signature { display: none; }
 .auth__separateur { display: flex; align-items: center; gap: var(--espace-3); color: var(--couleur-texte-doux); font-size: var(--taille-s); margin: var(--espace-2) 0; }
 .auth__separateur::before, .auth__separateur::after { content: ""; flex: 1; height: 1px; background: var(--couleur-bordure); }
 .auth__bas { text-align: center; font-size: var(--taille-s); color: var(--couleur-texte-doux); }
@@ -533,10 +569,30 @@
 .page-auth.avec-onglets { padding-bottom: 0; }
 .page-auth .onglets { display: none; }   /* pas de barre d'onglets avant connexion */
 @media (min-width: 1024px) {
-  .auth { grid-template-columns: 1fr 1fr; min-height: calc(100vh - var(--hauteur-entete)); }
-  .auth__illu { display: block; position: relative; overflow: hidden; }
-  .auth__illu img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .auth__illu blockquote { position: absolute; left: var(--espace-6); right: var(--espace-6); bottom: var(--espace-6); margin: 0; padding: var(--espace-5); background: var(--couleur-surface); border-radius: var(--rayon-grand); box-shadow: var(--ombre-3); font-family: var(--police-titre); font-size: var(--taille-xl); line-height: var(--interligne-serre); }
+  /* Hauteur FIXE = l'écran : si le formulaire allongeait la page, la photo (recadrée comme
+     object-fit: cover) grossirait pour la remplir, d'où l'effet « zoomé ». Sur un petit écran,
+     c'est la carte qui défile, pas la page. */
+  .auth {
+    place-items: center end;
+    height: calc(100vh - var(--hauteur-entete));
+    min-height: 0;
+    padding: var(--espace-5) calc(var(--marge-page) + var(--espace-7)) var(--espace-5) var(--marge-page);
+  }
+  .auth__carte { max-height: 100%; overflow-y: auto; padding: var(--espace-5) var(--espace-6); }
+  .auth__signature {
+    display: block;
+    position: absolute;
+    left: var(--espace-8);
+    bottom: var(--espace-8);
+    max-width: 50%;
+    margin: 0;
+    color: #FFFFFF;
+    font-family: var(--police-titre);
+    font-size: var(--taille-4xl);
+    line-height: 1.05;
+    text-shadow: 0 2px 18px rgb(0 0 0 / 0.45);
+  }
+  .auth__signature small { display: block; margin-top: var(--espace-3); font-family: var(--police-texte); font-size: var(--taille-m); text-shadow: 0 1px 8px rgb(0 0 0 / 0.5); }
 }
 
 

@@ -19,9 +19,11 @@ import ChampsLieu, { versPayload } from './ChampsLieu.jsx';
  *   enPlus         : contenu ajouté sous le formulaire (ex. la zone « Supprimer »)
  */
 const LONGUEUR_MAX = 600;
-const aujourdhui = () => {
+// Maintenant, au format attendu par <input type="datetime-local"> : « 2030-06-01T18:30 »
+const maintenant = () => {
     const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const deux = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${deux(d.getMonth() + 1)}-${deux(d.getDate())}T${deux(d.getHours())}:${deux(d.getMinutes())}`;
 };
 
 const FormulaireSortie = ({ initial, texteValider, onValider, onAnnuler, enPlus }) => {
@@ -53,8 +55,8 @@ const FormulaireSortie = ({ initial, texteValider, onValider, onAnnuler, enPlus 
         const e = {};
         if (!sortie.nom.trim()) e.nom = 'Donne un titre à ta sortie.';
         if (!sortie.lieu.trim()) e.lieu = 'Indique où ça se passe.';
-        if (!sortie.dateDebut) e.dateDebut = 'Choisis une date.';
-        else if (sortie.dateDebut < aujourdhui()) e.dateDebut = 'Choisis une date à venir.';
+        if (!sortie.dateDebut) e.dateDebut = 'Choisis une date et une heure.';
+        else if (sortie.dateDebut < maintenant()) e.dateDebut = 'Choisis une date et une heure à venir.';
         return e;
     };
 
@@ -102,7 +104,7 @@ const FormulaireSortie = ({ initial, texteValider, onValider, onAnnuler, enPlus 
                     </div>
                 </fieldset>
 
-                <Champ ref={refs.dateDebut} label="Date" type="date" min={aujourdhui()}
+                <Champ ref={refs.dateDebut} label="Date et heure" type="datetime-local" min={maintenant()}
                        value={sortie.dateDebut} onChange={(e) => modifier('dateDebut', e.target.value)} erreur={erreurs.dateDebut} required />
 
                 <div>
@@ -130,7 +132,7 @@ const FormulaireSortie = ({ initial, texteValider, onValider, onAnnuler, enPlus 
                     id: 0,
                     nom: sortie.nom || 'Ta super sortie',
                     categorie: sortie.categorie || 'autre',
-                    dateDebut: sortie.dateDebut || aujourdhui(),
+                    dateDebut: sortie.dateDebut || maintenant(),
                     lieu: sortie.lieu || 'Quelque part en France',
                 }} />
             </aside>

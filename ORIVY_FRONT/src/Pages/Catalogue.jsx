@@ -23,7 +23,7 @@ const LIEUX = [
 const PERSONNES = [
     { prenom: 'Inès', nom: 'Nakamura' }, { prenom: 'Théo', nom: 'Martin' }, { prenom: 'Yanis', nom: 'Benali' },
 ];
-const SORTIE = { id: 1, nom: 'Lever de soleil au puy de Dôme', categorie: 'promenade', dateDebut: '2026-10-25T07:00:00', lieu: 'Orcines', inscrits: PERSONNES, nombreInscrits: 8 };
+const SORTIE = { id: 1, nom: 'Lever de soleil au puy de Dôme', categorie: 'promenade', dateDebut: '2026-10-25T07:00:00', lieu: 'Orcines', participants: PERSONNES };
 
 const Section = ({ titre, children }) => (
     <section style={{ marginTop: 'var(--espace-8)' }}>

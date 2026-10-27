@@ -24,6 +24,10 @@ public class Utilisateur {
 
     @JsonProperty (access = JsonProperty.Access.WRITE_ONLY)
     private String motDePasse;
+
+    @Column(length = 500)
+    private String bio;
+
     private String role;
     private String numeroTelephone;
     private String adresse;
@@ -34,12 +38,13 @@ public class Utilisateur {
     public Utilisateur() {
     }
 
-    public Utilisateur(String nom, String prenom, LocalDate dateDeNaissance, String email, String motDePasse, String role, String numeroTelephone, String adresse, String ville, String codePostal, String pays) {
+    public Utilisateur(String nom, String prenom, LocalDate dateDeNaissance, String email, String motDePasse, String bio, String role, String numeroTelephone, String adresse, String ville, String codePostal, String pays) {
         this.nom = nom;
         this.prenom = prenom;
         this.dateDeNaissance = dateDeNaissance;
         this.email = email;
         this.motDePasse = motDePasse;
+        this.bio = bio;
         this.role = role;
         this.numeroTelephone = numeroTelephone;
         this.adresse = adresse;
@@ -138,6 +143,14 @@ public class Utilisateur {
 
     public void setPays(String pays) {
         this.pays = pays;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
     }
 
     

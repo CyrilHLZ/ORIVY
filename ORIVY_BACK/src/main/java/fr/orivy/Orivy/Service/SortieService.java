@@ -1,9 +1,11 @@
 package fr.orivy.Orivy.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import fr.orivy.Orivy.Model.Sortie;
@@ -32,16 +34,21 @@ public class SortieService {
 
     // L'organisateur vient du jeton, jamais du corps de la requête
     public Sortie creerSortie(Sortie sortie, Long organisateurId) {
-        Utilisateur organisateur = utilisateurRepository.findById(organisateurId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur introuvable"));
+        if (sortie.getDateDebut().isBefore(LocalDateTime.now())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La date ne peut pas être dans le passé.");
+        }
         sortie.setId(null);
-        sortie.setOrganisateur(organisateur);
+        sortie.setOrganisateur(trouverUtilisateur(organisateurId));
         return sortieRepository.save(sortie);
     }
 
     public Sortie modifierSortie(Long id, Sortie sortie, Long appelantId, boolean estAdmin) {
         Sortie sortieExistante = trouverSortie(id);
         verifierDroits(sortieExistante, appelantId, estAdmin);
+        boolean dateModifiee = !sortie.getDateDebut().equals(sortieExistante.getDateDebut());
+        if (dateModifiee && sortie.getDateDebut().isBefore(LocalDateTime.now())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La date ne peut pas être dans le passé.");
+    }
         sortieExistante.setNom(sortie.getNom());
         sortieExistante.setDescription(sortie.getDescription());
         sortieExistante.setCategorie(sortie.getCategorie());
@@ -58,13 +65,28 @@ public class SortieService {
         sortieRepository.delete(sortie);
     }
 
-    // TODO : à brancher quand Sortie aura une relation @ManyToMany avec Utilisateur
-    public void inscrireUtilisateurASortie(Long sortieId, Long utilisateurId) {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED, "Inscription pas encore disponible");
+    // @Transactional : sortie et utilisateur sont chargés dans la même session Hibernate,
+    // donc un même membre = un même objet Java, et le Set ignore bien les doublons
+    @Transactional
+    public Sortie inscrire(Long sortieId, Long utilisateurId) {
+        Sortie sortie = trouverSortie(sortieId);
+        if (sortie.getDateDebut() != null && sortie.getDateDebut().isBefore(LocalDateTime.now())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Cette sortie est déjà passée.");
+        }
+        sortie.getParticipants().add(trouverUtilisateur(utilisateurId));
+        return sortieRepository.save(sortie);
     }
 
-    public void desinscrireUtilisateurDeSortie(Long sortieId, Long utilisateurId) {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED, "Désinscription pas encore disponible");
+    @Transactional
+    public Sortie desinscrire(Long sortieId, Long utilisateurId) {
+        Sortie sortie = trouverSortie(sortieId);
+        sortie.getParticipants().remove(trouverUtilisateur(utilisateurId));
+        return sortieRepository.save(sortie);
+    }
+
+    private Utilisateur trouverUtilisateur(Long id) {
+        return utilisateurRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur introuvable"));
     }
 
     private Sortie trouverSortie(Long id) {
@@ -80,5 +102,13 @@ public class SortieService {
         if (!estAdmin && !estOrganisateur) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Seul l'organisateur peut gérer cette sortie.");
         }
+    }
+
+    public List<Sortie> getSortiesOrganisees(Long utilisateurId) {
+        return sortieRepository.findByOrganisateurId(utilisateurId);
+    }
+
+    public List<Sortie> getSortiesRejointes(Long utilisateurId) {
+        return sortieRepository.findByParticipantsId(utilisateurId);
     }
 }

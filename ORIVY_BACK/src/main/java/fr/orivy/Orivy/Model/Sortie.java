@@ -1,12 +1,19 @@
 package fr.orivy.Orivy.Model;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity 
 public class Sortie {
@@ -14,10 +21,17 @@ public class Sortie {
     @Id 
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
+
+    @NotBlank(message = "Le nom de la sortie est obligatoire")
     private String nom;
+
     private String description;
     private String categorie;
-    private LocalDate dateDebut;
+
+    @NotNull(message = "La date est obligatoire")
+    private LocalDateTime dateDebut;
+
+    @NotNull(message = "Le lieu est obligatoire")
     private String lieu;
     private Double latitude;
     private Double longitude;
@@ -26,10 +40,17 @@ public class Sortie {
     @JoinColumn(name = "organisateur_id")
     private Utilisateur organisateur;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "sortie_participant",
+            joinColumns = @JoinColumn(name = "sortie_id"),
+            inverseJoinColumns = @JoinColumn(name = "utilisateur_id"))
+    private Set<Utilisateur> participants = new HashSet<>();
+
+
     public Sortie() {
     }
 
-    public Sortie(Long id, String nom, String description, String categorie, LocalDate dateDebut, String lieu) {
+    public Sortie(Long id, String nom, String description, String categorie, LocalDateTime dateDebut, String lieu) {
         this.id = id;
         this.nom = nom;
         this.description = description;
@@ -62,11 +83,11 @@ public class Sortie {
         this.description = description;
     }
 
-    public LocalDate getDateDebut() {
+    public LocalDateTime getDateDebut() {
         return dateDebut;
     }
 
-    public void setDateDebut(LocalDate dateDebut) {
+    public void setDateDebut(LocalDateTime dateDebut) {
         this.dateDebut = dateDebut;
     }
 
@@ -108,5 +129,9 @@ public class Sortie {
 
     public void setOrganisateur(Utilisateur organisateur) {
         this.organisateur = organisateur;
+    }
+
+    public Set<Utilisateur> getParticipants() {
+        return participants;
     }
 }

@@ -60,6 +60,14 @@ const Effet = ({ effet, index, src }) => {
             return effet.points.map((p, i) => (
                 <div key={i} className="effet effet--lampe" style={{ ...point(p), '--ordre': i, '--taille': `${p.t ?? 4}em` }}><i /></div>
             ));
+        case 'statues':     // lueur dorée sur les statues, qui s'allument l'une après l'autre
+            return effet.points.map((p, i) => (
+                <div key={i} className="effet effet--statue" style={{ ...point(p), '--ordre': i, '--taille': `${p.t ?? 3}em` }}><i /></div>
+            ));
+        case 'pollen':      // grains dorés qui montent des massifs de fleurs, éclairés par le soleil
+            return <div className="effet effet--pollen" style={zone(effet)}><Semis n={effet.n ?? 10} graine={g} /></div>;
+        case 'miroir':      // le ciel doré se reflète dans le bassin et ondule
+            return <div className="effet effet--miroir" style={zone(effet)}><i /><i /></div>;
         case 'fenetres':    // (51) fenêtres qui s'allument la nuit
             return effet.points.map((p, i) => (
                 <div key={i} className="effet effet--fenetre" style={{ ...point(p), '--ordre': i }}><i /></div>
