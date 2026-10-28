@@ -20,11 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import fr.orivy.Orivy.DTO.ChangementEmail;
-import fr.orivy.Orivy.DTO.ChangementMotDePasse;
-import fr.orivy.Orivy.DTO.ReponseConnexion;
-import fr.orivy.Orivy.DTO.UtilisateurPrivee;
-import fr.orivy.Orivy.DTO.UtilisateurPublic;
+import fr.orivy.Orivy.DTO.ChangementEmailDto;
+import fr.orivy.Orivy.DTO.ChangementMotDePasseDto;
+import fr.orivy.Orivy.DTO.ReponseConnexionDto;
+import fr.orivy.Orivy.DTO.UtilisateurPriveeDto;
+import fr.orivy.Orivy.DTO.UtilisateurPublicDto;
 import fr.orivy.Orivy.Model.Utilisateur;
 import fr.orivy.Orivy.Service.JetonService;
 import fr.orivy.Orivy.Service.UtilisateurService;
@@ -47,29 +47,29 @@ public class UtilisateurController {
 
     @PostMapping("/inscription")
     @ResponseStatus(HttpStatus.CREATED)
-    public UtilisateurPrivee inscription(@RequestBody Utilisateur utilisateur) {
-        return UtilisateurPrivee.depuis(utilisateurService.creerUtilisateur(utilisateur));
+    public UtilisateurPriveeDto inscription(@RequestBody Utilisateur utilisateur) {
+        return UtilisateurPriveeDto.depuis(utilisateurService.creerUtilisateur(utilisateur));
     }
 
     @PutMapping("/{id}")
-    public UtilisateurPrivee modifierUtilisateur(@PathVariable Long id, @RequestBody Utilisateur utilisateur,
+    public UtilisateurPriveeDto modifierUtilisateur(@PathVariable Long id, @RequestBody Utilisateur utilisateur,
                                              @AuthenticationPrincipal Jwt jwt) {
         if (!estLuiMemeOuAdmin(id, jwt)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Tu ne peux modifier que ton propre profil.");
         }
-        return UtilisateurPrivee.depuis(utilisateurService.modifierUtilisateur(id, utilisateur));
+        return UtilisateurPriveeDto.depuis(utilisateurService.modifierUtilisateur(id, utilisateur));
     }
 
 
     @PostMapping("/connexion")
-    public ReponseConnexion connexion(@RequestBody Utilisateur identifiants) {
+    public ReponseConnexionDto connexion(@RequestBody Utilisateur identifiants) {
         Utilisateur utilisateur = utilisateurService.authentifierUtilisateur(identifiants.getEmail(), identifiants.getMotDePasse());
-        return new ReponseConnexion(jetonService.generateToken(utilisateur), UtilisateurPrivee.depuis(utilisateur));
+        return new ReponseConnexionDto(jetonService.generateToken(utilisateur), UtilisateurPriveeDto.depuis(utilisateur));
     }
 
     @GetMapping
-    public List<UtilisateurPublic> getAllUtilisateurs() {
-        return utilisateurService.getAllUtilisateurs().stream().map(UtilisateurPublic::depuis).toList();
+    public List<UtilisateurPublicDto> getAllUtilisateurs() {
+        return utilisateurService.getAllUtilisateurs().stream().map(UtilisateurPublicDto::depuis).toList();
     }
 
     // L'appelant est-il ce membre, ou un admin ? (pour voir tout le profil, ou le modifier)
@@ -83,9 +83,9 @@ public class UtilisateurController {
     public Object getUtilisateur(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
         Utilisateur utilisateur = utilisateurService.getUtilisateur(id);
         if (estLuiMemeOuAdmin(id, jwt)) {
-            return UtilisateurPrivee.depuis(utilisateur);
+            return UtilisateurPriveeDto.depuis(utilisateur);
         }
-        return UtilisateurPublic.depuis(utilisateur);
+        return UtilisateurPublicDto.depuis(utilisateur);
     }
 
     @DeleteMapping("/{id}")
@@ -96,20 +96,20 @@ public class UtilisateurController {
 
     @PutMapping("/moi/mot-de-passe")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void changerMotDePasse(@RequestBody ChangementMotDePasse demande, @AuthenticationPrincipal Jwt jwt) {
+    public void changerMotDePasse(@RequestBody ChangementMotDePasseDto demande, @AuthenticationPrincipal Jwt jwt) {
         utilisateurService.changerMotDePasse(Long.valueOf(jwt.getSubject()),
                 demande.ancienMotDePasse(), demande.nouveauMotDePasse());
     }
 
     // Envoi d'une photo de profil (formulaire « multipart », champ « photo »)
     @PostMapping("/moi/photo")
-    public UtilisateurPrivee changerPhoto(@RequestParam("photo") MultipartFile photo, @AuthenticationPrincipal Jwt jwt) throws IOException {
-        return UtilisateurPrivee.depuis(utilisateurService.changerPhoto(Long.valueOf(jwt.getSubject()), photo, dossierUploads));
+    public UtilisateurPriveeDto changerPhoto(@RequestParam("photo") MultipartFile photo, @AuthenticationPrincipal Jwt jwt) throws IOException {
+        return UtilisateurPriveeDto.depuis(utilisateurService.changerPhoto(Long.valueOf(jwt.getSubject()), photo, dossierUploads));
     }
 
     @PutMapping("/moi/email")
-    public UtilisateurPrivee changerEmail(@Valid @RequestBody ChangementEmail demande, @AuthenticationPrincipal Jwt jwt) {
-        return UtilisateurPrivee.depuis(utilisateurService.changerEmail(Long.valueOf(jwt.getSubject()),
+    public UtilisateurPriveeDto changerEmail(@Valid @RequestBody ChangementEmailDto demande, @AuthenticationPrincipal Jwt jwt) {
+        return UtilisateurPriveeDto.depuis(utilisateurService.changerEmail(Long.valueOf(jwt.getSubject()),
                 demande.motDePasse(), demande.nouvelEmail()));
     }
 }

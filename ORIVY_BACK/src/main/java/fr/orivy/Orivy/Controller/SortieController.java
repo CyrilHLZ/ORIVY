@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import fr.orivy.Orivy.DTO.SortieDto;
-import fr.orivy.Orivy.DTO.SortiesMembre;
+import fr.orivy.Orivy.DTO.SortiesMembreDto;
 import fr.orivy.Orivy.Model.Sortie;
 import fr.orivy.Orivy.Service.SortieService;
 import jakarta.validation.Valid;
@@ -79,8 +79,8 @@ public class SortieController {
     }
 
     @GetMapping("/membre/{id}")
-    public SortiesMembre sortiesDuMembre(@PathVariable Long id) {
-        return new SortiesMembre(
+    public SortiesMembreDto sortiesDuMembre(@PathVariable Long id) {
+        return new SortiesMembreDto(
             sortieService.getSortiesOrganisees(id).stream().map(SortieDto::depuis).toList(),
             sortieService.getSortiesRejointes(id).stream().map(SortieDto::depuis).toList());
     }

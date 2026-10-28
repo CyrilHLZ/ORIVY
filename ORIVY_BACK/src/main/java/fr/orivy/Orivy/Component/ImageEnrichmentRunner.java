@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import fr.orivy.Orivy.DTO.ImageResult;
+import fr.orivy.Orivy.DTO.ImageResultDto;
 import fr.orivy.Orivy.Model.PointInteret;
 import fr.orivy.Orivy.Repository.PointInteretRepository;
 import fr.orivy.Orivy.Service.ImageEnrichmentService;
@@ -34,10 +34,10 @@ public class ImageEnrichmentRunner {
 
         int found = 0;
         for (PointInteret point : points) {
-            Optional<ImageResult> result = enrichmentService.findImage(point);
+            Optional<ImageResultDto> result = enrichmentService.findImage(point);
 
             if (result.isPresent()) {
-                ImageResult img = result.get();
+                ImageResultDto img = result.get();
                 point.setImageUrl(img.url());
                 point.setImageSource("Wikimedia Commons");
                 point.setImageLicence(img.license() + " — " + img.attribution());

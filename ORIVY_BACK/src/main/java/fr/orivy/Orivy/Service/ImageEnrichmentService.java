@@ -11,7 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import fr.orivy.Orivy.DTO.ImageResult;
+import fr.orivy.Orivy.DTO.ImageResultDto;
 import fr.orivy.Orivy.Model.PointInteret;
 import tools.jackson.databind.JsonNode;
 
@@ -63,26 +63,26 @@ public class ImageEnrichmentService {
         return variants.stream().distinct().toList();
     }
 
-    public Optional<ImageResult> findImage(PointInteret point) {
+    public Optional<ImageResultDto> findImage(PointInteret point) {
         List<String> nameVariants = buildNameVariants(point.getNom());
 
         for (String candidate : nameVariants) {
-            Optional<ImageResult> result = searchCommonsByName(candidate);
+            Optional<ImageResultDto> result = searchCommonsByName(candidate);
             if (result.isPresent()) return result;
         }
 
-        Optional<ImageResult> geoResult = searchByGeolocation(point.getLatitude(), point.getLongitude(), point.getNom());
+        Optional<ImageResultDto> geoResult = searchByGeolocation(point.getLatitude(), point.getLongitude(), point.getNom());
         if (geoResult.isPresent()) return geoResult;
 
         for (String candidate : nameVariants) {
-            Optional<ImageResult> result = searchOpenverse(candidate);
+            Optional<ImageResultDto> result = searchOpenverse(candidate);
             if (result.isPresent()) return result;
         }
 
         return Optional.empty();
     }
 
-    private Optional<ImageResult> searchCommonsByName(String name) {
+    private Optional<ImageResultDto> searchCommonsByName(String name) {
         try {
             JsonNode root = commonsClient.get()
                     .uri(uri -> uri.queryParam("action", "query")
@@ -107,7 +107,7 @@ public class ImageEnrichmentService {
         }
     }
 
-    private Optional<ImageResult> searchByGeolocation(double lat, double lon, String pointName) {
+    private Optional<ImageResultDto> searchByGeolocation(double lat, double lon, String pointName) {
         try {
             JsonNode root = wikipediaClient.get()
                     .uri(uri -> uri.queryParam("action", "query")
@@ -148,7 +148,7 @@ public class ImageEnrichmentService {
         }
     }
 
-    private Optional<ImageResult> fetchImageInfo(String fileTitle, WebClient client) {
+    private Optional<ImageResultDto> fetchImageInfo(String fileTitle, WebClient client) {
         try {
             JsonNode root = client.get()
                     .uri(uri -> uri.queryParam("action", "query")
@@ -171,14 +171,14 @@ public class ImageEnrichmentService {
             String license = stripHtml(meta.path("LicenseShortName").path("value").asText("Licence non spécifiée"));
             String artist = stripHtml(meta.path("Artist").path("value").asText("Auteur non spécifié"));
 
-            return Optional.of(new ImageResult(url, license, artist, fileTitle));
+            return Optional.of(new ImageResultDto(url, license, artist, fileTitle));
         } catch (Exception e) {
             log.warn("Récupération imageinfo échouée pour '{}': {}", fileTitle, e.getMessage());
             return Optional.empty();
         }
     }
 
-    private Optional<ImageResult> searchOpenverse(String name) {
+    private Optional<ImageResultDto> searchOpenverse(String name) {
         try {
             JsonNode root = openverseClient.get()
                     .uri(uri -> uri.path("/images/")
@@ -202,7 +202,7 @@ public class ImageEnrichmentService {
             String creator = first.path("creator").asText("Auteur non spécifié");
             String source = first.path("foreign_landing_url").asText(url);
 
-            return Optional.of(new ImageResult(url, license.trim(), creator, source));
+            return Optional.of(new ImageResultDto(url, license.trim(), creator, source));
         } catch (Exception e) {
             log.warn("Recherche Openverse échouée pour '{}': {}", name, e.getMessage());
             return Optional.empty();

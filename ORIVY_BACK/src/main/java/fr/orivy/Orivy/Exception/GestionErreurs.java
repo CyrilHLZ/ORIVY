@@ -15,7 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 
-import fr.orivy.Orivy.DTO.ErreurApi;
+import fr.orivy.Orivy.DTO.ErreurApiDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,44 +27,44 @@ public class GestionErreurs {
 
         // 400 : le corps de la requête n'est pas du JSON valide
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErreurApi> jsonInvalide(HttpMessageNotReadableException e) {
-        return ResponseEntity.badRequest().body(ErreurApi.simple("La requête est mal formée."));
+    public ResponseEntity<ErreurApiDto> jsonInvalide(HttpMessageNotReadableException e) {
+        return ResponseEntity.badRequest().body(ErreurApiDto.simple("La requête est mal formée."));
     }
 
     // 413 : fichier envoyé trop lourd (limite dans application.properties)
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<ErreurApi> fichierTropLourd(MaxUploadSizeExceededException e) {
-        return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE).body(ErreurApi.simple("La photo ne doit pas dépasser 2 Mo."));
+    public ResponseEntity<ErreurApiDto> fichierTropLourd(MaxUploadSizeExceededException e) {
+        return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE).body(ErreurApiDto.simple("La photo ne doit pas dépasser 2 Mo."));
     }
 
     // 404 : l'adresse demandée n'existe pas
     @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<ErreurApi> adresseInconnue(NoResourceFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErreurApi.simple("Cette adresse n'existe pas."));
+    public ResponseEntity<ErreurApiDto> adresseInconnue(NoResourceFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErreurApiDto.simple("Cette adresse n'existe pas."));
     }
 
     // 400 : un champ ne respecte pas @NotBlank, @NotNull…
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErreurApi> validation(MethodArgumentNotValidException e) {
+    public ResponseEntity<ErreurApiDto> validation(MethodArgumentNotValidException e) {
         Map<String, String> champs = new LinkedHashMap<>();
         for (FieldError erreur : e.getBindingResult().getFieldErrors()) {
             champs.put(erreur.getField(), erreur.getDefaultMessage());
         }
         String premier = champs.values().iterator().next();   // le message principal = la première erreur
-        return ResponseEntity.badRequest().body(new ErreurApi(premier, champs));
+        return ResponseEntity.badRequest().body(new ErreurApiDto(premier, champs));
     }
 
     // 403, 404, 409… : les erreurs que tu lances toi-même avec throw new ResponseStatusException(...)
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ErreurApi> statut(ResponseStatusException e) {
-        return ResponseEntity.status(e.getStatusCode()).body(ErreurApi.simple(e.getReason()));
+    public ResponseEntity<ErreurApiDto> statut(ResponseStatusException e) {
+        return ResponseEntity.status(e.getStatusCode()).body(ErreurApiDto.simple(e.getReason()));
     }
 
     // 500 : tout le reste (bug, erreur de base de données…)
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErreurApi> inattendue(Exception e) {
+    public ResponseEntity<ErreurApiDto> inattendue(Exception e) {
         log.error("Erreur inattendue", e);   // le détail reste dans la console du back
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErreurApi.simple("Une erreur est survenue. Réessaie plus tard."));
+                .body(ErreurApiDto.simple("Une erreur est survenue. Réessaie plus tard."));
     }
 }
