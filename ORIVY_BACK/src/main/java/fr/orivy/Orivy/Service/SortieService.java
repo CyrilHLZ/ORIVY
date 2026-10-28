@@ -18,10 +18,13 @@ public class SortieService {
 
     private final SortieRepository sortieRepository;
     private final UtilisateurRepository utilisateurRepository;
+    private final NotificationService notificationService;
 
-    public SortieService(SortieRepository sortieRepository, UtilisateurRepository utilisateurRepository) {
+    public SortieService(SortieRepository sortieRepository, UtilisateurRepository utilisateurRepository,
+                         NotificationService notificationService) {
         this.sortieRepository = sortieRepository;
         this.utilisateurRepository = utilisateurRepository;
+        this.notificationService = notificationService;
     }
 
     public List<Sortie> getAllSorties() {
@@ -47,8 +50,8 @@ public class SortieService {
         verifierDroits(sortieExistante, appelantId, estAdmin);
         boolean dateModifiee = !sortie.getDateDebut().equals(sortieExistante.getDateDebut());
         if (dateModifiee && sortie.getDateDebut().isBefore(LocalDateTime.now())) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La date ne peut pas être dans le passé.");
-    }
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La date ne peut pas être dans le passé.");
+        }
         sortieExistante.setNom(sortie.getNom());
         sortieExistante.setDescription(sortie.getDescription());
         sortieExistante.setCategorie(sortie.getCategorie());
@@ -56,7 +59,17 @@ public class SortieService {
         sortieExistante.setLieu(sortie.getLieu());
         sortieExistante.setLatitude(sortie.getLatitude());
         sortieExistante.setLongitude(sortie.getLongitude());
-        return sortieRepository.save(sortieExistante);
+        Sortie enregistree = sortieRepository.save(sortieExistante);
+
+        // On prévient chaque participant (sauf celui qui vient de modifier)
+        for (Utilisateur p : enregistree.getParticipants()) {
+            if (!p.getId().equals(appelantId)) {
+                notificationService.notifier(p, "sortie-modifiee",
+                        "La sortie « " + enregistree.getNom() + " » a été modifiée",
+                        "/sorties/" + enregistree.getId());
+            }
+        }
+        return enregistree;
     }
 
     public void supprimerSortie(Long id, Long appelantId, boolean estAdmin) {
@@ -73,7 +86,16 @@ public class SortieService {
         if (sortie.getDateDebut() != null && sortie.getDateDebut().isBefore(LocalDateTime.now())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Cette sortie est déjà passée.");
         }
-        sortie.getParticipants().add(trouverUtilisateur(utilisateurId));
+        Utilisateur participant = trouverUtilisateur(utilisateurId);
+        // add renvoie false si le membre était déjà inscrit : dans ce cas, pas de nouvelle notification
+        boolean nouveau = sortie.getParticipants().add(participant);
+
+        // On prévient l'organisateur (sauf s'il rejoint sa propre sortie)
+        if (nouveau && sortie.getOrganisateur() != null && !sortie.getOrganisateur().getId().equals(utilisateurId)) {
+            notificationService.notifier(sortie.getOrganisateur(), "inscription",
+                    participant.getPrenom() + " a rejoint ta sortie « " + sortie.getNom() + " »",
+                    "/sorties/" + sortie.getId());
+        }
         return sortieRepository.save(sortie);
     }
 
