@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../Context/AuthContext.jsx';
+import { getNombreNonLues } from '../../Services/Notification/NotificationService.js';
 import Icone from '../../Composants/Icone.jsx';
 import Logo from '../../Composants/Logo.jsx';
 import MenuProfil from './MenuProfil.jsx';
@@ -10,12 +12,19 @@ import { ONGLETS, estActif } from './navigation.js';
  * Mobile : logo + loupe + cloche (les onglets sont en bas, voir BarreOnglets).
  * Ordinateur (≥ 1024px) : les onglets passent ici, et le profil devient l'avatar.
  *
- * nonLues : nombre de notifications non lues. Pas encore branché (le back n'a
- * pas de modèle Notification) : la pastille ne s'affiche que s'il est > 0.
+ * nonLues : nombre de notifications non lues, recompté à chaque changement de page.
+ * La pastille de la cloche ne s'affiche que s'il est > 0.
  */
-const Entete = ({ nonLues = 0 }) => {
+const Entete = () => {
     const { isAuthenticated } = useAuth();
     const { pathname } = useLocation();
+    const [nonLues, setNonLues] = useState(0);
+
+    // On recompte à chaque changement de page (ex. en revenant de /notifications)
+    useEffect(() => {
+        if (!isAuthenticated) { setNonLues(0); return; }
+        getNombreNonLues().then(setNonLues).catch(() => {});
+    }, [isAuthenticated, pathname]);
 
     return (
         <header className="entete">

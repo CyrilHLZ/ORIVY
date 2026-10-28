@@ -1,12 +1,11 @@
-package fr.orivy.demo;
+package fr.orivy.Orivy;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import fr.orivy.Orivy.DemoApplication;
 
-@SpringBootTest(classes = DemoApplication.class)
-class DemoApplicationTests {
+@SpringBootTest(classes = OrivyApplication.class)
+class OrivyApplicationTests {
 
 	@Test
 	void contextLoads() {

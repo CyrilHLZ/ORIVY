@@ -560,6 +560,19 @@ label.bouton:has(input:focus-visible) { outline: 3px solid var(--couleur-focus);
 }
 .notif--non-lue { background: var(--couleur-surface); }
 .notif__texte { margin: 0; }
+/* Bouton qui se lit comme du texte : toute la notification est cliquable (marquer lue, puis ouvrir) */
+.lien-bouton {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.lien-bouton:hover { text-decoration: underline; }
+.lien-bouton:focus-visible { outline: 3px solid var(--couleur-focus); outline-offset: 2px; border-radius: var(--rayon-petit); }
+.notif--non-lue .lien-bouton { font-weight: var(--graisse-moyenne); }
 .notif__heure { display: block; font-size: var(--taille-xs); color: var(--couleur-texte-doux); margin-top: var(--espace-1); }
 .notif__point {
   width: var(--espace-3);

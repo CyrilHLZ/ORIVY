@@ -12,15 +12,6 @@ import { getSortiesMembre } from '../../Services/Sortie/SortieService.js';
 import CarteSortie from '../../Composants/CarteSortie.jsx';
 
 
-/*
- * Profil (maquette design/maquettes/profil.html).
- *   /profil       → mon profil : modification, réglages, compte
- *   /profil/:id   → le profil d'un autre membre (lecture seule)
- *
- * Affiche l'identité, la ville, la bio et les sorties (organisées / rejointes) du membre.
- * (Pas encore d'abonnés ni de photo dans le back.)
- */
-
 const OPTIONS_THEME = [
     { valeur: 'auto', texte: 'Automatique' },
     { valeur: 'jour', texte: 'Jour' },
@@ -106,7 +97,6 @@ const ModifierProfil = ({ profil, onEnregistre, onAnnuler }) => {
     );
 };
 
-/* ---- Changer de photo : un bouton qui ouvre le choix de fichier ---- */
 const BoutonPhoto = ({ onChange }) => {
     const [erreur, setErreur] = useState(null);
 
@@ -133,11 +123,10 @@ const BoutonPhoto = ({ onChange }) => {
     );
 };
 
-/* ---- Changer de mot de passe ---- */
 const FormMotDePasse = () => {
     const [ancien, setAncien] = useState('');
     const [nouveau, setNouveau] = useState('');
-    const [retour, setRetour] = useState(null);   // { ok: true/false, texte }
+    const [retour, setRetour] = useState(null);  
 
     const envoyer = async (event) => {
         event.preventDefault();
@@ -271,6 +260,11 @@ const ProfilPage = () => {
                                     <Bouton variante="secondaire" icone="modifier" onClick={() => setEdition(true)}>Modifier le profil</Bouton>
                                     <BoutonPhoto onChange={enregistre} />
                                     {isAdmin && <Bouton variante="fantome" icone="bouclier" vers="/admin">Administration</Bouton>}
+                                </div>
+                            )}
+                            {!estMoi && user && (
+                                <div className="ligne-actions">
+                                    <Bouton icone="messages" vers={`/messages?avec=${profil.id}`}>Écrire</Bouton>
                                 </div>
                             )}
                         </div>

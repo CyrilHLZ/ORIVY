@@ -6,7 +6,6 @@ import Bouton from '../../Composants/Bouton.jsx';
 import Icone from '../../Composants/Icone.jsx';
 import { Champ, ChampMotDePasse } from '../../Composants/Formulaire.jsx';
 
-/* Les mêmes règles que le back : vérifiées en direct pendant la saisie */
 const REGLES = [
     { texte: '8 caractères minimum', test: (mdp) => mdp.length >= 8 },
     { texte: 'Une majuscule', test: (mdp) => /[A-ZÀ-Ý]/.test(mdp) },

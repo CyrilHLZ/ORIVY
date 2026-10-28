@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from '../Context/AuthContext.jsx';
 import HomePage from '../Pages/HomePage.jsx';
@@ -12,12 +13,15 @@ import SocialPage from '../Pages/Main/Social/SocialPage.jsx';
 import ConnexionPage from '../Pages/Utilisateur/ConnexionPage.jsx';
 import InscriptionPage from '../Pages/Utilisateur/InscriptionPage.jsx';
 import AdminPage from '../Pages/Main/Admin/AdminPage.jsx';
-import Catalogue from '../Pages/Catalogue.jsx';
 import PageIntrouvable from '../Pages/PageIntrouvable.jsx';
 import ProfilPage from '../Pages/Utilisateur/ProfilPage.jsx';
 import CommunautePage from '../Pages/Social/CommunautePage.jsx';
 import MessagesPage from '../Pages/Social/MessagesPage.jsx';
 import NotificationsPage from '../Pages/Social/NotificationsPage.jsx';
+
+// Catalogue des composants : outil de développement seulement.
+// lazy + import.meta.env.DEV : en production, la page n'existe pas et son code n'est même pas dans le build.
+const Catalogue = import.meta.env.DEV ? lazy(() => import('../Pages/Catalogue.jsx')) : null;
 
 const RequireAdmin = ({ children }) => {
 	const { isAdmin } = useAuth();
@@ -48,8 +52,8 @@ const AppRoutes = () => (
 		<Route path="/notifications" element={<RequireAuth><NotificationsPage /></RequireAuth>} />
 		<Route path="/connexion" element={<ConnexionPage />} />
 		<Route path="/inscription" element={<InscriptionPage />} />
-		{/* Catalogue des composants (outil de développement) */}
-		<Route path="/composants" element={<Catalogue />} />
+		{/* Catalogue des composants (en développement seulement) */}
+		{Catalogue && <Route path="/composants" element={<Suspense fallback={null}><Catalogue /></Suspense>} />}
 		<Route path="*" element={<PageIntrouvable />} />
 	</Routes>
 );

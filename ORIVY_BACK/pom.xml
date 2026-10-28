@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>fr.orivy</groupId>
-	<artifactId>demo</artifactId>
+	<artifactId>orivy</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>demo</name>
+	<name>orivy</name>
 	<description/>
 	<url/>
 	<licenses>

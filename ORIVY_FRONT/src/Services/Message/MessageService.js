@@ -4,3 +4,4 @@ import { apiRequest } from '../api.js';
 export const getMessages = (userId) => apiRequest(`/messages/${userId}`);
 export const sendMessage = (userId, message) => apiRequest(`/messages/${userId}`, { method: 'POST', body: { message } });
 export const deleteMessage = (userId, messageId) => apiRequest(`/messages/${userId}/${messageId}`, { method: 'DELETE' });
+export const getConversations = () => apiRequest('/message');

@@ -10,11 +10,6 @@ import { Chargement, EtatErreur, EtatVide } from '../Composants/Etats.jsx';
 import FenetreConfirmation from '../Composants/Fenetre.jsx';
 import { LISTE_CATEGORIES } from '../Constants/categories.js';
 
-/*
- * Page /composants : catalogue des composants React, avec des données de démonstration
- * qui ont la MÊME forme que celles du back (nom, categorie, lieu, dateDebut…).
- * Outil de développement : à garder pour tester, ou à retirer avant la mise en ligne.
- */
 const LIEUX = [
     { id: 1, nom: "Parc de la Tête d'Or", categorie: 'parc', lieu: 'Lyon 6e', note: 4.7, nombreSorties: 3, alt: 'Allée ombragée sous de grands arbres' },
     { id: 2, nom: 'Vieille ville d\'Annecy', categorie: 'village', lieu: 'Annecy', note: 4.8 },
