@@ -34,11 +34,12 @@ public class Utilisateur {
     private String ville;
     private String codePostal;
     private String pays;
+    private String photoUrl;
     
     public Utilisateur() {
     }
 
-    public Utilisateur(String nom, String prenom, LocalDate dateDeNaissance, String email, String motDePasse, String bio, String role, String numeroTelephone, String adresse, String ville, String codePostal, String pays) {
+    public Utilisateur(String nom, String prenom, LocalDate dateDeNaissance, String email, String motDePasse, String bio, String role, String numeroTelephone, String adresse, String ville, String codePostal, String pays, String photoUrl) {
         this.nom = nom;
         this.prenom = prenom;
         this.dateDeNaissance = dateDeNaissance;
@@ -51,6 +52,7 @@ public class Utilisateur {
         this.ville = ville;
         this.codePostal = codePostal;
         this.pays = pays;
+        this.photoUrl = photoUrl;
     }
 
     public Long getId() {
@@ -153,6 +155,11 @@ public class Utilisateur {
         this.bio = bio;
     }
 
-    
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
 
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
 }

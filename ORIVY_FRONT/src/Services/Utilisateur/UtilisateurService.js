@@ -16,6 +16,14 @@ export const getUserProfile = (userId) => apiRequest(`/utilisateurs/${userId}`);
 // le profil complet (valeurs actuelles + modifications).
 export const updateUserProfile = (userId, profil) => apiRequest(`/utilisateurs/${userId}`, { method: 'PUT', body: profil });
 
-// À venir côté back (routes pas encore créées) :
-//   GET/PUT/DELETE /utilisateurs/mon-profil (identifier l'utilisateur par son token)
+export const changerMotDePasse = (ancienMotDePasse, nouveauMotDePasse) =>
+    apiRequest('/utilisateurs/moi/mot-de-passe', { method: 'PUT', body: { ancienMotDePasse, nouveauMotDePasse } });
 
+export const changerEmail = (motDePasse, nouvelEmail) =>
+    apiRequest('/utilisateurs/moi/email', { method: 'PUT', body: { motDePasse, nouvelEmail } });
+
+export const changerPhoto = (fichier) => {
+    const formulaire = new FormData();
+    formulaire.append('photo', fichier);
+    return apiRequest('/utilisateurs/moi/photo', { method: 'POST', body: formulaire });
+};

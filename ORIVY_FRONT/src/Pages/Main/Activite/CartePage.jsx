@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Circle, CircleMarker, MapContainer, Marker, TileLayer, ZoomControl, useMap, useMapEvents } from 'react-leaflet';
+import { Circle, CircleMarker, MapContainer, Marker, Polyline, Popup, TileLayer, ZoomControl, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useAuth } from '../../../Context/AuthContext.jsx';
 import { useLieux } from '../../../Hooks/useLieux.js';
-import { updatePoint } from '../../../Services/Carte/CarteService.js';
+import { getPromenades, updatePoint } from '../../../Services/Carte/CarteService.js';
 import { ICONES } from '../../../Composants/icones.js';
 import { LISTE_CATEGORIES, categorie } from '../../../Constants/categories.js';
 import { demanderPosition, distanceKm, formaterDistance, trouverVille } from '../../../Utils/proximite.js';
@@ -21,7 +21,9 @@ import { ChoixSegmente, OPTIONS_RAYON, Puce, Puces } from '../../../Composants/F
  *   - plein écran, centrée sur la France entière ;
  *   - épingles colorées par catégorie, accessibles au clavier (Tab puis Entrée) ;
  *   - « Me localiser » (position demandée au clic seulement), point bleu, cercle du rayon ;
- *   - clic sur une épingle : tiroir de détail (monte du bas sur mobile).
+ *   - clic sur une épingle : tiroir de détail (monte du bas sur mobile) ;
+ *   - à l'arrivée, une fenêtre demande les catégories à afficher (765 lieux d'un coup, c'est illisible) ;
+ *   - les promenades sont tracées (ligne) avec la catégorie « Randonnées ».
  * Adresses comprises :
  *   /carte?cat=parc                 → filtre une catégorie
  *   /carte?lieu=point-12            → ouvre la fiche d'un lieu (liens des cartes de lieu)
@@ -82,12 +84,76 @@ const SuiviZoom = ({ onZoom }) => {
 /* En dessous de ce zoom, les épingles s'empileraient : on montre de petits points */
 const ZOOM_EPINGLES = 9;
 
+/* Dernier choix de catégories, retrouvé à la visite suivante (sur cet appareil seulement) */
+const CLE_CHOIX = 'orivy.carte.categories';
+const lireChoix = () => {
+    try { return JSON.parse(localStorage.getItem(CLE_CHOIX)) || []; } catch { return []; }
+};
+const enregistrerChoix = (liste) => {
+    try { localStorage.setItem(CLE_CHOIX, JSON.stringify(liste)); } catch { /* navigation privée : tant pis */ }
+};
+
+/* L'itinéraire d'une promenade est rangé en texte JSON : [[lat, lng], …] */
+const pointsDe = (promenade) => {
+    try { return JSON.parse(promenade.parcoursJson || '[]'); } catch { return []; }
+};
+
+/* ---- Fenêtre de choix des catégories (avant d'afficher la carte) ----
+   Même principe que FenetreConfirmation : <dialog> du navigateur, focus gardé, Échap ferme. */
+const ChoixCategories = ({ ouverte, choix, nombres, onValider, onFermer }) => {
+    const dialogue = useRef(null);
+    const [coches, setCoches] = useState(choix);
+
+    useEffect(() => {
+        const d = dialogue.current;
+        if (ouverte && !d.open) {
+            setCoches(choix);
+            d.showModal();
+            // Le navigateur donnerait le focus à la 1re case (elle aurait l'air cochée) : on le met sur le titre
+            d.querySelector('h2')?.focus();
+        }
+        if (!ouverte && d.open) d.close();
+    }, [ouverte]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const basculer = (cle) => setCoches((l) => (l.includes(cle) ? l.filter((c) => c !== cle) : [...l, cle]));
+    const total = coches.reduce((n, cle) => n + (nombres[cle] || 0), 0);
+
+    return (
+        <dialog className="fenetre fenetre--categories" ref={dialogue} aria-labelledby="choix-titre" onCancel={onFermer}>
+            <div className="fenetre--categories__tete">
+                <h2 id="choix-titre" tabIndex={-1} style={{ outline: 'none' }}>Qu'est-ce qui te tente ?</h2>
+                <BoutonIcone icone="fermer" label="Fermer" onClick={onFermer} />
+            </div>
+            {/* Petites pastilles à cocher : icône + nom, de la couleur de la catégorie une fois cochées */}
+            <fieldset className="choix-categories">
+                <legend className="visuellement-cache">Catégories à afficher sur la carte</legend>
+                {LISTE_CATEGORIES.filter((c) => c.cle !== 'autre').map((c) => (
+                    <label key={c.cle} className={`choix-categorie cat-${c.cle}`}>
+                        <input type="checkbox" className="visuellement-cache" checked={coches.includes(c.cle)} onChange={() => basculer(c.cle)} />
+                        <Icone nom={`cat-${c.cle}`} />{c.pluriel}
+                    </label>
+                ))}
+            </fieldset>
+            <div className="choix-categories__actions">
+                <Bouton variante="secondaire" onClick={() => onValider([])}>Tout</Bouton>
+                <Bouton icone="carte" disabled={coches.length === 0} onClick={() => onValider(coches)}>
+                    {coches.length === 0 ? 'Choisis' : `Voir ${total} ${total > 1 ? 'lieux' : 'lieu'}`}
+                </Bouton>
+            </div>
+        </dialog>
+    );
+};
+
 const CartePage = () => {
     const { isAdmin } = useAuth();
     const { lieux, chargement, erreur, recharger } = useLieux();
     const [parametres] = useSearchParams();
 
-    const [actives, setActives] = useState(() => (parametres.get('cat') ? [parametres.get('cat')] : []));
+    // On arrive d'un lien précis (?cat, ?lieu, ?lat) : pas de fenêtre, on montre directement
+    const arriveeDirecte = parametres.has('cat') || parametres.has('lieu') || parametres.has('lat');
+    const [actives, setActives] = useState(() => (parametres.get('cat') ? [parametres.get('cat')] : lireChoix()));
+    const [choixOuvert, setChoixOuvert] = useState(!arriveeDirecte);
+    const [promenades, setPromenades] = useState([]);
     const [position, setPosition] = useState(null);   // { lat, lng, gps }
     const [rayon, setRayon] = useState(10);
     const [ville, setVille] = useState('');
@@ -120,6 +186,26 @@ const CartePage = () => {
     );
 
     const basculerCategorie = (cle) => setActives((liste) => (liste.includes(cle) ? liste.filter((c) => c !== cle) : [...liste, cle]));
+
+    /* Promenades (itinéraires tracés) : affichées avec la catégorie « Randonnées » */
+    useEffect(() => {
+        getPromenades().then(setPromenades).catch(() => {});   // sans promenades, la carte reste utilisable
+    }, []);
+    const promenadesVisibles = actives.length === 0 || actives.includes('promenade') ? promenades : [];
+
+    /* Nombre de lieux par catégorie, affiché dans la fenêtre de choix */
+    const nombres = useMemo(() => {
+        const n = {};
+        lieux.forEach((l) => { n[l.categorie] = (n[l.categorie] || 0) + 1; });
+        n.promenade = (n.promenade || 0) + promenades.length;
+        return n;
+    }, [lieux, promenades]);
+
+    const validerChoix = (liste) => {
+        setActives(liste);
+        enregistrerChoix(liste);
+        setChoixOuvert(false);
+    };
 
     /* ---- Position ---- */
     const placerPosition = (pos) => {
@@ -214,6 +300,23 @@ const CartePage = () => {
                 <PiloteCarte vue={vue} />
                 <SuiviZoom onZoom={setZoom} />
 
+                {/* Promenades : une ligne qui relie les points de l'itinéraire, clic = fiche */}
+                {promenadesVisibles.map((p) => {
+                    const points = pointsDe(p);
+                    if (points.length < 2) return null;
+                    return (
+                        // className en prop directe (comme pour CircleMarker) : couleur prise dans le CSS
+                        <Polyline key={`promenade-${p.id}`} positions={points} className="trace-promenade">
+                            <Popup>
+                                <strong>{p.nom}</strong><br />
+                                {[p.distanceKm && `${p.distanceKm} km`, p.dureeMinutes && `${p.dureeMinutes} min`, p.difficulte]
+                                    .filter(Boolean).join(' · ')}
+                                {p.description && <p style={{ margin: '0.5em 0 0' }}>{p.description}</p>}
+                            </Popup>
+                        </Polyline>
+                    );
+                })}
+
                 {/* Vue éloignée : de petits points de couleur (lisibles même à 765 lieux) */}
                 {zoom < ZOOM_EPINGLES && visibles.map((lieu) => (
                     <CircleMarker
@@ -278,6 +381,7 @@ const CartePage = () => {
                         <ChoixSegmente nom="rayon" legende="Rayon autour de toi" valeur={rayon} onChange={changerRayon} options={OPTIONS_RAYON} />
                     </div>
                 )}
+                <Bouton variante="secondaire" pilule icone="filtres" onClick={() => setChoixOuvert(true)}>Catégories</Bouton>
                 <Bouton variante="secondaire" pilule icone="liste" vers="/activites">Liste</Bouton>
                 <button className="bouton bouton--icone bouton--flottant" type="button" onClick={meLocaliser}
                         disabled={localisation} aria-busy={localisation} aria-label="Me localiser">
@@ -298,6 +402,9 @@ const CartePage = () => {
                     />
                 )}
             </aside>
+
+            <ChoixCategories ouverte={choixOuvert} choix={actives} nombres={nombres}
+                             onValider={validerChoix} onFermer={() => setChoixOuvert(false)} />
 
             {/* États de chargement et messages (lus par les lecteurs d'écran) */}
             <p className="visuellement-cache" aria-live="polite">

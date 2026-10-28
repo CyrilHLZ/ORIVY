@@ -1,5 +1,6 @@
 package fr.orivy.Orivy.Model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,6 +20,8 @@ public class Promenade {
     private Double distanceKm;
     private Integer dureeMinutes;
     private String difficulte;
+    // Itinéraire : tableau JSON de points [[lat, lng], …] — un vrai tracé dépasse vite 255 caractères
+    @Column(length = 10000)
     private String parcoursJson;
 
     public Promenade() {

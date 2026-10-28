@@ -1,10 +1,15 @@
 package fr.orivy.Orivy.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import fr.orivy.Orivy.Model.Utilisateur;
@@ -15,6 +20,7 @@ public class UtilisateurService {
 
     private static final String ROLE_UTILISATEUR = "utilisateur";
     private static final String ROLE_ADMIN = "admin";
+    private static final List<String> TYPES_IMAGES = List.of("image/jpeg", "image/png", "image/webp");
 
     private final UtilisateurRepository utilisateurRepository;
     private final PasswordEncoder passwordEncoder;
@@ -94,5 +100,47 @@ public class UtilisateurService {
         } else if (!motDePasse.matches(".*[!@#$%^&*()].*")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Le mot de passe doit contenir au moins un caractère spécial (!@#$%^&*()).");
         }
+    }
+
+    public void changerMotDePasse(Long id, String ancien, String nouveau) {
+        Utilisateur utilisateur = trouverUtilisateur(id);
+        verifierMotDePasseActuel(utilisateur, ancien);
+        validerMotDePasse(nouveau);   // mêmes règles qu'à l'inscription
+        utilisateur.setMotDePasse(passwordEncoder.encode(nouveau));
+        utilisateurRepository.save(utilisateur);
+    }
+
+    public Utilisateur changerEmail(Long id, String motDePasse, String nouvelEmail) {
+        Utilisateur utilisateur = trouverUtilisateur(id);
+        verifierMotDePasseActuel(utilisateur, motDePasse);
+        if (utilisateurRepository.findByEmail(nouvelEmail).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Un compte existe déjà avec cet email.");
+        }
+        utilisateur.setEmail(nouvelEmail);
+        return utilisateurRepository.save(utilisateur);
+    }
+
+    private void verifierMotDePasseActuel(Utilisateur utilisateur, String motDePasse) {
+        if (motDePasse == null || !passwordEncoder.matches(motDePasse, utilisateur.getMotDePasse())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mot de passe actuel incorrect.");
+        }
+    }
+
+    public Utilisateur changerPhoto(Long id, MultipartFile fichier, String dossier) throws IOException {
+        if (fichier.isEmpty() || !TYPES_IMAGES.contains(fichier.getContentType())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Choisis une image JPEG, PNG ou WebP.");
+        }
+        Utilisateur utilisateur = trouverUtilisateur(id);
+
+        // Nom de fichier inventé par le back : on n'utilise JAMAIS le nom envoyé par le navigateur
+        String extension = fichier.getContentType().substring("image/".length()).replace("jpeg", "jpg");
+        String nom = "avatar-" + id + "-" + UUID.randomUUID() + "." + extension;
+
+        Path cible = Path.of(dossier, "avatars").toAbsolutePath();
+        Files.createDirectories(cible);
+        fichier.transferTo(cible.resolve(nom));
+
+        utilisateur.setPhotoUrl("/api/fichiers/avatars/" + nom);
+        return utilisateurRepository.save(utilisateur);
     }
 }

@@ -5,7 +5,7 @@
  * fond : photo plein écran (facultatif) ; sinon, l'illustration au trait (illu) dans un cadre.
  * cadrage : point de la photo à garder visible (object-position).
  * carte   : où poser la carte de texte sur ordinateur, pour ne cacher ni les gens ni le sujet
- * ambiance : animation posée sur la photo : "lumiere" (défaut), "grains", "feuilles" ou "oiseaux".
+ * ambiance : animation posée sur la photo : "lumiere" (défaut), "grains", "feuilles", "oiseaux" ou "aucune".
  * ratio   : largeur / hauteur de la photo.
  * effets  : animations posées sur des points précis de la photo, en % DE L'IMAGE
  *           (voir PhotoAnimee.jsx). Les numéros renvoient à la liste des 100 propositions.
@@ -48,18 +48,11 @@ export const ECRANS = [
       texte: "Des grands musées parisiens aux petites collections de province, il y a toujours une salle qui t'attend.", bouton: 'Vois les musées sur la carte' },
     { cle: 'parc', illu: parc, fond: fondParc, ratio: 1672 / 941,
       effets: [
+        // Effets lumineux retirés le 2026-10-27 (soleil, réverbères, statues, fenêtres, bassin doré, pollen, halo)
         { type: 'nuages', x: 5, y: 2, l: 75, h: 26 },                                 // (28)
-        { type: 'soleil', x: 24.1, y: 40.9, t: 12 },
-        { type: 'lampes', points: [{ x: 1.1, y: 27.8, t: 6 }, { x: 96.7, y: 26, t: 6 }] }, // (24)
         { type: 'papillons', x: 12, y: 68, l: 16, h: 14 },                            // (27) au-dessus de la lavande
         { type: 'papillons', x: 74, y: 68, l: 14, h: 14 },
-        { type: 'pollen', x: 31, y: 84, l: 38, h: 16, n: 14 },                        // grains dorés sur le chemin : au premier plan, large…
-        { type: 'pollen', x: 38, y: 70, l: 24, h: 14, n: 10 },                        // … puis de plus en plus étroit…
-        { type: 'pollen', x: 44, y: 58, l: 12, h: 12, n: 6 },                         // … jusqu'au bassin
-        { type: 'miroir', x: 41, y: 54, l: 18, h: 7 },                                // le ciel doré dans le bassin
-        { type: 'statues', points: [{ x: 7.5, y: 50, t: 5 }, { x: 90.5, y: 49, t: 5 }, { x: 23.5, y: 49.5 }, { x: 78, y: 49.5 }, { x: 33, y: 50.5 }, { x: 65.5, y: 50.5 }] },
-        { type: 'fenetres', points: [{ x: 42, y: 43.5 }, { x: 47, y: 43.5 }, { x: 56, y: 43.5 }, { x: 61, y: 43.5 }, { x: 44, y: 48 }, { x: 58, y: 48 }] }, // (51) le château la nuit
-      ], cadrage: '50% 60%', carte: 'haut-droite', alt: "Couple main dans la main dans l'allée d'un jardin à la française, bassin, statues et château au coucher du soleil", badge: 'Parcs & jardins', titre: 'Respire au vert',
+      ], cadrage: '50% 60%', carte: 'haut-droite', ambiance: 'aucune', alt: "Couple main dans la main dans l'allée d'un jardin à la française, bassin, statues et château au coucher du soleil", badge: 'Parcs & jardins', titre: 'Respire au vert',
       texte: 'Une pelouse, un grand arbre, un pique-nique entre amis : le bonheur tient parfois à peu de chose.', bouton: 'Vois les parcs sur la carte' },
     { cle: 'promenade', illu: randonnee, fond: fondPromenade, ratio: 1376 / 768,
       effets: [

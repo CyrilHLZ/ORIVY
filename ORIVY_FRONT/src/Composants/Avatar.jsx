@@ -1,6 +1,6 @@
 /*
  * <Avatar personne={{ prenom: 'Inès', nom: 'Nakamura' }} taille="l" />
- * Rond avec les initiales (pas de photo de profil pour l'instant).
+ * Rond avec la photo du membre (photoUrl) s'il en a une, sinon ses initiales.
  *
  * taille : "s" (32px) | défaut (44px) | "l" (64px) | "xl" (96px)
  * La couleur de fond est choisie d'après le nom : la même personne a
@@ -21,7 +21,11 @@ const Avatar = ({ personne, taille, className = '' }) => {
     const initiales = initialesDe(personne);
     const classes = ['avatar', taille && `avatar--${taille}`, `avatar--${couleurDe(initiales)}`, className].filter(Boolean).join(' ');
     // Décoratif : le nom de la personne est toujours écrit à côté, ou dans un aria-label du parent
-    return <span className={classes} aria-hidden="true">{initiales}</span>;
+    return (
+        <span className={classes} aria-hidden="true">
+            {personne?.photoUrl ? <img src={personne.photoUrl} alt="" /> : initiales}
+        </span>
+    );
 };
 
 /*

@@ -84,6 +84,56 @@
 .carte-rayon[hidden] { display: none; }
 .carte-rayon .rayon { border: 0; }
 
+/* Tracé d'une promenade : couleur de la catégorie « Randonnées » (suit le thème de nuit) */
+.trace-promenade {
+  stroke: var(--cat-promenade);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-opacity: 0.85;
+  fill: none;
+}
+.trace-promenade:hover { stroke-width: 7; stroke-opacity: 1; }
+
+/* Fenêtre de choix des catégories, à l'arrivée sur la carte : petite pop-up compacte */
+.fenetre--categories {
+  width: min(100% - 2 * var(--marge-page), 28rem);
+  max-height: calc(100dvh - 2 * var(--espace-5));
+  overflow-y: auto;   /* petit écran : la fenêtre défile au lieu de dépasser */
+  padding: var(--espace-4);
+  box-sizing: border-box;
+}
+.fenetre--categories__tete { display: flex; align-items: center; justify-content: space-between; gap: var(--espace-2); }
+.fenetre--categories h2 { margin: 0; font-size: var(--taille-l); }
+.choix-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espace-2);
+  margin: var(--espace-3) 0 0;
+  padding: 0;
+  border: 0;
+}
+/* Pastille à cocher (même allure que les puces de filtre) */
+.choix-categorie {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espace-1);
+  min-height: 2.25rem;
+  padding: 0 var(--espace-3);
+  border: 1.5px solid var(--couleur-bordure-forte);
+  border-radius: var(--rayon-pilule);
+  background: var(--couleur-surface);
+  font-size: var(--taille-s);
+  font-weight: var(--graisse-moyenne);
+  cursor: pointer;
+  transition: background var(--duree-normale), border-color var(--duree-normale), color var(--duree-normale);
+}
+.choix-categorie .icone { width: 1.1rem; height: 1.1rem; color: var(--cat); }
+.choix-categorie:has(input:checked) { background: var(--cat); border-color: var(--cat); color: var(--cat-texte); }
+.choix-categorie:has(input:checked) .icone { color: currentColor; }
+.choix-categorie:has(input:focus-visible) { outline: 3px solid var(--couleur-focus); outline-offset: 2px; }
+.choix-categories__actions { display: flex; justify-content: flex-end; gap: var(--espace-2); margin-top: var(--espace-4); }
+
 /* Leaflet aux couleurs d'ORIVY */
 .leaflet-container { font-family: var(--police-texte); background: var(--couleur-surface-creux); }
 .leaflet-control-attribution { font-size: var(--taille-xs); background: var(--couleur-surface) !important; color: var(--couleur-texte-doux); }

@@ -46,6 +46,7 @@ const useSaison = () => {
  *   "grains"   → le même halo, avec des petits grains dorés qui montent (le parc)
  *   "feuilles" → feuilles d'érable orange qui tombent des arbres
  *   "oiseaux"  → une volée d'oiseaux qui traverse le ciel en battant des ailes
+ *   "aucune"   → rien (la photo seule, ex. le parc)
  * Aucun zoom : la photo reste à sa taille, donc aussi nette que possible.
  */
 const Ambiance = ({ type = 'lumiere' }) => (
@@ -213,7 +214,7 @@ const HomePage = () => {
                                     <img src={e.saisonnier ? `${e.illu}${FRAGMENT_ARBRE[saison] ?? ''}` : e.illu}
                                          alt="" width="800" height="600" loading="lazy" />
                                 )}
-                                {e.fond && <Ambiance type={e.ambiance} />}
+                                {e.fond && e.ambiance !== 'aucune' && <Ambiance type={e.ambiance} />}
                             </div>
                             <div className="ecran__texte">
                                 <BadgeCategorie cle={e.cle} />

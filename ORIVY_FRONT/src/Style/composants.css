@@ -275,6 +275,8 @@
   text-transform: uppercase;
 }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
+/* Bouton qui cache un <input type="file"> (ex. « Changer la photo ») : contour au clavier */
+label.bouton:has(input:focus-visible) { outline: 3px solid var(--couleur-focus); outline-offset: 2px; }
 .avatar--s  { --taille-avatar: var(--espace-6); }
 .avatar--l  { --taille-avatar: var(--espace-8); }
 .avatar--xl { --taille-avatar: var(--espace-9); }

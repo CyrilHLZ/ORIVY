@@ -8,3 +8,6 @@ export const getPoints = () => apiRequest('/points-interet');
 export const createPoint = (point) => apiRequest('/points-interet', { method: 'POST', body: point });
 export const updatePoint = (id, point) => apiRequest(`/points-interet/${id}`, { method: 'PUT', body: point });
 export const deletePoint = (id) => apiRequest(`/points-interet/${id}`, { method: 'DELETE' });
+
+// Promenades : { id, nom, description, distanceKm, dureeMinutes, difficulte, parcoursJson }
+export const getPromenades = () => apiRequest('/promenades');

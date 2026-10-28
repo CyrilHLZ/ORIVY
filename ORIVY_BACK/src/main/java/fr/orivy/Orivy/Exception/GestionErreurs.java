@@ -10,6 +10,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -28,6 +29,12 @@ public class GestionErreurs {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErreurApi> jsonInvalide(HttpMessageNotReadableException e) {
         return ResponseEntity.badRequest().body(ErreurApi.simple("La requête est mal formée."));
+    }
+
+    // 413 : fichier envoyé trop lourd (limite dans application.properties)
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErreurApi> fichierTropLourd(MaxUploadSizeExceededException e) {
+        return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE).body(ErreurApi.simple("La photo ne doit pas dépasser 2 Mo."));
     }
 
     // 404 : l'adresse demandée n'existe pas

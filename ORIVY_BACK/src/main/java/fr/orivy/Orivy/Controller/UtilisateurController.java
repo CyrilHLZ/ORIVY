@@ -1,7 +1,9 @@
 package fr.orivy.Orivy.Controller;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -12,16 +14,21 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import fr.orivy.Orivy.DTO.ChangementEmail;
+import fr.orivy.Orivy.DTO.ChangementMotDePasse;
 import fr.orivy.Orivy.DTO.ReponseConnexion;
 import fr.orivy.Orivy.DTO.UtilisateurPrivee;
 import fr.orivy.Orivy.DTO.UtilisateurPublic;
 import fr.orivy.Orivy.Model.Utilisateur;
 import fr.orivy.Orivy.Service.JetonService;
 import fr.orivy.Orivy.Service.UtilisateurService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/utilisateurs")
@@ -29,6 +36,9 @@ public class UtilisateurController {
 
     private final UtilisateurService utilisateurService;
     private final JetonService jetonService;
+
+    @Value("${orivy.dossier-uploads}")
+    private String dossierUploads;
 
     public UtilisateurController(UtilisateurService utilisateurService, JetonService jetonService) {
         this.utilisateurService = utilisateurService;
@@ -82,5 +92,24 @@ public class UtilisateurController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void supprimerUtilisateur(@PathVariable Long id) {
         utilisateurService.supprimerUtilisateur(id);
+    }
+
+    @PutMapping("/moi/mot-de-passe")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void changerMotDePasse(@RequestBody ChangementMotDePasse demande, @AuthenticationPrincipal Jwt jwt) {
+        utilisateurService.changerMotDePasse(Long.valueOf(jwt.getSubject()),
+                demande.ancienMotDePasse(), demande.nouveauMotDePasse());
+    }
+
+    // Envoi d'une photo de profil (formulaire « multipart », champ « photo »)
+    @PostMapping("/moi/photo")
+    public UtilisateurPrivee changerPhoto(@RequestParam("photo") MultipartFile photo, @AuthenticationPrincipal Jwt jwt) throws IOException {
+        return UtilisateurPrivee.depuis(utilisateurService.changerPhoto(Long.valueOf(jwt.getSubject()), photo, dossierUploads));
+    }
+
+    @PutMapping("/moi/email")
+    public UtilisateurPrivee changerEmail(@Valid @RequestBody ChangementEmail demande, @AuthenticationPrincipal Jwt jwt) {
+        return UtilisateurPrivee.depuis(utilisateurService.changerEmail(Long.valueOf(jwt.getSubject()),
+                demande.motDePasse(), demande.nouvelEmail()));
     }
 }

@@ -12,15 +12,16 @@ import { lireJeton } from './jeton.js';
  */
 export const apiRequest = async (path, { body, headers, ...options } = {}) => {
     const jeton = lireJeton();
+    const estFichier = body instanceof FormData;
 
     const response = await fetch(`/api${path}`, {
         ...options,
         headers: {
-            'Content-Type': 'application/json',
+            ...(!estFichier && { 'Content-Type': 'application/json'}),
             ...(jeton && { 'Authorization': `Bearer ${jeton}` }),
             ...headers,
         },
-        body: body !== undefined ? JSON.stringify(body) : undefined,
+        body: body === undefined ? undefined : estFichier ? body : JSON.stringify(body),
     });
 
      if (response.status === 401 && jeton) {

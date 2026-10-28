@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../Context/AuthContext.jsx';
-import { getUserProfile, updateUserProfile } from '../../Services/Utilisateur/UtilisateurService.js';
+import { changerEmail, changerMotDePasse, changerPhoto, getUserProfile, updateUserProfile } from '../../Services/Utilisateur/UtilisateurService.js';
 import Avatar from '../../Composants/Avatar.jsx';
 import Bouton from '../../Composants/Bouton.jsx';
 import Icone from '../../Composants/Icone.jsx';
-import { Champ, Interrupteur } from '../../Composants/Formulaire.jsx';
+import { Champ, ChampMotDePasse, Interrupteur } from '../../Composants/Formulaire.jsx';
 import { ChoixSegmente } from '../../Composants/Filtres.jsx';
 import { EtatErreur } from '../../Composants/Etats.jsx';
 import { getSortiesMembre } from '../../Services/Sortie/SortieService.js';
@@ -106,6 +106,94 @@ const ModifierProfil = ({ profil, onEnregistre, onAnnuler }) => {
     );
 };
 
+/* ---- Changer de photo : un bouton qui ouvre le choix de fichier ---- */
+const BoutonPhoto = ({ onChange }) => {
+    const [erreur, setErreur] = useState(null);
+
+    const choisir = async (event) => {
+        const fichier = event.target.files[0];
+        if (!fichier) return;
+        try {
+            onChange(await changerPhoto(fichier));
+            setErreur(null);
+        } catch (e) {
+            setErreur(e.message);
+        }
+        event.target.value = '';   // permet de rechoisir le même fichier
+    };
+
+    return (
+        <>
+            <label className="bouton bouton--fantome">
+                <Icone nom="appareil-photo" />Changer la photo
+                <input type="file" accept="image/jpeg,image/png,image/webp" className="visuellement-cache" onChange={choisir} />
+            </label>
+            {erreur && <p className="champ__erreur" role="alert">{erreur}</p>}
+        </>
+    );
+};
+
+/* ---- Changer de mot de passe ---- */
+const FormMotDePasse = () => {
+    const [ancien, setAncien] = useState('');
+    const [nouveau, setNouveau] = useState('');
+    const [retour, setRetour] = useState(null);   // { ok: true/false, texte }
+
+    const envoyer = async (event) => {
+        event.preventDefault();
+        try {
+            await changerMotDePasse(ancien, nouveau);
+            setAncien(''); setNouveau('');
+            setRetour({ ok: true, texte: 'Mot de passe modifié.' });
+        } catch (e) {
+            setRetour({ ok: false, texte: e.message });
+        }
+    };
+
+    return (
+        <form className="formulaire" onSubmit={envoyer}>
+            <h3 style={{ margin: 0 }}>Mot de passe</h3>
+            <ChampMotDePasse label="Mot de passe actuel" value={ancien} onChange={(e) => setAncien(e.target.value)}
+                             autoComplete="current-password" required />
+            <ChampMotDePasse label="Nouveau mot de passe" value={nouveau} onChange={(e) => setNouveau(e.target.value)}
+                             autoComplete="new-password" required />
+            {retour && <p className={retour.ok ? 'texte-doux' : 'champ__erreur'} role="status">{retour.texte}</p>}
+            <Bouton type="submit" variante="secondaire">Changer le mot de passe</Bouton>
+        </form>
+    );
+};
+
+/* ---- Changer d'email ---- */
+const FormEmail = ({ onChange }) => {
+    const [email, setEmail] = useState('');
+    const [motDePasse, setMotDePasse] = useState('');
+    const [retour, setRetour] = useState(null);
+
+    const envoyer = async (event) => {
+        event.preventDefault();
+        try {
+            const nouveau = await changerEmail(motDePasse, email);
+            onChange(nouveau);   // met à jour l'email affiché partout
+            setEmail(''); setMotDePasse('');
+            setRetour({ ok: true, texte: 'Email modifié.' });
+        } catch (e) {
+            setRetour({ ok: false, texte: e.message });
+        }
+    };
+
+    return (
+        <form className="formulaire" onSubmit={envoyer}>
+            <h3 style={{ margin: 0 }}>Email</h3>
+            <Champ label="Nouvel email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                   autoComplete="email" required />
+            <ChampMotDePasse label="Mot de passe actuel" value={motDePasse} onChange={(e) => setMotDePasse(e.target.value)}
+                             autoComplete="current-password" required />
+            {retour && <p className={retour.ok ? 'texte-doux' : 'champ__erreur'} role="status">{retour.texte}</p>}
+            <Bouton type="submit" variante="secondaire">Changer l'email</Bouton>
+        </form>
+    );
+};
+
 const ProfilPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -181,6 +269,7 @@ const ProfilPage = () => {
                             {estMoi && !edition && (
                                 <div className="ligne-actions">
                                     <Bouton variante="secondaire" icone="modifier" onClick={() => setEdition(true)}>Modifier le profil</Bouton>
+                                    <BoutonPhoto onChange={enregistre} />
                                     {isAdmin && <Bouton variante="fantome" icone="bouclier" vers="/admin">Administration</Bouton>}
                                 </div>
                             )}
@@ -228,6 +317,8 @@ const ProfilPage = () => {
                         <section className="encart reglages" aria-labelledby="t-compte">
                             <h2 id="t-compte" style={{ fontSize: 'var(--taille-xl)', margin: 0 }}>Compte</h2>
                             <p className="texte-doux" style={{ margin: 0, fontSize: 'var(--taille-s)' }}>Connecté·e avec {profil.email}</p>
+                            <FormEmail onChange={(nouveau) => { setProfil(nouveau); mettreAJourUtilisateur(nouveau); }} />
+                            <FormMotDePasse />
                             <Bouton variante="fantome" icone="deconnexion" onClick={deconnexion} style={{ justifyContent: 'flex-start' }}>
                                 Se déconnecter
                             </Bouton>
