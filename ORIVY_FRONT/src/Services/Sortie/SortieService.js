@@ -11,7 +11,13 @@ export const searchSorties = (query) => apiRequest(`/sorties/search?query=${enco
 export const getSortiesMembre = (utilisateurId) => apiRequest(`/sorties/membre/${utilisateurId}`);
 export const rejoindreAttente = (sortieId) => apiRequest(`/sorties/${sortieId}/attente`, { method: 'POST' });
 export const quitterAttente = (sortieId) => apiRequest(`/sorties/${sortieId}/attente`, { method: 'DELETE' });
-
+export const getAlbum = (sortieId) => apiRequest(`/sorties/${sortieId}/album`);
+export const retirerDeLAlbum = (sortieId, photoId) => apiRequest(`/sorties/${sortieId}/album/${photoId}`, { method: 'DELETE' });
+export const ajouterAuAlbum = (sortieId, fichier) => {
+    const formulaire = new FormData();
+    formulaire.append('photo', fichier);
+    return apiRequest(`/sorties/${sortieId}/album`, { method: 'POST', body: formulaire });
+};
 
 export const envoyerMediaSortie = (sortieId, fichier) => {
     const formulaire = new FormData();

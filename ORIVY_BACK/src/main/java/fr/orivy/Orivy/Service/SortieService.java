@@ -10,8 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import fr.orivy.Orivy.Model.PhotoSortie;
 import fr.orivy.Orivy.Model.Sortie;
 import fr.orivy.Orivy.Model.Utilisateur;
+import fr.orivy.Orivy.Repository.PhotoSortieRepository;
 import fr.orivy.Orivy.Repository.SortieRepository;
 import fr.orivy.Orivy.Repository.UtilisateurRepository;
 
@@ -22,13 +24,16 @@ public class SortieService {
     private final UtilisateurRepository utilisateurRepository;
     private final NotificationService notificationService;
     private final FichierService fichierService;
+    private final PhotoSortieRepository photoSortieRepository;
 
     public SortieService(SortieRepository sortieRepository, UtilisateurRepository utilisateurRepository,
-                         NotificationService notificationService, FichierService fichierService) {
+                         NotificationService notificationService, FichierService fichierService,
+                         PhotoSortieRepository photoSortieRepository) {
         this.sortieRepository = sortieRepository;
         this.utilisateurRepository = utilisateurRepository;
         this.notificationService = notificationService;
         this.fichierService = fichierService;
+        this.photoSortieRepository = photoSortieRepository;
     }
 
     public List<Sortie> getAllSorties() {
@@ -86,9 +91,13 @@ public class SortieService {
         return enregistree;
     }
 
+    @Transactional
     public void supprimerSortie(Long id, Long appelantId, boolean estAdmin) {
         Sortie sortie = trouverSortie(id);
         verifierDroits(sortie, appelantId, estAdmin);
+        // Les photos de l'album pointent vers la sortie (clé étrangère) : on les supprime d'abord,
+        // sinon la base refuse de supprimer la sortie (erreur 500)
+        photoSortieRepository.deleteAll(photoSortieRepository.findBySortieIdOrderByDateAjoutDesc(id));
         sortieRepository.delete(sortie);
     }
 
@@ -204,4 +213,31 @@ public class SortieService {
         return sortieRepository.rechercher(mot.trim());
     }
 
+    public List<PhotoSortie> album(Long sortieId) {
+        return photoSortieRepository.findBySortieIdOrderByDateAjoutDesc(sortieId);
+    }
+
+    @Transactional
+    public PhotoSortie ajouterAuAlbum(Long sortieId, MultipartFile fichier, Long auteurId) throws IOException {
+        Sortie sortie = trouverSortie(sortieId);
+        Utilisateur auteur = trouverUtilisateur(auteurId);
+        boolean organisateur = sortie.getOrganisateur() != null && sortie.getOrganisateur().getId().equals(auteurId);
+        if (!organisateur && !sortie.getParticipants().contains(auteur)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Rejoins la sortie pour partager tes photos.");
+        }
+        String url = fichierService.enregistrerMedia(fichier, "albums", "album-" + sortieId);
+        return photoSortieRepository.save(new PhotoSortie(sortie, auteur, url));
+    }
+
+    public void retirerDeLAlbum(Long photoId, Long appelantId, boolean estAdmin) {
+        PhotoSortie photo = photoSortieRepository.findById(photoId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Photo introuvable."));
+        boolean auteur = photo.getAuteur().getId().equals(appelantId);
+        boolean organisateur = photo.getSortie().getOrganisateur() != null
+                && photo.getSortie().getOrganisateur().getId().equals(appelantId);
+        if (!auteur && !organisateur && !estAdmin) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Tu ne peux retirer que tes propres photos.");
+        }
+        photoSortieRepository.delete(photo);
+    }
 }

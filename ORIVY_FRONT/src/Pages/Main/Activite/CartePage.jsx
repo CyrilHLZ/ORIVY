@@ -14,6 +14,7 @@ import Icone from '../../../Composants/Icone.jsx';
 import Photo from '../../../Composants/Photo.jsx';
 import { BadgeCategorie } from '../../../Composants/Badges.jsx';
 import { Champ } from '../../../Composants/Formulaire.jsx';
+import BoutonFavori from '../../../Composants/BoutonFavori.jsx';
 import { ChoixSegmente, OPTIONS_RAYON, Puce, Puces } from '../../../Composants/Filtres.jsx';
 
 /*
@@ -447,7 +448,10 @@ const DetailLieu = ({ lieu, km, modifiable, onFermer, onModifie }) => {
             <div className={`detail-lieu cat-${categorie(lieu.categorie).cle}`}>
                 <div className="detail-lieu__tete">
                     <BadgeCategorie cle={lieu.categorie} />
-                    <BoutonIcone icone="fermer" label="Fermer la fiche du lieu" onClick={onFermer} />
+                    <span style={{ display: 'flex', gap: 'var(--espace-1)' }}>
+                        <BoutonFavori type={lieu.source} id={lieu.idNum} nom={lieu.nom} />
+                        <BoutonIcone icone="fermer" label="Fermer la fiche du lieu" onClick={onFermer} />
+                    </span>
                 </div>
                 <Photo src={lieu.imageUrl || categorie(lieu.categorie).image} alt="" cle={lieu.categorie} paresseuse={false} />
                 <h2 id="tiroir-titre">{lieu.nom}</h2>

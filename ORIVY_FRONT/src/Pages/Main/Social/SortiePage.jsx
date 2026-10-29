@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../../Context/AuthContext.jsx';
-import { deleteSortie, desinscriptionSortie, getSortieById, inscriptionSortie, quitterAttente, rejoindreAttente } from '../../../Services/Sortie/SortieService';
+import { deleteSortie, desinscriptionSortie, getSortieById, inscriptionSortie, quitterAttente, rejoindreAttente, getAlbum, ajouterAuAlbum, retirerDeLAlbum } from '../../../Services/Sortie/SortieService';
 import { createCommentaire, getCommentaires } from '../../../Services/Commentaire/CommentaireService.js';
 import { categorie } from '../../../Constants/categories.js';
 import { dateLisible, dateLongue, ilYa } from '../../../Utils/dates.js';
@@ -15,13 +15,50 @@ import FenetreConfirmation from '../../../Composants/Fenetre.jsx';
 import Confettis from '../../../Composants/Confettis.jsx';
 import { telechargerIcs } from '../../../Utils/agenda.js';
 import { meteoDeLaSortie } from '../../../Utils/meteo.js';
+import BoutonFavori from '../../../Composants/BoutonFavori.jsx';
 
+
+/*
+ * Détail d'une sortie (maquette design/maquettes/sortie.html).
+ * Mobile : bouton d'inscription collé en bas. Ordinateur : encart à droite qui suit le défilement.
+ *
+ * Données du back : { id, nom, description, categorie, dateDebut, lieu, latitude, longitude,
+ *                     organisateur, participants, attente, nombreMax, imageUrl }.
+ * Commentaires : GET /api/sortie/{id}/commentaires · Album : GET /api/sorties/{id}/album.
+ */
+
+/* Nom affiché d'une personne : « Inès Nakamura », sinon son e-mail */
+const nomDe = (personne) => [personne?.prenom, personne?.nom].filter(Boolean).join(' ') || personne?.email || 'Quelqu\'un';
+
+/* ---- Encart d'inscription (le même contenu sert sur mobile et sur ordinateur) ----
+   En dehors de SortiePage : un composant écrit DANS un autre serait recréé à chaque affichage. */
+const BoutonInscription = ({ connecte, inscrit, complet, position, enCours, onBasculer, onAttente }) => {
+    if (!connecte) return <Bouton vers="/connexion" bloc>Connecte-toi pour participer</Bouton>;
+
+    // Complète (et pas inscrit) : liste d'attente. Le texte dit toujours que c'est complet ;
+    // le 1er de la file prend la prochaine place libre (géré par le back).
+    if (complet && !inscrit) {
+        return (
+            <Bouton variante={position ? 'secondaire' : 'principal'} bloc aria-pressed={position > 0}
+                    disabled={enCours} aria-busy={enCours} onClick={onAttente}>
+                {position ? `Tu es n°${position} sur la liste · Quitter` : 'Complet · Préviens-moi'}
+            </Bouton>
+        );
+    }
+
+    // Sinon : rejoindre, ou se désinscrire (un inscrit peut toujours partir, même si c'est complet)
+    return (
+        <Bouton variante={inscrit ? 'secondaire' : 'principal'} bloc aria-pressed={inscrit}
+                disabled={enCours} aria-busy={enCours} onClick={onBasculer}>
+            {inscrit ? 'Tu es inscrit·e ✓ (te désinscrire)' : 'Rejoins la sortie'}
+        </Bouton>
+    );
+};
 
 const SortiePage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user, isAuthenticated, isAdmin } = useAuth();
-
     const [sortie, setSortie] = useState(null);
     const [erreur, setErreur] = useState(null);
     const [enCours, setEnCours] = useState(false);
@@ -31,6 +68,7 @@ const SortiePage = () => {
     const [message, setMessage] = useState(null);
     const [fete, setFete] = useState(0);   // (75) compteur : chaque inscription relance les confettis
     const [meteo, setMeteo] = useState(null);
+    const [album, setAlbum] = useState([]);
 
     useEffect(() => {
         document.body.classList.add('page-sortie');
@@ -46,7 +84,8 @@ const SortiePage = () => {
             .catch(() => setErreur("Cette sortie n'existe pas, ou a été supprimée."));
         getCommentaires('sortie', id)
             .then(setCommentaires)
-            .catch(() => setCommentaires([]));   // sans commentaires, la page reste utilisable
+            .catch(() => setCommentaires([]));
+        getAlbum(id).then(setAlbum).catch(() => setAlbum([]));
     }, [id]);
 
     /* Météo du jour J, une fois la sortie chargée (pas rechargée à chaque inscription) */
@@ -77,29 +116,11 @@ const SortiePage = () => {
     const peutGerer = isAdmin || sortie.organisateur?.id === user?.id;
     // Inscrit = présent dans la liste renvoyée par le back (vrai aussi après un rechargement)
     const inscrit = participants.some((p) => p.id === user?.id);
+    // L'album : les participants et l'organisateur peuvent y partager leurs photos
+    const peutPartager = inscrit || sortie.organisateur?.id === user?.id;
     const complet = sortie.nombreMax != null && participants.length >= sortie.nombreMax;
     // Position dans la file d'attente : 1, 2, 3… (0 = pas en attente)
     const position = (sortie.attente ?? []).findIndex((p) => p.id === user?.id) + 1;
-
-    const nomDe = (personne) => [personne?.prenom, personne?.nom].filter(Boolean).join(' ') || personne?.email || 'Quelqu\'un';
-
-    const BoutonInscription = ({ connecte, inscrit, complet, position, enCours, onBasculer, onAttente }) => {
-        if (!connecte) return <Bouton vers="/connexion" bloc>Connecte-toi pour participer</Bouton>;
-        if (complet && !inscrit) {
-            return (
-                <Bouton variante={position ? 'secondaire' : 'principal'} bloc aria-pressed={position > 0}
-                        disabled={enCours} aria-busy={enCours} onClick={onAttente}>
-                    {position ? `Tu es n°${position} sur la liste · Quitter` : 'Complet · Préviens-moi'}
-                </Bouton>
-            );
-        }
-        return (
-            <Bouton variante={inscrit ? 'secondaire' : 'principal'} bloc aria-pressed={inscrit}
-                    disabled={enCours} aria-busy={enCours} onClick={onBasculer}>
-                {inscrit ? 'Tu es inscrit·e ✓ (te désinscrire)' : 'Rejoins la sortie'}
-            </Bouton>
-        );
-    };
 
     const basculerInscription = async () => {
         setEnCours(true);
@@ -161,6 +182,28 @@ const SortiePage = () => {
         ? `/carte?lat=${sortie.latitude}&lng=${sortie.longitude}&nom=${encodeURIComponent(sortie.nom)}`
         : null;
 
+    const ajouterPhoto = async (event) => {
+        const fichier = event.target.files[0];
+        event.target.value = '';
+        if (!fichier) return;
+        try {
+            const nouvelle = await ajouterAuAlbum(id, fichier);
+            setAlbum((liste) => [nouvelle, ...liste]);   // la plus récente en premier
+            setMessage('Merci pour le souvenir !');
+        } catch (e) {
+            setMessage(e.message || "L'envoi a échoué.");
+        }
+    };
+
+    const retirerPhoto = async (photoId) => {
+        try {
+            await retirerDeLAlbum(id, photoId);
+            setAlbum((liste) => liste.filter((p) => p.id !== photoId));
+        } catch (e) {
+            setMessage(e.message || 'Impossible de retirer cette photo.');
+        }
+    };
+
     return (
         <main>
             {/* Photo du lieu, avec retour et partage */}
@@ -169,7 +212,10 @@ const SortiePage = () => {
                     <Photo src={sortie.imageUrl || cat.image} alt="" cle={cat.cle} paresseuse={false} />
                     <div className="sortie-hero__actions">
                         <Link className="bouton bouton--icone bouton--flottant" to="/sorties" aria-label="Retour aux sorties"><Icone nom="retour" /></Link>
-                        <BoutonIcone icone="partager" label="Partager la sortie" flottant onClick={partager} />
+                        <span style={{ display: 'flex', gap: 'var(--espace-2)' }}>
+                            <BoutonFavori type="sortie" id={sortie.id} nom={sortie.nom} flottant />
+                            <BoutonIcone icone="partager" label="Partager la sortie" flottant onClick={partager} />
+                        </span>
                     </div>
                 </div>
             </div>
@@ -273,6 +319,28 @@ const SortiePage = () => {
                                 </form>
                             ) : (
                                 <p className="texte-doux" style={{ marginTop: 'var(--espace-3)' }}><Link to="/connexion">Connecte-toi</Link> pour commenter.</p>
+                            )}
+                        </section>
+
+                        <section aria-labelledby="t-album">
+                            <h2 id="t-album" style={{ fontSize: 'var(--taille-xl)' }}>
+                                Album{album.length > 0 && ` (${album.length})`}
+                            </h2>
+                            {album.length > 0 ? (
+                                <div className="galerie">
+                                    {album.map((p) => (
+                                        <Photo key={p.id} src={p.url} alt={`Souvenir partagé par ${p.auteur?.prenom ?? 'un membre'}`} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="texte-doux">Pas encore de souvenir. Après la sortie, partagez vos photos ici !</p>
+                            )}
+                            {peutPartager && (
+                                <label className="bouton bouton--secondaire" style={{ marginTop: 'var(--espace-3)' }}>
+                                    <Icone nom="appareil-photo" />Ajouter mes photos
+                                    <input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
+                                        className="visuellement-cache" onChange={ajouterPhoto} />
+                                </label>
                             )}
                         </section>
 

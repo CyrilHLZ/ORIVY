@@ -334,6 +334,7 @@ label.bouton:has(input:focus-visible) { outline: 3px solid var(--couleur-focus);
 .carte-lieu .photo { transition: transform var(--duree-normale) var(--courbe-sortie); }
 .carte-lieu:hover .photo { transform: translateY(calc(var(--espace-1) * -1)); }
 .carte-lieu__haut {
+  pointer-events: none;   /* les badges laissent passer le clic vers la carte… */
   position: absolute;
   top: var(--espace-3);
   left: var(--espace-3);
@@ -342,8 +343,15 @@ label.bouton:has(input:focus-visible) { outline: 3px solid var(--couleur-focus);
   justify-content: space-between;
   align-items: flex-start;
   gap: var(--espace-2);
-  z-index: var(--plan-contenu);
+  z-index: calc(var(--plan-contenu) + 1);   /* au-dessus du lien qui recouvre la carte */
 }
+.carte-lieu__droite { display: flex; align-items: center; gap: var(--espace-2); }
+.carte-lieu__haut .bouton-favori { pointer-events: auto; }   /* …sauf le cœur */
+
+/* Bouton favori : cœur vide, plein (couleur framboise) quand la chose est aimée */
+.bouton-favori .icone { transition: transform var(--duree-normale) var(--courbe-sortie); }
+.bouton-favori--actif .icone { color: var(--couleur-danger); fill: currentColor; }
+.bouton-favori:active .icone { transform: scale(0.85); }
 .carte-lieu__nom {
   font-family: var(--police-titre);
   font-weight: var(--graisse-titre);

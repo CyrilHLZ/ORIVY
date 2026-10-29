@@ -3,6 +3,7 @@ import Icone from './Icone.jsx';
 import Photo from './Photo.jsx';
 import { BadgeCategorie, BadgeDistance } from './Badges.jsx';
 import { categorie } from '../Constants/categories.js';
+import BoutonFavori from './BoutonFavori.jsx';
 
 /*
  * <CarteLieu lieu={lieu} km={2.3} lien="/carte?lieu=12" />
@@ -22,7 +23,11 @@ const CarteLieu = ({ lieu, km, lien }) => {
             <Photo src={lieu.imageUrl || cat.image} alt={lieu.alt ?? ''} cle={cat.cle} />
             <div className="carte-lieu__haut">
                 <BadgeCategorie cle={cat.cle} />
-                {km != null && <BadgeDistance km={km} />}
+                <span className="carte-lieu__droite">
+                    {km != null && <BadgeDistance km={km} />}
+                    {/* lieu.source = "point" ou "activite", lieu.idNum = son id dans le back */}
+                    {lieu.source && <BoutonFavori type={lieu.source} id={lieu.idNum} nom={lieu.nom} flottant />}
+                </span>
             </div>
             <h3 className="carte-lieu__nom">
                 <Link to={lien || `/carte?lieu=${lieu.id}`}>{lieu.nom}</Link>

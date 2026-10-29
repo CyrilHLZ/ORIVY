@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import fr.orivy.Orivy.DTO.PhotoSortieDto;
 import fr.orivy.Orivy.DTO.SortieDto;
 import fr.orivy.Orivy.DTO.SortiesMembreDto;
 import fr.orivy.Orivy.Model.Sortie;
@@ -111,4 +112,21 @@ public class SortieController {
         return sortieService.rechercher(query).stream().map(SortieDto::depuis).toList();
     }
 
+    @GetMapping("/{id}/album")
+    public List<PhotoSortieDto> album(@PathVariable Long id) {
+        return sortieService.album(id).stream().map(PhotoSortieDto::depuis).toList();
+    }
+
+    @PostMapping("/{id}/album")
+    @ResponseStatus(HttpStatus.CREATED)
+    public PhotoSortieDto ajouterAuAlbum(@PathVariable Long id, @RequestParam("photo") MultipartFile photo,
+                                        @AuthenticationPrincipal Jwt jwt) throws IOException {
+        return PhotoSortieDto.depuis(sortieService.ajouterAuAlbum(id, photo, idDe(jwt)));
+    }
+
+    @DeleteMapping("/{id}/album/{photoId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void retirerDeLAlbum(@PathVariable Long photoId, @AuthenticationPrincipal Jwt jwt) {
+        sortieService.retirerDeLAlbum(photoId, idDe(jwt), estAdmin(jwt));
+    }
 }

@@ -8,8 +8,11 @@ import Icone from '../../Composants/Icone.jsx';
 import { Champ, ChampMotDePasse, Interrupteur } from '../../Composants/Formulaire.jsx';
 import { ChoixSegmente } from '../../Composants/Filtres.jsx';
 import { EtatErreur } from '../../Composants/Etats.jsx';
-import { getSortiesMembre } from '../../Services/Sortie/SortieService.js';
+import { getSortieById, getSortiesMembre } from '../../Services/Sortie/SortieService.js';
 import CarteSortie from '../../Composants/CarteSortie.jsx';
+import CarteLieu from '../../Composants/CarteLieu.jsx';
+import { useFavoris } from '../../Context/FavorisContext.jsx';
+import { useLieux } from '../../Hooks/useLieux.js';
 
 
 const OPTIONS_THEME = [
@@ -183,6 +186,51 @@ const FormEmail = ({ onChange }) => {
     );
 };
 
+/* ---- Mes favoris (seulement sur MON profil) ----
+   Le back ne renvoie que { cibleType, cibleId } : on retrouve les lieux dans useLieux
+   (leurs id sont « point-12 », « activite-3 ») et on charge chaque sortie aimée. */
+const MesFavoris = () => {
+    const { favoris } = useFavoris();
+    const { lieux } = useLieux();
+    const [sorties, setSorties] = useState([]);
+
+    const idsSorties = favoris.filter((f) => f.cibleType === 'sortie').map((f) => f.cibleId);
+    useEffect(() => {
+        Promise.all(idsSorties.map((id) => getSortieById(id).catch(() => null)))
+            .then((liste) => setSorties(liste.filter(Boolean)));   // une sortie supprimée entre-temps est ignorée
+    }, [idsSorties.join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const lieuxAimes = favoris
+        .filter((f) => f.cibleType !== 'sortie')
+        .map((f) => lieux.find((l) => l.id === `${f.cibleType}-${f.cibleId}`))
+        .filter(Boolean);
+
+    return (
+        <section className="encart" aria-labelledby="t-favoris" style={{ marginTop: 'var(--espace-5)' }}>
+            <h2 id="t-favoris" style={{ fontSize: 'var(--taille-xl)' }}>Tes favoris</h2>
+            {lieuxAimes.length > 0 && (
+                <>
+                    <h3>Lieux</h3>
+                    <div className="carrousel">
+                        {lieuxAimes.map((l) => <CarteLieu key={l.id} lieu={l} />)}
+                    </div>
+                </>
+            )}
+            {sorties.length > 0 && (
+                <>
+                    <h3>Sorties</h3>
+                    <div className="carrousel">
+                        {sorties.map((s) => <CarteSortie key={s.id} sortie={s} />)}
+                    </div>
+                </>
+            )}
+            {lieuxAimes.length === 0 && sorties.length === 0 && (
+                <p className="texte-doux">Touche le ♡ d'un lieu ou d'une sortie pour le retrouver ici.</p>
+            )}
+        </section>
+    );
+};
+
 const ProfilPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -302,6 +350,8 @@ const ProfilPage = () => {
                             {estMoi && <Bouton icone="plus" vers="/sorties/creation">Crée une sortie</Bouton>}
                         </div>
                     </section>
+
+                    {estMoi && <MesFavoris />}
                 </div>
 
                 {/* Réglages et compte : seulement sur MON profil */}
