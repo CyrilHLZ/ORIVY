@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../../Context/AuthContext.jsx';
-import { deleteSortie, desinscriptionSortie, getSortieById, inscriptionSortie } from '../../../Services/Sortie/SortieService';
+import { deleteSortie, desinscriptionSortie, getSortieById, inscriptionSortie, quitterAttente, rejoindreAttente } from '../../../Services/Sortie/SortieService';
 import { createCommentaire, getCommentaires } from '../../../Services/Commentaire/CommentaireService.js';
 import { categorie } from '../../../Constants/categories.js';
 import { dateLisible, dateLongue, ilYa } from '../../../Utils/dates.js';
@@ -13,31 +13,46 @@ import { BadgeCategorie } from '../../../Composants/Badges.jsx';
 import { EtatErreur } from '../../../Composants/Etats.jsx';
 import FenetreConfirmation from '../../../Composants/Fenetre.jsx';
 import Confettis from '../../../Composants/Confettis.jsx';
+import { telechargerIcs } from '../../../Utils/agenda.js';
 
-/*
- * Détail d'une sortie (maquette design/maquettes/sortie.html).
- * Mobile : bouton d'inscription collé en bas. Ordinateur : encart à droite qui suit le défilement.
- *
- * Données du back : { id, nom, description, categorie, dateDebut, lieu, latitude, longitude }.
- * Affichés s'ils arrivent : imageUrl, nombreMax.
- * Commentaires : GET /api/sortie/{id}/commentaires et POST /api/commentaires.
- */
 
-/* Nom affiché d'une personne : « Inès Nakamura », sinon son e-mail */
 const nomDe = (personne) => [personne?.prenom, personne?.nom].filter(Boolean).join(' ') || personne?.email || 'Quelqu\'un';
 
-/* ---- Encart d'inscription (le même contenu sert sur mobile et sur ordinateur) ---- */
-const BoutonInscription = ({ connecte, inscrit, complet, enCours, onBasculer }) => {
+const BoutonInscription = ({ connecte, inscrit, complet, position, enCours, onBasculer, onAttente }) => {
+
     if (!connecte) return <Bouton vers="/connexion" bloc>Connecte-toi pour participer</Bouton>;
-    // Complète : on ne peut plus rejoindre… mais un inscrit peut toujours se désinscrire (ça libère une place)
-    if (complet && !inscrit) return <Bouton bloc disabled>Complet</Bouton>;
+
+    if (complet && !inscrit) {
+
+        return (
+
+            <Bouton variante={position ? 'secondaire' : 'principal'} bloc aria-pressed={position > 0}
+
+                    disabled={enCours} aria-busy={enCours} onClick={onAttente}>
+
+                {position ? `Tu es n°${position} sur la liste · Quitter` : 'Complet · Préviens-moi'}
+
+            </Bouton>
+
+        );
+
+    }
+
     return (
+
         <Bouton variante={inscrit ? 'secondaire' : 'principal'} bloc aria-pressed={inscrit}
+
                 disabled={enCours} aria-busy={enCours} onClick={onBasculer}>
+
             {inscrit ? 'Tu es inscrit·e ✓ (te désinscrire)' : 'Rejoins la sortie'}
+
         </Bouton>
+
     );
+
 };
+
+
 
 const SortiePage = () => {
     const { id } = useParams();
@@ -93,6 +108,8 @@ const SortiePage = () => {
     // Inscrit = présent dans la liste renvoyée par le back (vrai aussi après un rechargement)
     const inscrit = participants.some((p) => p.id === user?.id);
     const complet = sortie.nombreMax != null && participants.length >= sortie.nombreMax;
+    // Position dans la file d'attente : 1, 2, 3… (0 = pas en attente)
+    const position = (sortie.attente ?? []).findIndex((p) => p.id === user?.id) + 1;
 
     const basculerInscription = async () => {
         setEnCours(true);
@@ -100,6 +117,18 @@ const SortiePage = () => {
             // Le back renvoie la sortie à jour : participants et avatars se rafraîchissent
             if (inscrit) { setSortie(await desinscriptionSortie(id)); setMessage('Tu t\'es désinscrit·e de la sortie.'); }
             else { setSortie(await inscriptionSortie(id)); setFete((n) => n + 1); setMessage("C'est noté, à bientôt !"); }
+        } catch (e) {
+            setMessage(e.message || "Ça n'a pas fonctionné. Réessaie plus tard.");
+        } finally {
+            setEnCours(false);
+        }
+    };
+
+    const basculerAttente = async () => {
+        setEnCours(true);
+        try {
+            if (position) { setSortie(await quitterAttente(id)); setMessage("Tu n'es plus sur la liste d'attente."); }
+            else { setSortie(await rejoindreAttente(id)); setMessage('On te prévient dès qu\'une place se libère.'); }
         } catch (e) {
             setMessage(e.message || "Ça n'a pas fonctionné. Réessaie plus tard.");
         } finally {
@@ -168,7 +197,18 @@ const SortiePage = () => {
                     <div className="pile" style={{ gap: 'var(--espace-7)' }}>
                         <section aria-label="Infos pratiques">
                             <ul className="infos">
-                                <li><Icone nom="calendrier" /><div><strong>{dateLongue(sortie.dateDebut)}</strong></div></li>
+                                <li><Icone nom="calendrier" />
+                                    <div>
+                                        <strong>{dateLongue(sortie.dateDebut)}</strong>
+                                        {/* Inscrit : on peut l'ajouter à son agenda (fichier .ics fabriqué par le navigateur) */}
+                                        {inscrit && (
+                                            <Bouton variante="fantome" icone="calendrier" onClick={() => telechargerIcs(sortie)}
+                                                    style={{ alignSelf: 'flex-start', paddingInline: 0 }}>
+                                                Ajouter à mon agenda
+                                            </Bouton>
+                                        )}
+                                    </div>
+                                </li>
                                 {sortie.lieu && (
                                     <li><Icone nom="epingle" />
                                         <div>
@@ -258,10 +298,11 @@ const SortiePage = () => {
                                         <span style={{ '--rempli': `${Math.min(100, (participants.length / sortie.nombreMax) * 100)}%` }} />
                                     </div>
                                     <p className="inscription__places">{participants.length} inscrits · <strong>{placesRestantes} places restantes</strong></p>
+                                    {sortie.attente?.length > 0 && <p className="texte-doux" style={{ margin: 0 }}>{sortie.attente.length} en liste d'attente</p>}
                                 </>
                             )}
                             {participants.length > 0 && <PileAvatars personnes={participants} />}
-                            <BoutonInscription connecte={isAuthenticated} inscrit={inscrit} complet={complet} enCours={enCours} onBasculer={basculerInscription} />
+                            <BoutonInscription connecte={isAuthenticated} inscrit={inscrit} complet={complet} position={position} enCours={enCours} onBasculer={basculerInscription} onAttente={basculerAttente} />
                         </div>
                     </aside>
                 </div>
@@ -270,7 +311,7 @@ const SortiePage = () => {
             {/* Barre d'inscription collée en bas (mobile) */}
             <div className="inscription-mobile">
                 <p>{placesRestantes != null ? <><strong>{placesRestantes} places</strong><br />restantes</> : <strong>{dateLisible(sortie.dateDebut)}</strong>}</p>
-                <BoutonInscription connecte={isAuthenticated} inscrit={inscrit} complet={complet} enCours={enCours} onBasculer={basculerInscription} />
+                <BoutonInscription connecte={isAuthenticated} inscrit={inscrit} complet={complet} position={position} enCours={enCours} onBasculer={basculerInscription} onAttente={basculerAttente} />
             </div>
 
             <FenetreConfirmation

@@ -9,6 +9,10 @@ export const inscriptionSortie = (sortieId) => apiRequest(`/sorties/${sortieId}/
 export const desinscriptionSortie = (sortieId) => apiRequest(`/sorties/${sortieId}/inscription`, { method: 'DELETE' });
 export const searchSorties = (query) => apiRequest(`/sorties/search?query=${encodeURIComponent(query)}`);
 export const getSortiesMembre = (utilisateurId) => apiRequest(`/sorties/membre/${utilisateurId}`);
+export const rejoindreAttente = (sortieId) => apiRequest(`/sorties/${sortieId}/attente`, { method: 'POST' });
+export const quitterAttente = (sortieId) => apiRequest(`/sorties/${sortieId}/attente`, { method: 'DELETE' });
+
+
 export const envoyerMediaSortie = (sortieId, fichier) => {
     const formulaire = new FormData();
     formulaire.append('photo', fichier);
