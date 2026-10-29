@@ -17,17 +17,22 @@ public class AbonnementService {
     private final AbonnementRepository abonnementRepository;
     private final UtilisateurRepository utilisateurRepository;
     private final NotificationService notificationService;
+    private final BlocageService blocageService;
 
     public AbonnementService(AbonnementRepository abonnementRepository, UtilisateurRepository utilisateurRepository,
-                             NotificationService notificationService) {
+                             NotificationService notificationService, BlocageService blocageService) {
         this.abonnementRepository = abonnementRepository;
         this.utilisateurRepository = utilisateurRepository;
         this.notificationService = notificationService;
+        this.blocageService = blocageService;
     }
 
     public void suivre(Long abonneId, Long suiviId) {
         if (abonneId.equals(suiviId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tu ne peux pas t'abonner à toi-même.");
+        }
+        if (blocageService.entreEux(abonneId, suiviId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Tu ne peux pas t'abonner à ce membre.");
         }
         if (abonnementRepository.findByAbonneIdAndSuiviId(abonneId, suiviId).isPresent()) return;
         Utilisateur abonne = trouver(abonneId);

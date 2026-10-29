@@ -11,4 +11,3 @@ public record PhotoSortieDto(Long id, String url, UtilisateurPublicDto auteur, L
         return new PhotoSortieDto(p.getId(), p.getUrl(), UtilisateurPublicDto.depuis(p.getAuteur()), p.getDateAjout());
     }
 }
-

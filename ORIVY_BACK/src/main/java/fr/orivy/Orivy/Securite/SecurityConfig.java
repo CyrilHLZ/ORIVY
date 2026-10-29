@@ -35,10 +35,14 @@ public class SecurityConfig {
                                 "/api/promenades/**", "/api/sorties/**", "/api/notes", "/api/*/*/commentaires", "/api/fichiers/**").permitAll()
                         // Admin
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        // Se désabonner : tout membre connecté (AVANT la règle admin, la 1re qui correspond gagne)
+                        // Se désabonner / débloquer : tout membre connecté (AVANT la règle admin, la 1re qui correspond gagne)
                         .requestMatchers(HttpMethod.DELETE, "/api/utilisateurs/*/abonnement").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/utilisateurs/*/blocage").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/utilisateurs/**").hasRole("ADMIN")
                         .requestMatchers("/api/points-interet/**", "/api/activites/**", "/api/promenades/**").hasRole("ADMIN")
+                        // Signalements : tout membre en envoie (POST), seul l'admin les lit et les traite
+                        .requestMatchers(HttpMethod.GET, "/api/signalements").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/signalements/**").hasRole("ADMIN")
                         // Tout le reste : il faut être connecté
                         .anyRequest().authenticated())
                 // Lit l'en-tête « Authorization: Bearer … » et vérifie le jeton

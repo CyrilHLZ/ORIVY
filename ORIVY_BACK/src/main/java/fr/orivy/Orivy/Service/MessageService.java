@@ -23,17 +23,22 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final UtilisateurRepository utilisateurRepository;
     private final NotificationService notificationService;
+    private final BlocageService blocageService;
 
     public MessageService(MessageRepository messageRepository, UtilisateurRepository utilisateurRepository,
-                          NotificationService notificationService) {
+                          NotificationService notificationService, BlocageService blocageService) {
         this.messageRepository = messageRepository;
         this.utilisateurRepository = utilisateurRepository;
         this.notificationService = notificationService;
+        this.blocageService = blocageService;
     }
 
     public Message envoyer(Long expediteurId, Long destinataireId, String contenu) {
         if (expediteurId.equals(destinataireId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tu ne peux pas t'écrire à toi-même.");
+        }
+        if (blocageService.entreEux(expediteurId, destinataireId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Tu ne peux pas écrire à ce membre.");
         }
         if (contenu == null || contenu.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ton message est vide.");
