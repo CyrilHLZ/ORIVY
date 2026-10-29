@@ -35,6 +35,8 @@ public class SecurityConfig {
                                 "/api/promenades/**", "/api/sorties/**", "/api/notes", "/api/*/*/commentaires", "/api/fichiers/**").permitAll()
                         // Admin
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        // Se désabonner : tout membre connecté (AVANT la règle admin, la 1re qui correspond gagne)
+                        .requestMatchers(HttpMethod.DELETE, "/api/utilisateurs/*/abonnement").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/utilisateurs/**").hasRole("ADMIN")
                         .requestMatchers("/api/points-interet/**", "/api/activites/**", "/api/promenades/**").hasRole("ADMIN")
                         // Tout le reste : il faut être connecté
