@@ -13,6 +13,7 @@ import CarteSortie from '../../Composants/CarteSortie.jsx';
 import CarteLieu from '../../Composants/CarteLieu.jsx';
 import { useFavoris } from '../../Context/FavorisContext.jsx';
 import { useLieux } from '../../Hooks/useLieux.js';
+import { followUser, getFollowers, getFollowing, unfollowUser } from '../../Services/Social/SocialService.js';
 
 
 const OPTIONS_THEME = [
@@ -267,6 +268,30 @@ const ProfilPage = () => {
             .catch(() => {});   // sans sorties, le profil reste utilisable
     }, [idProfil]);
 
+    // Abonnés / abonnements de ce membre ; « je le suis » si je suis dans ses abonnés
+    const [abonnes, setAbonnes] = useState([]);
+    const [abonnements, setAbonnements] = useState([]);
+    useEffect(() => {
+        if (!idProfil) return;
+        getFollowers(idProfil).then(setAbonnes).catch(() => {});
+        getFollowing(idProfil).then(setAbonnements).catch(() => {});
+    }, [idProfil]);
+    const jeSuis = abonnes.some((a) => a.id === user?.id);
+
+    const basculerAbonnement = async () => {
+        try {
+            if (jeSuis) {
+                await unfollowUser(idProfil);
+                setAbonnes((liste) => liste.filter((a) => a.id !== user.id));
+            } else {
+                await followUser(idProfil);
+                setAbonnes((liste) => [...liste, user]);
+            }
+        } catch (e) {
+            setMessage(e.message);
+        }
+    };
+
     useEffect(() => {
         if (!message) return undefined;
         const minuteur = setTimeout(() => setMessage(null), 4000);
@@ -301,6 +326,11 @@ const ProfilPage = () => {
                                     <Icone nom="epingle" taille="petite" />{profil.ville}
                                 </p>
                             )}
+                            <p className="texte-doux" style={{ margin: 0 }}>
+                                <strong>{abonnes.length}</strong> abonné{abonnes.length > 1 ? 's' : ''}
+                                {' · '}
+                                <strong>{abonnements.length}</strong> abonnement{abonnements.length > 1 ? 's' : ''}
+                            </p>
                             {/* pre-line : garde les retours à la ligne tapés par le membre */}
                             {profil.bio && <p style={{ margin: 0, whiteSpace: 'pre-line' }}>{profil.bio}</p>}
                             {estMoi && !edition && (
@@ -312,7 +342,11 @@ const ProfilPage = () => {
                             )}
                             {!estMoi && user && (
                                 <div className="ligne-actions">
-                                    <Bouton icone="messages" vers={`/messages?avec=${profil.id}`}>Écrire</Bouton>
+                                    <Bouton variante={jeSuis ? 'secondaire' : 'principal'} icone={jeSuis ? 'abonne' : 'suivre'}
+                                            aria-pressed={jeSuis} onClick={basculerAbonnement}>
+                                        {jeSuis ? 'Abonné' : 'Suivre'}
+                                    </Bouton>
+                                    <Bouton variante="secondaire" icone="messages" vers={`/messages?avec=${profil.id}`}>Écrire</Bouton>
                                 </div>
                             )}
                         </div>

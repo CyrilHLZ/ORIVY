@@ -7,7 +7,7 @@ import { getNotifications, markNotificationAsRead } from '../../Services/Notific
 import { ilYa } from '../../Utils/dates.js';
 
 
-const ICONE_DU_TYPE = { inscription: 'utilisateurs', commentaire: 'commentaire', 'sortie-modifiee': 'calendrier' };
+const ICONE_DU_TYPE = { inscription: 'utilisateurs', commentaire: 'commentaire', 'sortie-modifiee': 'calendrier', abonnement: 'suivre' };
 
 const NotificationsPage = () => {
     const navigate = useNavigate();

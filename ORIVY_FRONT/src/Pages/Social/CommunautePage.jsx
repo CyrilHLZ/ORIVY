@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../Context/AuthContext.jsx';
 import { getUtilisateurs } from '../../Services/Utilisateur/UtilisateurService.js';
+import { followUser, getFollowing, unfollowUser } from '../../Services/Social/SocialService.js';
 import Avatar from '../../Composants/Avatar.jsx';
 import Bouton from '../../Composants/Bouton.jsx';
 import { Champ } from '../../Composants/Formulaire.jsx';
@@ -11,7 +12,7 @@ import { EtatErreur, EtatVide } from '../../Composants/Etats.jsx';
  * Communauté (maquette design/maquettes/communaute.html) : trouver des membres.
  * Données : GET /api/utilisateurs. On n'affiche QUE prénom, nom et ville
  * (le back renvoie aussi des données privées, qu'on ne montre jamais).
- * À venir avec le back : bouton « Suivre » et fil d'activité des abonnements.
+ * Bouton « Suivre » sur chaque membre (le nom mène à son profil).
  */
 const simplifier = (texte) => (texte || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
@@ -33,6 +34,28 @@ const CommunautePage = () => {
     };
     useEffect(charger, []);
 
+    // Les ids des membres que JE suis : un Set répond vite à « je suis Inès ? »
+    const [suivis, setSuivis] = useState(new Set());
+    useEffect(() => {
+        if (!user?.id) return;
+        getFollowing(user.id).then((liste) => setSuivis(new Set(liste.map((m) => m.id)))).catch(() => {});
+    }, [user?.id]);
+
+    const basculer = async (id) => {
+        const deja = suivis.has(id);
+        try {
+            if (deja) await unfollowUser(id);
+            else await followUser(id);
+            setSuivis((avant) => {
+                const apres = new Set(avant);   // nouveau Set : React ne voit pas un .add() sur l'ancien
+                if (deja) apres.delete(id); else apres.add(id);
+                return apres;
+            });
+        } catch {
+            setErreur("L'abonnement n'a pas pu être enregistré.");
+        }
+    };
+
     const visibles = useMemo(() => {
         const q = simplifier(recherche.trim());
         return membres
@@ -53,7 +76,11 @@ const CommunautePage = () => {
                 <p className="carte-utilisateur__nom"><Link to={`/profil/${m.id}`}>{[m.prenom, m.nom].filter(Boolean).join(' ')}</Link></p>
                 {m.ville && <p className="carte-utilisateur__info">{m.ville}</p>}
             </div>
-            <Bouton variante="secondaire" pilule vers={`/profil/${m.id}`} aria-label={`Voir le profil de ${m.prenom}`}>Profil</Bouton>
+            <Bouton variante={suivis.has(m.id) ? 'secondaire' : 'principal'} pilule icone={suivis.has(m.id) ? 'abonne' : 'suivre'}
+                    aria-pressed={suivis.has(m.id)} aria-label={`${suivis.has(m.id) ? 'Ne plus suivre' : 'Suivre'} ${m.prenom}`}
+                    onClick={() => basculer(m.id)}>
+                {suivis.has(m.id) ? 'Abonné' : 'Suivre'}
+            </Bouton>
         </div>
     );
 
