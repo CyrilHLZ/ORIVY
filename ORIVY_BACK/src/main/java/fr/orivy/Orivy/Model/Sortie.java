@@ -1,9 +1,12 @@
 package fr.orivy.Orivy.Model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -12,8 +15,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OrderColumn;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 @Entity 
 public class Sortie {
@@ -25,8 +31,16 @@ public class Sortie {
     @NotBlank(message = "Le nom de la sortie est obligatoire")
     private String nom;
 
+    // Facultative ; même limite que le formulaire du front (LONGUEUR_MAX = 600)
+    @Column(length = 600)
+    @Size(max = 600, message = "La description ne doit pas dépasser 600 caractères.")
     private String description;
     private String categorie;
+
+    @Min(value = 2, message = "Une sortie doit accueillir au moins 2 personnes.")
+    private Integer nombreMax;
+
+    private String imageUrl;
 
     @NotNull(message = "La date est obligatoire")
     private LocalDateTime dateDebut;
@@ -46,17 +60,28 @@ public class Sortie {
             inverseJoinColumns = @JoinColumn(name = "utilisateur_id"))
     private Set<Utilisateur> participants = new HashSet<>();
 
+    // Liste d'attente, dans l'ordre d'arrivée (la colonne « position » garde l'ordre en base)
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "sortie_attente",
+            joinColumns = @JoinColumn(name = "sortie_id"),
+            inverseJoinColumns = @JoinColumn(name = "utilisateur_id"))
+    @OrderColumn(name = "position")
+    private List<Utilisateur> attente = new ArrayList<>();
 
     public Sortie() {
     }
 
-    public Sortie(Long id, String nom, String description, String categorie, LocalDateTime dateDebut, String lieu) {
+    public Sortie(Long id, String nom, String description, String categorie, LocalDateTime dateDebut, String lieu,
+                    Integer nombreMax, String imageUrl
+    ) {
         this.id = id;
         this.nom = nom;
         this.description = description;
         this.categorie = categorie;
         this.dateDebut = dateDebut;
         this.lieu = lieu;
+        this.nombreMax = nombreMax;
+        this.imageUrl = imageUrl;
     }
 
     public Long getId() {
@@ -133,5 +158,25 @@ public class Sortie {
 
     public Set<Utilisateur> getParticipants() {
         return participants;
+    }
+
+    public List<Utilisateur> getAttente() {
+        return attente;
+    }
+
+    public Integer getNombreMax() {
+        return nombreMax;
+    }
+
+    public void setNombreMax(Integer nombreMax) {
+        this.nombreMax = nombreMax;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

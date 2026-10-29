@@ -3,7 +3,6 @@ package fr.orivy.Orivy.Controller;
 import java.io.IOException;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -37,8 +36,6 @@ public class UtilisateurController {
     private final UtilisateurService utilisateurService;
     private final JetonService jetonService;
 
-    @Value("${orivy.dossier-uploads}")
-    private String dossierUploads;
 
     public UtilisateurController(UtilisateurService utilisateurService, JetonService jetonService) {
         this.utilisateurService = utilisateurService;
@@ -104,7 +101,7 @@ public class UtilisateurController {
     // Envoi d'une photo de profil (formulaire « multipart », champ « photo »)
     @PostMapping("/moi/photo")
     public UtilisateurPriveeDto changerPhoto(@RequestParam("photo") MultipartFile photo, @AuthenticationPrincipal Jwt jwt) throws IOException {
-        return UtilisateurPriveeDto.depuis(utilisateurService.changerPhoto(Long.valueOf(jwt.getSubject()), photo, dossierUploads));
+        return UtilisateurPriveeDto.depuis(utilisateurService.changerPhoto(Long.valueOf(jwt.getSubject()), photo));
     }
 
     @PutMapping("/moi/email")

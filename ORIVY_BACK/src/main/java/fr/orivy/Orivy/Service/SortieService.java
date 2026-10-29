@@ -1,11 +1,13 @@
 package fr.orivy.Orivy.Service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import fr.orivy.Orivy.Model.Sortie;
@@ -19,12 +21,14 @@ public class SortieService {
     private final SortieRepository sortieRepository;
     private final UtilisateurRepository utilisateurRepository;
     private final NotificationService notificationService;
+    private final FichierService fichierService;
 
     public SortieService(SortieRepository sortieRepository, UtilisateurRepository utilisateurRepository,
-                         NotificationService notificationService) {
+                         NotificationService notificationService, FichierService fichierService) {
         this.sortieRepository = sortieRepository;
         this.utilisateurRepository = utilisateurRepository;
         this.notificationService = notificationService;
+        this.fichierService = fichierService;
     }
 
     public List<Sortie> getAllSorties() {
@@ -45,6 +49,7 @@ public class SortieService {
         return sortieRepository.save(sortie);
     }
 
+    @Transactional
     public Sortie modifierSortie(Long id, Sortie sortie, Long appelantId, boolean estAdmin) {
         Sortie sortieExistante = trouverSortie(id);
         verifierDroits(sortieExistante, appelantId, estAdmin);
@@ -52,6 +57,14 @@ public class SortieService {
         if (dateModifiee && sortie.getDateDebut().isBefore(LocalDateTime.now())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La date ne peut pas être dans le passé.");
         }
+
+        // On ne peut pas descendre sous le nombre de personnes déjà inscrites
+        if (sortie.getNombreMax() != null && sortie.getNombreMax() < sortieExistante.getParticipants().size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Il y a déjà " + sortieExistante.getParticipants().size() + " inscrits.");
+        }
+
+        sortieExistante.setNombreMax(sortie.getNombreMax());
         sortieExistante.setNom(sortie.getNom());
         sortieExistante.setDescription(sortie.getDescription());
         sortieExistante.setCategorie(sortie.getCategorie());
@@ -59,6 +72,7 @@ public class SortieService {
         sortieExistante.setLieu(sortie.getLieu());
         sortieExistante.setLatitude(sortie.getLatitude());
         sortieExistante.setLongitude(sortie.getLongitude());
+        remplirDepuisAttente(sortieExistante);   // des places ajoutées ? on inscrit les premiers en attente
         Sortie enregistree = sortieRepository.save(sortieExistante);
 
         // On prévient chaque participant (sauf celui qui vient de modifier)
@@ -86,9 +100,15 @@ public class SortieService {
         if (sortie.getDateDebut() != null && sortie.getDateDebut().isBefore(LocalDateTime.now())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Cette sortie est déjà passée.");
         }
+        
+        if (estComplete(sortie)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Cette sortie est complète.");
+        }
+
         Utilisateur participant = trouverUtilisateur(utilisateurId);
         // add renvoie false si le membre était déjà inscrit : dans ce cas, pas de nouvelle notification
         boolean nouveau = sortie.getParticipants().add(participant);
+        sortie.getAttente().remove(participant);   // s'il était en attente, il n'y est plus
 
         // On prévient l'organisateur (sauf s'il rejoint sa propre sortie)
         if (nouveau && sortie.getOrganisateur() != null && !sortie.getOrganisateur().getId().equals(utilisateurId)) {
@@ -103,7 +123,45 @@ public class SortieService {
     public Sortie desinscrire(Long sortieId, Long utilisateurId) {
         Sortie sortie = trouverSortie(sortieId);
         sortie.getParticipants().remove(trouverUtilisateur(utilisateurId));
+        remplirDepuisAttente(sortie);   // la place libérée revient au premier de la liste
         return sortieRepository.save(sortie);
+    }
+
+    @Transactional
+    public Sortie rejoindreAttente(Long sortieId, Long utilisateurId) {
+        Sortie sortie = trouverSortie(sortieId);
+        Utilisateur membre = trouverUtilisateur(utilisateurId);
+        if (!estComplete(sortie)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Il reste des places : rejoins directement la sortie.");
+        }
+        if (sortie.getParticipants().contains(membre) || sortie.getAttente().contains(membre)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Tu es déjà inscrit·e ou en attente.");
+        }
+        sortie.getAttente().add(membre);
+        return sortieRepository.save(sortie);
+    }
+
+    @Transactional
+    public Sortie quitterAttente(Long sortieId, Long utilisateurId) {
+        Sortie sortie = trouverSortie(sortieId);
+        sortie.getAttente().removeIf((u) -> u.getId().equals(utilisateurId));
+        return sortieRepository.save(sortie);
+    }
+
+    private boolean estComplete(Sortie sortie) {
+        return sortie.getNombreMax() != null && sortie.getParticipants().size() >= sortie.getNombreMax();
+    }
+
+    // Une place s'est libérée : on inscrit les premiers de la liste (premier arrivé, premier servi),
+    // tant qu'il reste de la place. while et pas if : +2 places = 2 personnes inscrites d'un coup.
+    private void remplirDepuisAttente(Sortie sortie) {
+        while (!sortie.getAttente().isEmpty() && !estComplete(sortie)) {
+            Utilisateur suivant = sortie.getAttente().remove(0);
+            sortie.getParticipants().add(suivant);
+            notificationService.notifier(suivant, "attente",
+                    "Une place s'est libérée : tu es inscrit·e à « " + sortie.getNom() + " » !",
+                    "/sorties/" + sortie.getId());
+        }
     }
 
     private Utilisateur trouverUtilisateur(Long id) {
@@ -133,4 +191,12 @@ public class SortieService {
     public List<Sortie> getSortiesRejointes(Long utilisateurId) {
         return sortieRepository.findByParticipantsId(utilisateurId);
     }
+
+    public Sortie changerPhoto(Long id, MultipartFile fichier, Long appelantId, boolean estAdmin) throws IOException {
+        Sortie sortie = trouverSortie(id);
+        verifierDroits(sortie, appelantId, estAdmin);   // seul l'organisateur (ou un admin)
+        sortie.setImageUrl(fichierService.enregistrerMedia(fichier, "sorties", "sortie-" + id));
+        return sortieRepository.save(sortie);
+    }
+
 }

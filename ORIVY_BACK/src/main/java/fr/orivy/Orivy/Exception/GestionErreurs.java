@@ -34,7 +34,7 @@ public class GestionErreurs {
     // 413 : fichier envoyé trop lourd (limite dans application.properties)
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ErreurApiDto> fichierTropLourd(MaxUploadSizeExceededException e) {
-        return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE).body(ErreurApiDto.simple("La photo ne doit pas dépasser 2 Mo."));
+        return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE).body(ErreurApiDto.simple("Le fichier ne doit pas dépasser 50 Mo."));
     }
 
     // 404 : l'adresse demandée n'existe pas

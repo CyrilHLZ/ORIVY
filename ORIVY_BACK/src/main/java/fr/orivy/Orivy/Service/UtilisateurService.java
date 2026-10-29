@@ -1,10 +1,7 @@
 package fr.orivy.Orivy.Service;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,14 +17,16 @@ public class UtilisateurService {
 
     private static final String ROLE_UTILISATEUR = "utilisateur";
     private static final String ROLE_ADMIN = "admin";
-    private static final List<String> TYPES_IMAGES = List.of("image/jpeg", "image/png", "image/webp");
 
     private final UtilisateurRepository utilisateurRepository;
     private final PasswordEncoder passwordEncoder;
+    private final FichierService fichierService;
 
-    public UtilisateurService(UtilisateurRepository utilisateurRepository, PasswordEncoder passwordEncoder) {
+    public UtilisateurService(UtilisateurRepository utilisateurRepository, PasswordEncoder passwordEncoder,
+                              FichierService fichierService) {
         this.utilisateurRepository = utilisateurRepository;
         this.passwordEncoder = passwordEncoder;
+        this.fichierService = fichierService;
     }
 
     public Utilisateur creerUtilisateur(Utilisateur utilisateur) {
@@ -126,21 +125,10 @@ public class UtilisateurService {
         }
     }
 
-    public Utilisateur changerPhoto(Long id, MultipartFile fichier, String dossier) throws IOException {
-        if (fichier.isEmpty() || !TYPES_IMAGES.contains(fichier.getContentType())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Choisis une image JPEG, PNG ou WebP.");
-        }
+    public Utilisateur changerPhoto(Long id, MultipartFile fichier) throws IOException {
         Utilisateur utilisateur = trouverUtilisateur(id);
-
-        // Nom de fichier inventé par le back : on n'utilise JAMAIS le nom envoyé par le navigateur
-        String extension = fichier.getContentType().substring("image/".length()).replace("jpeg", "jpg");
-        String nom = "avatar-" + id + "-" + UUID.randomUUID() + "." + extension;
-
-        Path cible = Path.of(dossier, "avatars").toAbsolutePath();
-        Files.createDirectories(cible);
-        fichier.transferTo(cible.resolve(nom));
-
-        utilisateur.setPhotoUrl("/api/fichiers/avatars/" + nom);
+        utilisateur.setPhotoUrl(fichierService.enregistrerImage(fichier, "avatars", "avatar-" + id));
         return utilisateurRepository.save(utilisateur);
     }
+
 }

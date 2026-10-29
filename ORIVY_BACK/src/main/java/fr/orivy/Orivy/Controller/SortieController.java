@@ -1,5 +1,6 @@
 package fr.orivy.Orivy.Controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -12,8 +13,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import fr.orivy.Orivy.DTO.SortieDto;
 import fr.orivy.Orivy.DTO.SortiesMembreDto;
@@ -70,6 +73,17 @@ public class SortieController {
         return SortieDto.depuis(sortieService.desinscrire(id, idDe(jwt)));
     }
 
+    // Liste d'attente d'une sortie complète
+    @PostMapping("/{id}/attente")
+    public SortieDto rejoindreAttente(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        return SortieDto.depuis(sortieService.rejoindreAttente(id, idDe(jwt)));
+    }
+
+    @DeleteMapping("/{id}/attente")
+    public SortieDto quitterAttente(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        return SortieDto.depuis(sortieService.quitterAttente(id, idDe(jwt)));
+    }
+
     private Long idDe(Jwt jwt) {
         return Long.valueOf(jwt.getSubject());
     }
@@ -83,5 +97,12 @@ public class SortieController {
         return new SortiesMembreDto(
             sortieService.getSortiesOrganisees(id).stream().map(SortieDto::depuis).toList(),
             sortieService.getSortiesRejointes(id).stream().map(SortieDto::depuis).toList());
+    }
+
+    // Photo ou petite vidéo de la sortie (organisateur ou admin)
+    @PostMapping("/{id}/photo")
+    public SortieDto changerPhoto(@PathVariable Long id, @RequestParam("photo") MultipartFile photo,
+                                  @AuthenticationPrincipal Jwt jwt) throws IOException {
+        return SortieDto.depuis(sortieService.changerPhoto(id, photo, idDe(jwt), estAdmin(jwt)));
     }
 }
