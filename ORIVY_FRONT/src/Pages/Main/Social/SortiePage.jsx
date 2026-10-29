@@ -14,44 +14,7 @@ import { EtatErreur } from '../../../Composants/Etats.jsx';
 import FenetreConfirmation from '../../../Composants/Fenetre.jsx';
 import Confettis from '../../../Composants/Confettis.jsx';
 import { telechargerIcs } from '../../../Utils/agenda.js';
-
-
-const nomDe = (personne) => [personne?.prenom, personne?.nom].filter(Boolean).join(' ') || personne?.email || 'Quelqu\'un';
-
-const BoutonInscription = ({ connecte, inscrit, complet, position, enCours, onBasculer, onAttente }) => {
-
-    if (!connecte) return <Bouton vers="/connexion" bloc>Connecte-toi pour participer</Bouton>;
-
-    if (complet && !inscrit) {
-
-        return (
-
-            <Bouton variante={position ? 'secondaire' : 'principal'} bloc aria-pressed={position > 0}
-
-                    disabled={enCours} aria-busy={enCours} onClick={onAttente}>
-
-                {position ? `Tu es n°${position} sur la liste · Quitter` : 'Complet · Préviens-moi'}
-
-            </Bouton>
-
-        );
-
-    }
-
-    return (
-
-        <Bouton variante={inscrit ? 'secondaire' : 'principal'} bloc aria-pressed={inscrit}
-
-                disabled={enCours} aria-busy={enCours} onClick={onBasculer}>
-
-            {inscrit ? 'Tu es inscrit·e ✓ (te désinscrire)' : 'Rejoins la sortie'}
-
-        </Bouton>
-
-    );
-
-};
-
+import { meteoDeLaSortie } from '../../../Utils/meteo.js';
 
 
 const SortiePage = () => {
@@ -67,6 +30,7 @@ const SortiePage = () => {
     const [confirmation, setConfirmation] = useState(false);
     const [message, setMessage] = useState(null);
     const [fete, setFete] = useState(0);   // (75) compteur : chaque inscription relance les confettis
+    const [meteo, setMeteo] = useState(null);
 
     useEffect(() => {
         document.body.classList.add('page-sortie');
@@ -84,6 +48,12 @@ const SortiePage = () => {
             .then(setCommentaires)
             .catch(() => setCommentaires([]));   // sans commentaires, la page reste utilisable
     }, [id]);
+
+    /* Météo du jour J, une fois la sortie chargée (pas rechargée à chaque inscription) */
+    useEffect(() => {
+        if (!sortie) return;
+        meteoDeLaSortie(sortie).then(setMeteo).catch(() => setMeteo(null));   // sans météo, la page reste utilisable
+    }, [sortie?.id, sortie?.dateDebut]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (!message) return undefined;
@@ -110,6 +80,26 @@ const SortiePage = () => {
     const complet = sortie.nombreMax != null && participants.length >= sortie.nombreMax;
     // Position dans la file d'attente : 1, 2, 3… (0 = pas en attente)
     const position = (sortie.attente ?? []).findIndex((p) => p.id === user?.id) + 1;
+
+    const nomDe = (personne) => [personne?.prenom, personne?.nom].filter(Boolean).join(' ') || personne?.email || 'Quelqu\'un';
+
+    const BoutonInscription = ({ connecte, inscrit, complet, position, enCours, onBasculer, onAttente }) => {
+        if (!connecte) return <Bouton vers="/connexion" bloc>Connecte-toi pour participer</Bouton>;
+        if (complet && !inscrit) {
+            return (
+                <Bouton variante={position ? 'secondaire' : 'principal'} bloc aria-pressed={position > 0}
+                        disabled={enCours} aria-busy={enCours} onClick={onAttente}>
+                    {position ? `Tu es n°${position} sur la liste · Quitter` : 'Complet · Préviens-moi'}
+                </Bouton>
+            );
+        }
+        return (
+            <Bouton variante={inscrit ? 'secondaire' : 'principal'} bloc aria-pressed={inscrit}
+                    disabled={enCours} aria-busy={enCours} onClick={onBasculer}>
+                {inscrit ? 'Tu es inscrit·e ✓ (te désinscrire)' : 'Rejoins la sortie'}
+            </Bouton>
+        );
+    };
 
     const basculerInscription = async () => {
         setEnCours(true);
@@ -209,6 +199,15 @@ const SortiePage = () => {
                                         )}
                                     </div>
                                 </li>
+                                {meteo && (
+                                    <li>
+                                        <span aria-hidden="true" style={{ fontSize: '1.4em', lineHeight: 1 }}>{meteo.emoji}</span>
+                                        <div>
+                                            <strong>{meteo.temperature} °C · {meteo.texte}</strong>
+                                            <span>{meteo.pluie} % de risque de pluie · prévision Open-Meteo</span>
+                                        </div>
+                                    </li>
+                                )}
                                 {sortie.lieu && (
                                     <li><Icone nom="epingle" />
                                         <div>
