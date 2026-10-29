@@ -199,4 +199,9 @@ public class SortieService {
         return sortieRepository.save(sortie);
     }
 
+        public List<Sortie> rechercher(String mot) {
+        if (mot == null || mot.isBlank()) return List.of();
+        return sortieRepository.rechercher(mot.trim());
+    }
+
 }

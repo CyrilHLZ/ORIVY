@@ -105,4 +105,10 @@ public class SortieController {
                                   @AuthenticationPrincipal Jwt jwt) throws IOException {
         return SortieDto.depuis(sortieService.changerPhoto(id, photo, idDe(jwt), estAdmin(jwt)));
     }
+
+    @GetMapping("/search")
+    public List<SortieDto> rechercher(@RequestParam("query") String query) {
+        return sortieService.rechercher(query).stream().map(SortieDto::depuis).toList();
+    }
+
 }
