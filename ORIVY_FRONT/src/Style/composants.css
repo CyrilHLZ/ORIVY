@@ -309,7 +309,8 @@ label.bouton:has(input:focus-visible) { outline: 3px solid var(--couleur-focus);
   aspect-ratio: 4 / 3;
 }
 .photo > .icone { width: var(--espace-7); height: var(--espace-7); opacity: 0.6; }
-.photo img {
+.photo img,
+.photo video {
   position: absolute;
   inset: 0;
   width: 100%;

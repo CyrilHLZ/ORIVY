@@ -9,3 +9,8 @@ export const inscriptionSortie = (sortieId) => apiRequest(`/sorties/${sortieId}/
 export const desinscriptionSortie = (sortieId) => apiRequest(`/sorties/${sortieId}/inscription`, { method: 'DELETE' });
 export const searchSorties = (query) => apiRequest(`/sorties/search?query=${encodeURIComponent(query)}`);
 export const getSortiesMembre = (utilisateurId) => apiRequest(`/sorties/membre/${utilisateurId}`);
+export const envoyerMediaSortie = (sortieId, fichier) => {
+    const formulaire = new FormData();
+    formulaire.append('photo', fichier);
+    return apiRequest(`/sorties/${sortieId}/photo`, { method: 'POST', body: formulaire });
+};

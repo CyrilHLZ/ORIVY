@@ -4,6 +4,7 @@ import { LISTE_CATEGORIES, categorie } from '../../../Constants/categories.js';
 import Bouton from '../../../Composants/Bouton.jsx';
 import Icone from '../../../Composants/Icone.jsx';
 import CarteSortie from '../../../Composants/CarteSortie.jsx';
+import Photo, { estVideo } from '../../../Composants/Photo.jsx';
 import { Champ } from '../../../Composants/Formulaire.jsx';
 import ChampsLieu, { versPayload } from './ChampsLieu.jsx';
 
@@ -12,9 +13,9 @@ import ChampsLieu, { versPayload } from './ChampsLieu.jsx';
  * (maquette design/maquettes/sortie-formulaire.html).
  *
  * Props :
- *   initial        : valeurs de départ { nom, categorie, dateDebut, description, lieu, latitude, longitude }
+ *   initial        : valeurs de départ { nom, categorie, dateDebut, description, lieu, latitude, longitude, nombreMax, imageUrl }
  *   texteValider   : « Publie la sortie » ou « Enregistre les modifications »
- *   onValider(payload) : appelée avec les données prêtes pour le back ; peut lancer une erreur
+ *   onValider(payload, fichier) : données prêtes pour le back + photo/vidéo choisie (ou null) ; peut lancer une erreur
  *   onAnnuler      : retour en arrière
  *   enPlus         : contenu ajouté sous le formulaire (ex. la zone « Supprimer »)
  */
@@ -33,6 +34,9 @@ const FormulaireSortie = ({ initial, texteValider, onValider, onAnnuler, enPlus 
     const [erreurEnvoi, setErreurEnvoi] = useState(null);
     const [enCours, setEnCours] = useState(false);
     const refs = { nom: useRef(null), dateDebut: useRef(null) };
+    const [fichier, setFichier] = useState(null);                       // photo ou vidéo choisie
+    const [apercu, setApercu] = useState(initial.imageUrl ?? null);     // ce qu'on montre dans le formulaire
+    const [apercuVideo, setApercuVideo] = useState(estVideo(initial.imageUrl));
 
     const modifier = (champ, valeur) => {
         setSortie((s) => ({ ...s, [champ]: valeur }));
@@ -49,6 +53,34 @@ const FormulaireSortie = ({ initial, texteValider, onValider, onAnnuler, enPlus 
     const saisirLieu = (texte) => {
         setSortie((s) => ({ ...s, lieu: texte, latitude: null, longitude: null }));
         if (erreurs.lieu) setErreurs((e) => ({ ...e, lieu: undefined }));
+    };
+
+    const choisirMedia = (event) => {
+        const f = event.target.files[0];
+        event.target.value = '';
+        if (!f) return;
+        const video = f.type.startsWith('video/');
+
+        const maxMo = video ? 50 : 2;
+        if (f.size > maxMo * 1024 * 1024) {
+            setErreurs((e) => ({ ...e, media: `${video ? 'La vidéo' : 'La photo'} ne doit pas dépasser ${maxMo} Mo.` }));
+            return;
+        }
+
+        const url = URL.createObjectURL(f);   // adresse temporaire, pour l'aperçu avant l'envoi
+        if (!video) { setFichier(f); setApercu(url); setApercuVideo(false); setErreurs((e) => ({ ...e, media: undefined })); return; }
+        // Vidéo : on lit sa durée avant d'accepter
+        const lecteur = document.createElement('video');
+        lecteur.preload = 'metadata';
+        lecteur.onloadedmetadata = () => {
+            if (lecteur.duration > 60) {
+                URL.revokeObjectURL(url);
+                setErreurs((e) => ({ ...e, media: "Ta vidéo dure plus d'une minute." }));
+            } else {
+                setFichier(f); setApercu(url); setApercuVideo(true); setErreurs((e) => ({ ...e, media: undefined }));
+            }
+        };
+        lecteur.src = url;
     };
 
     const valider = () => {
@@ -74,7 +106,9 @@ const FormulaireSortie = ({ initial, texteValider, onValider, onAnnuler, enPlus 
         setErreurEnvoi(null);
         setEnCours(true);
         try {
-            await onValider(versPayload({ ...sortie, nom: sortie.nom.trim(), description: sortie.description.trim() }));
+            await onValider(versPayload({ ...sortie, nom: sortie.nom.trim(), description: sortie.description.trim(),
+                              nombreMax: sortie.nombreMax ? Number(sortie.nombreMax) : null }), fichier);
+
         } catch (err) {
             setErreurEnvoi(err.message || "L'enregistrement a échoué. Réessaie.");
             setEnCours(false);
@@ -106,6 +140,20 @@ const FormulaireSortie = ({ initial, texteValider, onValider, onAnnuler, enPlus 
 
                 <Champ ref={refs.dateDebut} label="Date et heure" type="datetime-local" min={maintenant()}
                        value={sortie.dateDebut} onChange={(e) => modifier('dateDebut', e.target.value)} erreur={erreurs.dateDebut} required />
+                <Champ label="Nombre de places" type="number" min={2} inputMode="numeric" placeholder="Illimité"
+                        value={sortie.nombreMax ?? ''} onChange={(e) => modifier('nombreMax', e.target.value)}
+                        aide="Laisse vide si tout le monde peut venir." />
+
+                    <div className="champ">
+                        <span className="champ__label">Photo ou vidéo (1 min max)</span>
+                        {apercu && <Photo src={apercu} video={apercuVideo} alt="" cle={sortie.categorie} paresseuse={false} />}
+                        <label className="bouton bouton--secondaire" style={{ alignSelf: 'flex-start' }}>
+                            <Icone nom="appareil-photo" />{apercu ? 'Changer' : 'Ajouter une photo ou une vidéo'}
+                            <input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
+                                className="visuellement-cache" onChange={choisirMedia} />
+                        </label>
+                        {erreurs.media && <p className="champ__erreur" role="alert">{erreurs.media}</p>}
+                    </div>
 
                 <div>
                     <Champ label="Description" multiligne maxLength={LONGUEUR_MAX}

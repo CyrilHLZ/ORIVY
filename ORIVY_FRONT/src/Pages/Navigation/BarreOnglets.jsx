@@ -2,11 +2,12 @@ import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../Context/AuthContext.jsx';
 import Icone from '../../Composants/Icone.jsx';
-import { ONGLETS, estActif } from './navigation.js';
+import { ONGLETS_MOBILE, estActif } from './navigation.js';
 
 /*
  * Barre d'onglets en bas de l'écran (mobile et tablette, cachée ≥ 1024px par le CSS).
- * 5 onglets au pouce : les 4 de navigation.js + Profil (ou Connexion si déconnecté).
+ * 5 onglets au pouce maximum : ceux de navigation.js marqués pour le mobile + Profil (ou Connexion).
+ * L'accueil passe par le logo, les messages par l'icône de l'en-tête.
  */
 const BarreOnglets = () => {
     const { isAuthenticated } = useAuth();
@@ -24,7 +25,7 @@ const BarreOnglets = () => {
 
     return (
         <nav className="onglets" aria-label="Navigation principale">
-            {[...ONGLETS, profil].map((onglet) => (
+            {[...ONGLETS_MOBILE, profil].map((onglet) => (
                 <Link key={onglet.lien} to={onglet.lien} viewTransition aria-current={estActif(onglet, pathname) ? 'page' : undefined}>
                     <Icone nom={onglet.icone} />
                     <span>{onglet.nom}</span>

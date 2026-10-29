@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { createSortie } from '../../../Services/Sortie/SortieService';
+import { createSortie, envoyerMediaSortie } from '../../../Services/Sortie/SortieService';
 import { useLieux } from '../../../Hooks/useLieux.js';
 import { categorie } from '../../../Constants/categories.js';
 import Bouton from '../../../Composants/Bouton.jsx';
@@ -29,11 +29,12 @@ const CreationSortiePage = () => {
         longitude: lieu?.longitude ?? null,
     };
 
-    const creer = async (payload) => {
+    const creer = async (payload, fichier) => {
         const creee = await createSortie(payload);
-        // On ouvre la sortie créée si le back renvoie son id, sinon la liste
-        navigate(creee?.id ? `/sorties/${creee.id}` : '/sorties');
+        if (fichier) await envoyerMediaSortie(creee.id, fichier);
+        navigate(`/sorties/${creee.id}`);
     };
+
 
     return (
         <main className="conteneur page-formulaire">

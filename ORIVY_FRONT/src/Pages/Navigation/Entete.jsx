@@ -9,7 +9,7 @@ import { ONGLETS, estActif } from './navigation.js';
 
 /*
  * En-tête de toutes les pages (classe .entete de composants.css).
- * Mobile : logo + loupe + cloche (les onglets sont en bas, voir BarreOnglets).
+ * Mobile : logo + loupe + messages + cloche (les onglets sont en bas, voir BarreOnglets).
  * Ordinateur (≥ 1024px) : les onglets passent ici, et le profil devient l'avatar.
  *
  * nonLues : nombre de notifications non lues, recompté à chaque changement de page.
@@ -53,6 +53,10 @@ const Entete = () => {
 
                     {isAuthenticated ? (
                         <>
+                            {/* Mobile : les messages ne sont pas dans la barre du bas, on y accède d'ici */}
+                            <NavLink className="bouton bouton--icone mobile-seulement" to="/messages" aria-label="Messages">
+                                <Icone nom="messages" />
+                            </NavLink>
                             <NavLink
                                 className="bouton bouton--icone"
                                 to="/notifications"

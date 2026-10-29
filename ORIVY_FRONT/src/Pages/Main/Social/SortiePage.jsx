@@ -27,8 +27,10 @@ import Confettis from '../../../Composants/Confettis.jsx';
 const nomDe = (personne) => [personne?.prenom, personne?.nom].filter(Boolean).join(' ') || personne?.email || 'Quelqu\'un';
 
 /* ---- Encart d'inscription (le même contenu sert sur mobile et sur ordinateur) ---- */
-const BoutonInscription = ({ connecte, inscrit, enCours, onBasculer }) => {
+const BoutonInscription = ({ connecte, inscrit, complet, enCours, onBasculer }) => {
     if (!connecte) return <Bouton vers="/connexion" bloc>Connecte-toi pour participer</Bouton>;
+    // Complète : on ne peut plus rejoindre… mais un inscrit peut toujours se désinscrire (ça libère une place)
+    if (complet && !inscrit) return <Bouton bloc disabled>Complet</Bouton>;
     return (
         <Bouton variante={inscrit ? 'secondaire' : 'principal'} bloc aria-pressed={inscrit}
                 disabled={enCours} aria-busy={enCours} onClick={onBasculer}>
@@ -90,6 +92,7 @@ const SortiePage = () => {
     const peutGerer = isAdmin || sortie.organisateur?.id === user?.id;
     // Inscrit = présent dans la liste renvoyée par le back (vrai aussi après un rechargement)
     const inscrit = participants.some((p) => p.id === user?.id);
+    const complet = sortie.nombreMax != null && participants.length >= sortie.nombreMax;
 
     const basculerInscription = async () => {
         setEnCours(true);
@@ -258,7 +261,7 @@ const SortiePage = () => {
                                 </>
                             )}
                             {participants.length > 0 && <PileAvatars personnes={participants} />}
-                            <BoutonInscription connecte={isAuthenticated} inscrit={inscrit} enCours={enCours} onBasculer={basculerInscription} />
+                            <BoutonInscription connecte={isAuthenticated} inscrit={inscrit} complet={complet} enCours={enCours} onBasculer={basculerInscription} />
                         </div>
                     </aside>
                 </div>
@@ -267,7 +270,7 @@ const SortiePage = () => {
             {/* Barre d'inscription collée en bas (mobile) */}
             <div className="inscription-mobile">
                 <p>{placesRestantes != null ? <><strong>{placesRestantes} places</strong><br />restantes</> : <strong>{dateLisible(sortie.dateDebut)}</strong>}</p>
-                <BoutonInscription connecte={isAuthenticated} inscrit={inscrit} enCours={enCours} onBasculer={basculerInscription} />
+                <BoutonInscription connecte={isAuthenticated} inscrit={inscrit} complet={complet} enCours={enCours} onBasculer={basculerInscription} />
             </div>
 
             <FenetreConfirmation

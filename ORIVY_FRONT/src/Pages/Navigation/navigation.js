@@ -4,19 +4,23 @@
  * il apparaît aux deux endroits.
  *
  * chemins : adresses pour lesquelles l'onglet est « actif ».
- * Ex. : « Carte » reste allumé sur /activites, la liste des lieux étant la
- * bascule « liste » de la carte.
+ * mobile  : false = absent de la barre du bas. Sur mobile, l'accueil passe par
+ *           le logo et les messages par l'icône de l'en-tête (à côté de la cloche) :
+ *           la barre garde ainsi 5 cases au maximum, confortables pour le pouce.
  */
 export const ONGLETS = [
-    { nom: 'Accueil', icone: 'accueil', lien: '/', chemins: ['/'], exact: true },
-    { nom: 'Carte', icone: 'carte', lien: '/carte', chemins: ['/carte', '/activites'] },
+    { nom: 'Accueil', icone: 'accueil', lien: '/', chemins: ['/'], exact: true, mobile: false },
+    { nom: 'Carte', icone: 'carte', lien: '/carte', chemins: ['/carte'] },
+    { nom: 'Lieux', icone: 'epingle', lien: '/activites', chemins: ['/activites'] },
     { nom: 'Sorties', icone: 'calendrier', lien: '/sorties', chemins: ['/sorties'] },
-    { nom: 'Messages', icone: 'messages', lien: '/messages', chemins: ['/messages'] },
+    { nom: 'Messages', icone: 'messages', lien: '/messages', chemins: ['/messages'], mobile: false },
 ];
+
+/* Les onglets de la barre du bas (mobile) */
+export const ONGLETS_MOBILE = ONGLETS.filter((onglet) => onglet.mobile !== false);
 
 /* Vrai si l'adresse actuelle correspond à l'onglet */
 export const estActif = (onglet, pathname) =>
     onglet.exact
         ? pathname === onglet.lien
         : onglet.chemins.some((chemin) => pathname === chemin || pathname.startsWith(`${chemin}/`));
-

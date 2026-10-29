@@ -46,6 +46,7 @@ const DiapoSortie = ({ sortie, premiere, inscrit, onRejoindre, onPartager }) => 
     const cat = categorie(sortie.categorie);
     const titreId = `sortie-${sortie.id}`;
     const nbInscrits = sortie.participants?.length;
+    const complet = sortie.nombreMax != null && (nbInscrits ?? 0) >= sortie.nombreMax;
 
     return (
         <article className={`diapo cat-${cat.cle}`} aria-labelledby={titreId}>
@@ -70,9 +71,9 @@ const DiapoSortie = ({ sortie, premiere, inscrit, onRejoindre, onPartager }) => 
                     </div>
                 )}
                 <div className="diapo__boutons">
-                    <Bouton variante={inscrit ? 'secondaire' : 'principal'} aria-pressed={inscrit} disabled={inscrit}
+                    <Bouton variante={inscrit ? 'secondaire' : 'principal'} aria-pressed={inscrit} disabled={inscrit || complet}
                             onClick={() => onRejoindre(sortie)}>
-                        {inscrit ? 'Inscrit·e ✓' : 'Rejoins'}
+                        {inscrit ? 'Inscrit·e ✓' : complet ? 'Complet' : 'Rejoins'}
                     </Bouton>
                     <Bouton variante="secondaire" vers={`/sorties/${sortie.id}`}>Détails</Bouton>
                 </div>

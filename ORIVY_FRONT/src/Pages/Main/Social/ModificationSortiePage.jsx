@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { deleteSortie, getSortieById, updateSortie } from '../../../Services/Sortie/SortieService';
+import { deleteSortie, envoyerMediaSortie, getSortieById, updateSortie } from '../../../Services/Sortie/SortieService';
 import Bouton from '../../../Composants/Bouton.jsx';
 import FenetreConfirmation from '../../../Composants/Fenetre.jsx';
 import { EtatErreur } from '../../../Composants/Etats.jsx';
@@ -19,17 +19,20 @@ const ModificationSortiePage = () => {
             .then((data) => setInitial({
                 nom: data.nom ?? '',
                 categorie: data.categorie ?? 'autre',
-                dateDebut: data.dateDebut?.slice(0, 10) ?? '',   // <input type="date"> attend AAAA-MM-JJ
+                dateDebut: data.dateDebut?.slice(0, 16) ?? '',   // <input type="datetime-local"> attend AAAA-MM-JJTHH:MM
                 description: data.description ?? '',
                 lieu: data.lieu ?? '',
                 latitude: data.latitude ?? null,
                 longitude: data.longitude ?? null,
+                nombreMax: data.nombreMax ?? '',
+                imageUrl: data.imageUrl ?? null,
             }))
             .catch(() => setErreur('Impossible de charger cette sortie.'));
     }, [id]);
 
-    const enregistrer = async (payload) => {
+    const enregistrer = async (payload, fichier) => {
         await updateSortie(id, { ...payload, id: Number(id) });
+        if (fichier) await envoyerMediaSortie(id, fichier);
         navigate(`/sorties/${id}`);
     };
 
