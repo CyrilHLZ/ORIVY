@@ -22,6 +22,10 @@ export const changerMotDePasse = (ancienMotDePasse, nouveauMotDePasse) =>
 export const changerEmail = (motDePasse, nouvelEmail) =>
     apiRequest('/utilisateurs/moi/email', { method: 'PUT', body: { motDePasse, nouvelEmail } });
 
+// Supprime MON compte et tout ce qui va avec (sorties organisées, messages, photos…). Irréversible.
+export const supprimerMonCompte = (motDePasse) =>
+    apiRequest('/utilisateurs/moi/suppression', { method: 'POST', body: { motDePasse } });
+
 export const changerPhoto = (fichier) => {
     const formulaire = new FormData();
     formulaire.append('photo', fichier);

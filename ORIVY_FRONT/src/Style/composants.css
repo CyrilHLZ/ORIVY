@@ -477,6 +477,11 @@ label.bouton:has(input:focus-visible) { outline: 3px solid var(--couleur-focus);
 }
 .galerie .photo { border-radius: 0; aspect-ratio: 1; }
 .galerie .photo:first-child { grid-column: span 2; grid-row: span 2; }
+/* Profil : chaque vignette est un lien vers sa sortie (le lien prend la place de .photo dans la grille) */
+.galerie--profil > a { display: block; aspect-ratio: 1; }
+.galerie--profil .photo, .galerie--profil .photo:first-child { width: 100%; height: 100%; aspect-ratio: auto; grid-column: auto; grid-row: auto; }
+.galerie--profil > a:first-child { grid-column: span 2; grid-row: span 2; }
+.galerie--profil > a:focus-visible { outline: 3px solid var(--couleur-focus); outline-offset: -3px; }
 .galerie__plus {
   position: absolute;
   inset: 0;

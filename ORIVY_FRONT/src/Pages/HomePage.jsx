@@ -6,7 +6,7 @@ import Bouton from '../Composants/Bouton.jsx';
 import CarteSortie from '../Composants/CarteSortie.jsx';
 import { BadgeCategorie } from '../Composants/Badges.jsx';
 import { EtatVide } from '../Composants/Etats.jsx';
-import { ECRANS, EFFETS_LAC, FRAGMENT_ARBRE } from './EcransAccueil.js';
+import { ECRANS, EFFETS_LAC, FRAGMENT_ARBRE, ecranDuMoment } from './EcransAccueil.js';
 import PhotoAnimee from './Accueil/PhotoAnimee.jsx';
 import Icone from '../Composants/Icone.jsx';
 import Compteur from '../Composants/Compteur.jsx';
@@ -39,6 +39,17 @@ const useSaison = () => {
     return saison;
 };
 
+/* Thème horaire courant (aube, jour, crepuscule, nuit), mis à jour à chaque changement (themes.js) */
+const useTheme = () => {
+    const [theme, setTheme] = useState(() => document.documentElement.getAttribute('data-theme'));
+    useEffect(() => {
+        const ecouter = (e) => setTheme(e.detail.theme);
+        window.addEventListener('orivy:theme', ecouter);
+        return () => window.removeEventListener('orivy:theme', ecouter);
+    }, []);
+    return theme;
+};
+
 /*
  * Ambiance animée posée sur les photos (purement décorative, aria-hidden).
  * type :
@@ -61,6 +72,7 @@ const Ambiance = ({ type = 'lumiere' }) => (
 
 const HomePage = () => {
     const saison = useSaison();
+    const theme = useTheme();
     const [sorties, setSorties] = useState(null);   // null = en cours de chargement
     const [courant, setCourant] = useState('ecran-intro');
     const zone = useRef(null);
@@ -80,15 +92,16 @@ const HomePage = () => {
             .catch(() => setSorties([]));
     }, []);
 
-    /* Ordre des écrans selon la saison (automne : promenades d'abord ; hiver : musées…) */
+    /* Ordre des écrans selon la saison (automne : promenades d'abord ; hiver : musées…),
+       et la photo du moment : la nuit, le château et le parc s'illuminent (sous la neige en hiver) */
     const ecrans = useMemo(() => {
         const ordre = window.orivySaison?.ordreCategories() ?? [];
         return [...ECRANS].sort((a, b) => {
             const ia = ordre.indexOf(a.cle);
             const ib = ordre.indexOf(b.cle);
             return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
-        });
-    }, [saison]); // eslint-disable-line react-hooks/exhaustive-deps
+        }).map((e) => ecranDuMoment(e, theme, saison));
+    }, [saison, theme]); // eslint-disable-line react-hooks/exhaustive-deps
 
     /* Liste de tous les écrans, pour l'indicateur de progression */
     const tousLesEcrans = useMemo(() => [
@@ -209,7 +222,9 @@ const HomePage = () => {
                             <div className="ecran__illu">
                                 {e.fond ? (
                                     // Photo plein écran (sur ordinateur) : elle décrit une vraie scène, d'où un texte alternatif
-                                    <PhotoAnimee src={e.fond} alt={e.alt} ratio={e.ratio} cadrage={e.cadrage} effets={e.effets} />
+                                    <PhotoAnimee src={e.fond} alt={e.alt} ratio={e.ratio} cadrage={e.cadrage} effets={e.effets}
+                                                 className={[e.etoiles && 'photo-animee--etoiles', e.etoilesSeules && 'photo-animee--etoiles-seules',
+                                                             e.floconsSeuls && 'photo-animee--flocons-seuls'].filter(Boolean).join(' ')} />
                                 ) : (
                                     <img src={e.saisonnier ? `${e.illu}${FRAGMENT_ARBRE[saison] ?? ''}` : e.illu}
                                          alt="" width="800" height="600" loading="lazy" />

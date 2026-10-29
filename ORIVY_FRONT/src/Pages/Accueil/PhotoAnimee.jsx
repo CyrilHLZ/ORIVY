@@ -118,6 +118,8 @@ const Effet = ({ effet, index, src }) => {
                     <img src={src} alt="" style={{ clipPath: `inset(${effet.y}% ${100 - effet.x - effet.l}% ${100 - effet.y - effet.h}% ${effet.x}%)` }} />
                 </div>
             );
+        case 'lune':        // la pleine lune : un halo pâle qui respire doucement
+            return <div className="effet effet--lune" style={{ ...point(effet), '--taille': `${effet.t ?? 8}em` }}><i /></div>;
         case 'soleil':      // le soleil couchant respire, ses rayons tournent lentement
             // descend : le halo glisse doucement vers l'horizon, comme un vrai coucher de soleil
             return <div className={`effet effet--soleil${effet.descend ? ' effet--descend' : ''}`} style={{ ...point(effet), '--taille': `${effet.t ?? 14}em` }}><i /><b /></div>;

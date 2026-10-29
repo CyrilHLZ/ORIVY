@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../Context/AuthContext.jsx';
-import { changerEmail, changerMotDePasse, changerPhoto, getUserProfile, updateUserProfile } from '../../Services/Utilisateur/UtilisateurService.js';
+import { changerEmail, changerMotDePasse, changerPhoto, getUserProfile, supprimerMonCompte, updateUserProfile } from '../../Services/Utilisateur/UtilisateurService.js';
 import Avatar from '../../Composants/Avatar.jsx';
 import Bouton from '../../Composants/Bouton.jsx';
 import Icone from '../../Composants/Icone.jsx';
@@ -13,6 +13,8 @@ import CarteSortie from '../../Composants/CarteSortie.jsx';
 import CarteLieu from '../../Composants/CarteLieu.jsx';
 import { useFavoris } from '../../Context/FavorisContext.jsx';
 import { useLieux } from '../../Hooks/useLieux.js';
+import { getMediasDuMembre } from '../../Services/Fil/FilService.js';
+import Photo, { estVideo } from '../../Composants/Photo.jsx';
 import { bloquer, debloquer, followUser, getFollowers, getFollowing, getMesBlocages, unfollowUser } from '../../Services/Social/SocialService.js';
 import MenuOptions from '../../Composants/MenuOptions.jsx';
 import FenetreConfirmation from '../../Composants/Fenetre.jsx';
@@ -187,6 +189,77 @@ const FormEmail = ({ onChange }) => {
             {retour && <p className={retour.ok ? 'texte-doux' : 'champ__erreur'} role="status">{retour.texte}</p>}
             <Bouton type="submit" variante="secondaire">Changer l'email</Bouton>
         </form>
+    );
+};
+
+/* ---- Supprimer mon compte (RGPD) : mot de passe + confirmation, puis déconnexion ----
+   Le bouton rouge plein n'apparaît que dans la fenêtre de confirmation (règle du design). */
+const FormSuppression = ({ onSupprime }) => {
+    const [motDePasse, setMotDePasse] = useState('');
+    const [confirmation, setConfirmation] = useState(false);
+    const [erreur, setErreur] = useState(null);
+
+    const demander = (event) => {
+        event.preventDefault();
+        if (!motDePasse) { setErreur('Tape ton mot de passe pour confirmer que c\'est bien toi.'); return; }
+        setErreur(null);
+        setConfirmation(true);
+    };
+
+    const supprimer = async () => {
+        setConfirmation(false);
+        try {
+            await supprimerMonCompte(motDePasse);
+            onSupprime();
+        } catch (e) {
+            setErreur(e.message || "Le compte n'a pas pu être supprimé.");
+        }
+    };
+
+    return (
+        <form className="formulaire zone-danger" onSubmit={demander}>
+            <h3 style={{ margin: 0 }}>Supprimer mon compte</h3>
+            <p className="texte-doux" style={{ margin: 0, fontSize: 'var(--taille-s)' }}>
+                Tes sorties, messages, photos, avis et abonnements seront effacés. C'est définitif.
+            </p>
+            <ChampMotDePasse label="Mot de passe actuel" value={motDePasse} onChange={(e) => setMotDePasse(e.target.value)}
+                             autoComplete="current-password" erreur={erreur} />
+            <Bouton type="submit" variante="danger" icone="supprimer">Supprimer mon compte</Bouton>
+            <FenetreConfirmation ouverte={confirmation} titre="Supprimer ton compte ?" texteConfirmer="Oui, tout supprimer"
+                                 texteAnnuler="Garder mon compte" onConfirmer={supprimer} onAnnuler={() => setConfirmation(false)}>
+                Tout ce que tu as créé sur ORIVY disparaîtra, et on ne pourra pas le récupérer.
+            </FenetreConfirmation>
+        </form>
+    );
+};
+
+/* ---- Ses photos et vidéos : ce que le membre a posté dans les albums des sorties (= le Fil) ----
+   Le titre suit le contenu : « Tes photos », « Tes vidéos » ou « Tes photos et vidéos ».
+   Chaque vignette mène à la sortie d'où elle vient. Rien de posté : la section ne s'affiche pas. */
+const MesMedias = ({ membreId, estMoi }) => {
+    const [medias, setMedias] = useState([]);
+
+    useEffect(() => {
+        getMediasDuMembre(membreId).then(setMedias).catch(() => setMedias([]));
+    }, [membreId]);
+
+    if (medias.length === 0) return null;
+
+    const videos = medias.filter((m) => estVideo(m.url)).length;
+    const quoi = videos === 0 ? 'photos' : videos === medias.length ? 'vidéos' : 'photos et vidéos';
+    const titre = `${estMoi ? 'Tes' : 'Ses'} ${quoi}`;
+
+    return (
+        <section className="encart" aria-labelledby="t-medias" style={{ marginTop: 'var(--espace-5)' }}>
+            <h2 id="t-medias" style={{ fontSize: 'var(--taille-xl)' }}>{titre}</h2>
+            <div className="galerie galerie--profil">
+                {medias.map((m) => (
+                    <Link key={m.id} to={`/sorties/${m.sortieId}`} aria-label={`${estVideo(m.url) ? 'Vidéo' : 'Photo'} de la sortie « ${m.sortieNom} »`}>
+                        <Photo src={m.url} alt="" />
+                    </Link>
+                ))}
+            </div>
+        </section>
     );
 };
 
@@ -429,6 +502,7 @@ const ProfilPage = () => {
                         </div>
                     </section>
 
+                    {profil.id && <MesMedias membreId={profil.id} estMoi={estMoi} />}
                     {estMoi && <MesFavoris />}
                 </div>
 
@@ -444,6 +518,7 @@ const ProfilPage = () => {
                             <Bouton variante="fantome" icone="deconnexion" onClick={deconnexion} style={{ justifyContent: 'flex-start' }}>
                                 Se déconnecter
                             </Bouton>
+                            {!isAdmin && <FormSuppression onSupprime={deconnexion} />}
                         </section>
                     </aside>
                 )}

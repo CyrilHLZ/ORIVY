@@ -470,6 +470,12 @@
 .ambiance--feuilles i:nth-child(3n + 1) { --chute-image: url("decorations/feuille-erable-2.svg"); width: 28px; height: 28px; }
 .ambiance--feuilles i:nth-child(3n + 2) { --chute-image: url("decorations/feuille-erable-3.svg"); width: 40px; height: 40px; }
 
+/* En hiver (et à Noël), plus aucune feuille ne tombe ni ne roule : les arbres sont nus, place à la neige */
+[data-saison="hiver"] .ambiance--feuilles,
+[data-saison="noel"] .ambiance--feuilles,
+[data-saison="hiver"] .effet--feuilles-sol,
+[data-saison="noel"] .effet--feuilles-sol { display: none; }
+
 @media (prefers-reduced-motion: no-preference) {
   /* Les feuilles tombent en tournoyant */
   .ambiance--feuilles i { animation: feuille-tombe calc(var(--duree) * 0.9) linear var(--delai) infinite; }

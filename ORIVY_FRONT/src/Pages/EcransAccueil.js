@@ -10,6 +10,12 @@
  * effets  : animations posées sur des points précis de la photo, en % DE L'IMAGE
  *           (voir PhotoAnimee.jsx). Les numéros renvoient à la liste des 100 propositions.
  *           ("bas-gauche" par défaut, "bas-droite", "haut-gauche", "haut-droite").
+ * variantes : autres photos selon le moment (voir ecranDuMoment, en bas du fichier).
+ * etoiles       : les étoiles scintillent sur cette photo (réservé aux photos DE NUIT ; les autres n'en ont pas).
+ * etoilesSeules : comme etoiles, et rien d'autre de la couche de saison (pas de flocons, pétales, feuilles…).
+ * floconsSeuls  : seulement les flocons de neige (l'icône flocon.svg) qui tombent sur la photo.
+ * Une variante sans « theme » vaut à toute heure (ex. la neige en hiver) : on met la nuit AVANT elle.
+ *           { theme: 'nuit', saisons: ['hiver', 'noel'], fond, ratio, effets, alt } : la 1re qui correspond gagne.
  * Les illustrations sont importées : Vite leur donne une adresse unique au build.
  */
 import musee from '../Style/illustrations/musee.svg';
@@ -33,9 +39,26 @@ import fondPointDeVue from '../Style/fonds/point-de-vue.jpg';
 import fondBar from '../Style/fonds/bar.jpg';
 import fondCinema from '../Style/fonds/cinema.jpg';
 import fondEvenement from '../Style/fonds/evenement.jpg';
+// Versions de nuit (fournies par l'utilisateur le 2026-10-29) : en hiver, sous la neige
+import fondMonumentNuit from '../Style/fonds/monument-nuit.jpg';
+import fondMonumentNuitHiver from '../Style/fonds/monument-nuit-hiver.jpg';
+import fondParcNuit from '../Style/fonds/parc-nuit.jpg';
+import fondParcNuitHiver from '../Style/fonds/parc-nuit-hiver.jpg';
+import fondPromenadeNuit from '../Style/fonds/promenade-nuit.jpg';
+import fondPromenadeHiver from '../Style/fonds/promenade-hiver.jpg';
 // Fonds des pages connexion / inscription (fournis par l'utilisateur le 2026-10-25 : tout le monde de dos)
 import fondConnexion from '../Style/fonds/connexion.jpg';
 import fondInscription from '../Style/fonds/inscription.jpg';
+
+/* Effets communs aux deux nuits du château (même cadrage en été et en hiver) */
+const EFFETS_MONUMENT_NUIT = [
+    // Pas de scintillements sur l'étang ni de lucioles : retirés le 2026-10-29 (points lumineux)
+    { type: 'ondes', points: [{ x: 23.7, y: 88.4 }, { x: 30.2, y: 91.5 }] },        // autour des barques
+    { type: 'flamme', x: 23.6, y: 87.4 },                                           // les lanternes des barques
+    { type: 'flamme', x: 30.6, y: 90.4 },
+    { type: 'lampes', points: [{ x: 97, y: 48.6, t: 6 }, { x: 74, y: 69.4, t: 2.5 }, { x: 79.4, y: 72.8, t: 2.5 }, { x: 88.6, y: 67.4, t: 2.5 }] },
+    // Pas de halos sur les fenêtres : la photo de nuit les montre déjà allumées
+];
 
 export const ECRANS = [
     { cle: 'culture', illu: musee, fond: fondMusee, ratio: 1672 / 941,
@@ -43,7 +66,7 @@ export const ECRANS = [
         { type: 'soleil', x: 39.2, y: 58, t: 12 },                                    // au fond de l'allée, entre la fontaine et le couple
         { type: 'lampes', points: [{ x: 69.7, y: 52, t: 4 }, { x: 89.2, y: 15, t: 7 }] }, // (8) aucun halo sur les bords gauche et droit
         { type: 'petales', x: 0, y: 76, l: 24, h: 20 },                               // (9) hortensias
-        { type: 'fenetres', points: [{ x: 60, y: 32 }, { x: 66, y: 26 }, { x: 74, y: 22 }, { x: 79, y: 22 }, { x: 74, y: 32 }, { x: 79, y: 32 }] }, // (51)
+        // (51) fenêtres retirées le 2026-10-29 : les halos tombaient à côté des fenêtres
       ], cadrage: '72% 60%', ambiance: 'feuilles', alt: 'Place parisienne au coucher du soleil, fontaine et façade haussmannienne marquée Musée', badge: 'Musées & culture', titre: 'Laisse-toi surprendre',
       texte: "Des grands musées parisiens aux petites collections de province, il y a toujours une salle qui t'attend.", bouton: 'Vois les musées sur la carte' },
     { cle: 'parc', illu: parc, fond: fondParc, ratio: 1672 / 941,
@@ -52,7 +75,15 @@ export const ECRANS = [
         { type: 'nuages', x: 5, y: 2, l: 75, h: 26 },                                 // (28)
         { type: 'papillons', x: 12, y: 68, l: 16, h: 14 },                            // (27) au-dessus de la lavande
         { type: 'papillons', x: 74, y: 68, l: 14, h: 14 },
-      ], cadrage: '50% 60%', carte: 'haut-droite', ambiance: 'aucune', alt: "Couple main dans la main dans l'allée d'un jardin à la française, bassin, statues et château au coucher du soleil", badge: 'Parcs & jardins', titre: 'Respire au vert',
+      ], cadrage: '50% 60%', carte: 'haut-droite', ambiance: 'aucune',
+      // La nuit : aucune animation, seulement les étoiles qui scintillent (etoilesSeules, choix du 2026-10-29)
+      variantes: [
+        { theme: 'nuit', saisons: ['hiver', 'noel'], fond: fondParcNuitHiver, ratio: 1670 / 941, effets: [], etoilesSeules: true,
+          alt: "Couple main dans la main dans l'allée enneigée d'un jardin à la française, sous la pleine lune, château illuminé" },
+        { theme: 'nuit', fond: fondParcNuit, ratio: 1670 / 941, effets: [], etoilesSeules: true,
+          alt: "Couple main dans la main dans l'allée fleurie d'un jardin à la française, sous la pleine lune, château illuminé" },
+      ],
+      alt: "Couple main dans la main dans l'allée d'un jardin à la française, bassin, statues et château au coucher du soleil", badge: 'Parcs & jardins', titre: 'Respire au vert',
       texte: 'Une pelouse, un grand arbre, un pique-nique entre amis : le bonheur tient parfois à peu de chose.', bouton: 'Vois les parcs sur la carte' },
     { cle: 'promenade', illu: randonnee, fond: fondPromenade, ratio: 1376 / 768,
       effets: [
@@ -62,7 +93,18 @@ export const ECRANS = [
         { type: 'fleurs', points: [{ x: 12, y: 92 }, { x: 30, y: 96 }, { x: 64, y: 84 }, { x: 70, y: 94 }, { x: 88, y: 97 }] }, // (26)
         { type: 'papillons', x: 2, y: 80, l: 16, h: 14 },                             // (27) à gauche, en bas
         { type: 'papillons', x: 82, y: 80, l: 16, h: 14 },                            // (27) à droite, en bas
-      ], cadrage: '50% 55%', carte: 'haut-droite', ambiance: 'feuilles', alt: 'Deux randonneurs sur un sentier vers le puy de Dôme, panneau GR4 Auvergne, au coucher du soleil', badge: 'Randonnées', titre: 'Prends de la hauteur',
+      ], cadrage: '50% 55%', carte: 'haut-droite', ambiance: 'feuilles',
+      variantes: [
+        // La nuit (toute l'année) : la pleine lune brille et les étoiles scintillent
+        { theme: 'nuit', fond: fondPromenadeNuit, ratio: 1376 / 768, ambiance: 'aucune', etoilesSeules: true,
+          effets: [{ type: 'lune', x: 42.9, y: 21.9, t: 12 }],
+          alt: 'Deux randonneurs sur un sentier vers le puy de Dôme, panneau GR4 Auvergne, sous la pleine lune et les étoiles' },
+        // L'hiver, le reste du temps : le puy sous la neige, et des flocons qui tombent
+        { saisons: ['hiver', 'noel'], fond: fondPromenadeHiver, ratio: 1376 / 768, ambiance: 'aucune', floconsSeuls: true,
+          effets: [{ type: 'nuages', x: 30, y: 15, l: 70, h: 18 }],
+          alt: 'Deux randonneurs en raquettes sur un sentier enneigé vers le puy de Dôme, panneau GR4 Auvergne, ciel bleu' },
+      ],
+      alt: 'Deux randonneurs sur un sentier vers le puy de Dôme, panneau GR4 Auvergne, au coucher du soleil', badge: 'Randonnées', titre: 'Prends de la hauteur',
       texte: 'Sentiers de crête, chemins côtiers, balades en forêt : enfile tes chaussures, la France est à toi.', bouton: 'Vois les randonnées sur la carte' },
     { cle: 'village', illu: village, fond: fondVillage, ratio: 1672 / 941,
       effets: [
@@ -85,7 +127,7 @@ export const ECRANS = [
         { type: 'fleurs', points: [{ x: 4.8, y: 64 }, { x: 19.4, y: 86 }, { x: 65.8, y: 89 }, { x: 89.4, y: 90 }] }, // (4)
         { type: 'hirondelles', x: 73, y: 38, echelle: 0.55 },                         // (5) mouettes autour de l'Aiguille
         { type: 'hirondelles', x: 62, y: 20 },                                        // mouettes au loin
-        { type: 'fenetres', points: [{ x: 4.8, y: 43.6 }, { x: 7.2, y: 43.6 }, { x: 12, y: 46.8 }, { x: 15, y: 46.8 }, { x: 15.6, y: 53 }, { x: 3.6, y: 35 }] }, // (51) le village la nuit
+        // (51) fenêtres du village retirées le 2026-10-29
       ], cadrage: '60% 50%', carte: 'haut-gauche', alt: "Couple assis dans l'herbe en haut des falaises d'Étretat, face à l'Aiguille et au soleil couchant", badge: 'Points de vue', titre: 'Admire le panorama',
       texte: 'Falaises d\'Étretat, dune du Pilat, belvédères du Verdon : vis les couchers de soleil en grand.', bouton: 'Vois les points de vue sur la carte' },
     { cle: 'restaurant', illu: restaurant, fond: fondRestaurant, ratio: 1376 / 768,
@@ -105,7 +147,7 @@ export const ECRANS = [
         { type: 'lampes', points: [{ x: 39.2, y: 52.6, t: 2.5 }, { x: 47, y: 53, t: 2.5 }, { x: 54.4, y: 53.7, t: 2.5 }, { x: 62.5, y: 54.2, t: 2.5 }] }, // le pont s'éclaire
         { type: 'flamme', x: 7.3, y: 77.9 },                                          // (11) bougies
         { type: 'flamme', x: 50.1, y: 85 },
-        { type: 'fenetres', points: [{ x: 76, y: 46 }, { x: 82, y: 44 }, { x: 88, y: 47 }, { x: 93, y: 43 }] }, // (51)
+        // (51) fenêtres retirées le 2026-10-29 : les halos tombaient à côté des fenêtres
       ], cadrage: '55% 55%', carte: 'bas-droite', ambiance: 'feuilles', alt: "Couple attablé à la terrasse d'une guinguette au bord du fleuve, pont et cathédrale au coucher du soleil", badge: 'Bars', titre: 'Trinque en terrasse',
       texte: 'Guinguettes au bord de l\'eau, bars à vin, toits-terrasses : profite de la soirée avec ta bande.', bouton: 'Vois les bars sur la carte' },
     { cle: 'cinema', illu: cinema, fond: fondCinema, ratio: 1365 / 768,
@@ -117,7 +159,7 @@ export const ECRANS = [
         ] },                                                                           // la marquise
         { type: 'reflet', x: 76.5, y: 64, l: 8.5, h: 20 },                            // (13) la lumière glisse sur l'affiche
         { type: 'lampes', points: [{ x: 87, y: 10.2, t: 9 }, { x: 12.1, y: 51.4, t: 4 }, { x: 18.7, y: 67.7, t: 2.5 }, { x: 5.9, y: 68.4, t: 2.5 }, { x: 22.3, y: 69.7, t: 2 }] },
-        { type: 'fenetres', points: [{ x: 58.6, y: 39 }, { x: 63, y: 37.8 }, { x: 67.4, y: 39 }, { x: 43.2, y: 35 }, { x: 46.2, y: 35 }] }, // (51)
+        // (51) fenêtres de la façade retirées le 2026-10-29 : les halos tombaient à côté des arcades
       ], cadrage: '50% 50%', carte: 'haut-gauche', ambiance: 'feuilles', alt: "Couple devant la façade illuminée d'un grand cinéma parisien, pavés mouillés et ciel orangé", badge: 'Cinémas', titre: 'Fais-toi une toile',
       texte: 'Salles Art déco, cinémas de quartier, séances en plein air : le grand écran, c\'est mieux ensemble.', bouton: 'Vois les cinémas sur la carte' },
     { cle: 'evenement', illu: evenement, fond: fondEvenement, ratio: 1672 / 941,
@@ -141,7 +183,16 @@ export const ECRANS = [
         { type: 'ondes', points: [{ x: 24, y: 90 }, { x: 30.5, y: 93 }] },            // (16, 17)
         { type: 'lampes', points: [{ x: 96.5, y: 49, t: 6 }] },                       // (19)
         { type: 'hirondelles', x: 52, y: 20 },                                        // (20)
-      ], cadrage: '50% 45%', alt: "Château fort aux tours coiffées d'ardoise au bord d'un étang, au coucher du soleil", badge: 'Monuments', titre: 'Remonte le temps',
+      ], cadrage: '50% 45%',
+      variantes: [
+        { theme: 'nuit', saisons: ['hiver', 'noel'], fond: fondMonumentNuitHiver, ratio: 1679 / 937, etoiles: true,
+          effets: [{ type: 'lune', x: 17.4, y: 11.3, t: 8 }, ...EFFETS_MONUMENT_NUIT],
+          alt: "Château fort enneigé et illuminé au bord d'un étang, sous la pleine lune" },
+        { theme: 'nuit', fond: fondMonumentNuit, ratio: 1679 / 937, etoiles: true,
+          effets: [{ type: 'lune', x: 16.9, y: 10.8, t: 8 }, ...EFFETS_MONUMENT_NUIT],
+          alt: "Château fort illuminé au bord d'un étang, sous la pleine lune" },
+      ],
+      alt: "Château fort aux tours coiffées d'ardoise au bord d'un étang, au coucher du soleil", badge: 'Monuments', titre: 'Remonte le temps',
       texte: "Châteaux de la Loire, ponts romains, abbayes perchées : l'histoire de France se visite en vrai.", bouton: 'Vois les monuments sur la carte' },
 ];
 
@@ -195,4 +246,15 @@ export const FONDS_AUTH = {
         { type: 'hirondelles', x: 37, y: 22, echelle: 0.6 },                          // autour du château
         { type: 'fenetres', points: [{ x: 30, y: 33 }, { x: 33.5, y: 32 }, { x: 37, y: 31 }] },
       ] },
+};
+
+/*
+ * L'écran tel qu'il doit s'afficher MAINTENANT : la première variante dont le thème (heure)
+ * et la saison correspondent remplace la photo, ses effets et sa description.
+ * Sans variante qui correspond : l'écran de base (le coucher de soleil).
+ *   ecranDuMoment(ecran, 'nuit', 'hiver') → la photo enneigée sous la lune
+ */
+export const ecranDuMoment = (ecran, theme, saison) => {
+    const variante = ecran.variantes?.find((v) => (!v.theme || v.theme === theme) && (!v.saisons || v.saisons.includes(saison)));
+    return variante ? { ...ecran, ...variante } : ecran;
 };

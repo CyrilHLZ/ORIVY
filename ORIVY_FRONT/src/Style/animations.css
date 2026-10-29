@@ -269,6 +269,15 @@
   mask: radial-gradient(closest-side, #000 20%, transparent);
 }
 
+/* Pleine lune : un halo bleuté, plus froid et plus doux que celui du soleil */
+.effet--lune i {
+  width: var(--taille); height: var(--taille);
+  margin: calc(var(--taille) / -2) 0 0 calc(var(--taille) / -2);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(235 240 255 / 0.55), rgb(190 205 255 / 0.18) 45%, rgb(190 205 255 / 0));
+  mix-blend-mode: screen;
+}
+
 /* Le ciel rougit lentement au-dessus de l'horizon */
 .effet--rougeoie {
   background: linear-gradient(to bottom, rgb(255 90 70 / 0), rgb(255 90 70 / 0.22) 70%, rgb(255 120 60 / 0.3));
@@ -355,6 +364,17 @@
 .couche-saison > div { position: absolute; inset: 0; display: none; }
 .couche-saison i, .couche-saison b { position: absolute; display: block; }
 [data-decorations="off"] .couche-saison { display: none; }
+/* Certaines photos ne gardent que les étoiles de la nuit (ex. le parc la nuit) */
+.photo-animee--etoiles-seules .couche-saison > div:not(.s-etoiles) { display: none !important; }
+/* Photo de neige : seulement les flocons (icône flocon.svg), quelle que soit la saison affichée */
+.photo-animee--flocons-seuls .couche-saison > div:not(.s-flocons) { display: none !important; }
+.photo-animee--flocons-seuls .couche-saison > .s-flocons { display: block !important; }
+/* Sur un paysage blanc, les flocons doivent se voir : plus grands, avec une ombre bleutée */
+.photo-animee--flocons-seuls .s-flocons i { width: 26px; height: 26px; filter: drop-shadow(0 0 2px rgb(40 70 120 / 0.55)); }
+.photo-animee--flocons-seuls .s-flocons i:nth-child(2n) { width: 17px; height: 17px; }
+/* Les étoiles ne scintillent QUE sur les vraies photos de nuit (choix du 2026-10-29) :
+   sur une photo de coucher de soleil, elles n'ont rien à faire, même quand le thème est « nuit » */
+.photo-animee:not(.photo-animee--etoiles):not(.photo-animee--etoiles-seules) .s-etoiles { display: none !important; }
 
 [data-theme="aube"] .s-brume,
 [data-theme="jour"] .s-rayons,
@@ -458,6 +478,7 @@
   .effet--papillons i { animation: volette var(--duree) ease-in-out var(--delai) infinite alternate; }
   .effet--aigle span { animation: tourne 40s linear infinite; }
   .effet--soleil i { animation: soleil-respire 6s ease-in-out infinite alternate; }
+  .effet--lune i { animation: soleil-respire 9s ease-in-out infinite alternate; }
   .effet--soleil b { animation: tourne 90s linear infinite; }
   .effet--descend { animation: soleil-descend 40s ease-in-out infinite alternate; }
   .effet--rougeoie { animation: rougeoie 40s ease-in-out infinite alternate; }
