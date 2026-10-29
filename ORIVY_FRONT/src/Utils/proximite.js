@@ -41,20 +41,24 @@ export const demanderPosition = () => new Promise((resoudre, rejeter) => {
     );
 });
 
-/* Grandes villes, pour le champ « Tape ta ville » quand la position est refusée */
-const VILLES = {
-    paris: [48.8566, 2.3522], lyon: [45.7640, 4.8357], marseille: [43.2965, 5.3698],
-    bordeaux: [44.8378, -0.5792], lille: [50.6292, 3.0573], nantes: [47.2184, -1.5536],
-    toulouse: [43.6047, 1.4442], strasbourg: [48.5734, 7.7521], nice: [43.7102, 7.2620],
-    rennes: [48.1173, -1.6778], montpellier: [43.6108, 3.8767], 'clermont-ferrand': [45.7772, 3.0870],
-    annecy: [45.8992, 6.1294], grenoble: [45.1885, 5.7245], 'saint-malo': [48.6493, -2.0257],
+export const trouverVille = async (texte) => {
+    const nom = (texte || '').trim();
+    if (nom.length < 2) return null;
+    const url = `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(nom)}`
+        + '&fields=nom,centre&boost=population&limit=1';
+    const reponse = await fetch(url);
+    if (!reponse.ok) throw new Error('La recherche de ville ne répond pas. Réessaie dans un instant.');
+    const [commune] = await reponse.json();
+    if (!commune) return null;
+    const [lng, lat] = commune.centre.coordinates;   // GeoJSON : longitude D'ABORD
+    return { lat, lng, nom: commune.nom };
 };
 
-/* « Clermont Ferrand », « clermont-ferrand », « CLERMONT-FERRAND » → la même ville */
-export const trouverVille = (texte) => {
-    const cle = (texte || '').trim().toLowerCase()
-        .normalize('NFD').replace(/[̀-ͯ]/g, '')   // retire les accents
-        .replace(/\s+/g, '-');
-    const coord = VILLES[cle];
-    return coord ? { lat: coord[0], lng: coord[1], nom: texte.trim() } : null;
+/* { lat, lng } → « 15 Rue Bardin 03200 Vichy » (ou '' si rien trouvé : en mer, à l'étranger…) */
+export const adresseDe = async (lat, lng) => {
+    const reponse = await fetch(`https://api-adresse.data.gouv.fr/reverse/?lat=${lat}&lon=${lng}&limit=1`);
+    if (!reponse.ok) return '';
+    const { features } = await reponse.json();
+    return features[0]?.properties.label ?? '';
 };
+

@@ -8,7 +8,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Entity
 public class Commentaire {
@@ -21,9 +24,15 @@ public class Commentaire {
     @ManyToOne
     @JoinColumn(name = "auteur_id")
     private Utilisateur auteur;
+
     @NotBlank
+    @Size(max = 255, message = "255 caractères max")
     private String contenu;
+
+    @Min(value = 1, message = "La note va de 1 à 5")
+    @Max(value = 5, message = "La note va de 1 à 5")
     private Integer note;
+
     @NotBlank
     private String cibleType;
     private Long cibleId;

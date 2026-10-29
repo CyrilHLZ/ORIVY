@@ -8,14 +8,16 @@ import { useLieux } from '../../../Hooks/useLieux.js';
 import { getPromenades, updatePoint } from '../../../Services/Carte/CarteService.js';
 import { ICONES } from '../../../Composants/icones.js';
 import { LISTE_CATEGORIES, categorie } from '../../../Constants/categories.js';
-import { demanderPosition, distanceKm, formaterDistance, trouverVille } from '../../../Utils/proximite.js';
+import { demanderPosition, distanceKm, formaterDistance, trouverVille, adresseDe } from '../../../Utils/proximite.js';
 import Bouton, { BoutonIcone } from '../../../Composants/Bouton.jsx';
 import Icone from '../../../Composants/Icone.jsx';
 import Photo from '../../../Composants/Photo.jsx';
 import { BadgeCategorie } from '../../../Composants/Badges.jsx';
 import { Champ } from '../../../Composants/Formulaire.jsx';
 import BoutonFavori from '../../../Composants/BoutonFavori.jsx';
+import FenetreLieu from '../../../Composants/FenetreLieu.jsx';
 import { ChoixSegmente, OPTIONS_RAYON, Puce, Puces } from '../../../Composants/Filtres.jsx';
+import AvisLieu from '../../../Composants/AvisLieu.jsx';
 
 /*
  * Page Carte (maquette design/maquettes/carte.html) :
@@ -24,7 +26,8 @@ import { ChoixSegmente, OPTIONS_RAYON, Puce, Puces } from '../../../Composants/F
  *   - « Me localiser » (position demandée au clic seulement), point bleu, cercle du rayon ;
  *   - clic sur une épingle : tiroir de détail (monte du bas sur mobile) ;
  *   - à l'arrivée, une fenêtre demande les catégories à afficher (765 lieux d'un coup, c'est illisible) ;
- *   - les promenades sont tracées (ligne) avec la catégorie « Randonnées ».
+ *   - les promenades sont tracées (ligne) avec la catégorie « Randonnées » ;
+ *   - admin : « Ajouter un lieu », puis clic sur la carte → fenêtre pré-remplie (coordonnées + adresse).
  * Adresses comprises :
  *   /carte?cat=parc                 → filtre une catégorie
  *   /carte?lieu=point-12            → ouvre la fiche d'un lieu (liens des cartes de lieu)
@@ -79,6 +82,13 @@ const SuiviZoom = ({ onZoom }) => {
     const carte = useMapEvents(ecouteurs);
     // Le zoom a pu changer avant que l'écouteur ne soit branché
     useEffect(() => { onZoom(carte.getZoom()); }, [carte, onZoom]);
+    return null;
+};
+
+/* ---- Mode « ajout d'un lieu » (admin) : un clic sur la carte donne ses coordonnées ---- */
+const ClicCarte = ({ onClic }) => {
+    const ecouteurs = useMemo(() => ({ click: (e) => onClic(e.latlng) }), [onClic]);
+    useMapEvents(ecouteurs);
     return null;
 };
 
@@ -166,6 +176,8 @@ const CartePage = () => {
     const champVille = useRef(null);
     const tiroir = useRef(null);
     const marqueurs = useRef({});   // id du lieu → marqueur Leaflet (pour rendre le focus)
+    const [placement, setPlacement] = useState(false);   // admin : « clique sur la carte »
+    const [nouveauLieu, setNouveauLieu] = useState(null); // ouvre FenetreLieu pré-remplie
 
     /* Cette page occupe tout l'écran : classe sur <body> (voir pages.css) */
     useEffect(() => {
@@ -227,11 +239,21 @@ const CartePage = () => {
         }
     };
 
-    const chercherVille = (event) => {
+    const chercherVille = async (event) => {
         event.preventDefault();
-        const trouvee = trouverVille(ville);
-        if (trouvee) placerPosition({ ...trouvee, gps: false });
-        else setMessage(`On ne connaît pas encore « ${ville} ». Essaie une grande ville voisine.`);
+        try {
+            const trouvee = await trouverVille(ville);
+            if (trouvee) placerPosition({ ...trouvee, gps: false });
+            else setMessage(`Aucune commune ne s'appelle « ${ville} ». Vérifie l'orthographe.`);
+        } catch (e) {
+            setMessage(e.message);
+        }
+    };
+
+    const placerLieu = async ({ lat, lng }) => {
+        setPlacement(false);
+        const adresse = await adresseDe(lat, lng).catch(() => '');
+        setNouveauLieu({ latitude: lat.toFixed(6), longitude: lng.toFixed(6), adresse });
     };
 
     const changerRayon = (km) => {
@@ -282,7 +304,7 @@ const CartePage = () => {
     const km = (l) => (position ? distanceKm(position.lat, position.lng, l.latitude, l.longitude) : null);
 
     return (
-        <main className="carte-zone">
+        <main className={placement ? "carte-zone carte-zone--placement" : "carte-zone"}>
             <h1 className="visuellement-cache">Carte des lieux</h1>
 
             <MapContainer
@@ -356,6 +378,7 @@ const CartePage = () => {
                             className="cercle-rayon" />
                 )}
                 {repere && <Marker position={repere.centre} icon={iconeEpingle('autre', true)} title={repere.nom} />}
+                {placement && <ClicCarte onClic={placerLieu} />}
             </MapContainer>
 
             {/* Recherche et filtres posés sur la carte */}
@@ -382,6 +405,12 @@ const CartePage = () => {
                         <ChoixSegmente nom="rayon" legende="Rayon autour de toi" valeur={rayon} onChange={changerRayon} options={OPTIONS_RAYON} />
                     </div>
                 )}
+                {isAdmin && (
+                    <Bouton variante={placement ? 'principal' : 'secondaire'} pilule icone="plus"
+                            onClick={() => { setPlacement(!placement); setMessage(placement ? null : "Touche la carte à l'endroit du nouveau lieu."); }}>
+                        {placement ? 'Annuler' : 'Ajouter un lieu'}
+                    </Bouton>
+                )}
                 <Bouton variante="secondaire" pilule icone="filtres" onClick={() => setChoixOuvert(true)}>Catégories</Bouton>
                 <Bouton variante="secondaire" pilule icone="liste" vers="/activites">Liste</Bouton>
                 <button className="bouton bouton--icone bouton--flottant" type="button" onClick={meLocaliser}
@@ -400,6 +429,7 @@ const CartePage = () => {
                         modifiable={isAdmin && selection.source === 'point'}
                         onFermer={fermer}
                         onModifie={() => { recharger(); setMessage('Point enregistré.'); }}
+                        onAvis={recharger}
                     />
                 )}
             </aside>
@@ -418,12 +448,14 @@ const CartePage = () => {
                 </div>
             )}
             {message && !erreur && <div className="toast" role="status"><Icone nom="info" />{message}</div>}
+            <FenetreLieu point={nouveauLieu} onFermer={() => setNouveauLieu(null)}
+                         onEnregistre={(texte) => { setNouveauLieu(null); setMessage(texte); recharger(); }} />
         </main>
     );
 };
 
 /* ---- Contenu du tiroir : fiche d'un lieu (+ modification pour les admins) ---- */
-const DetailLieu = ({ lieu, km, modifiable, onFermer, onModifie }) => {
+const DetailLieu = ({ lieu, km, modifiable, onFermer, onModifie, onAvis }) => {
     const [edition, setEdition] = useState(null);   // null = lecture ; objet = formulaire ouvert
     const [statut, setStatut] = useState('');
 
@@ -472,6 +504,8 @@ const DetailLieu = ({ lieu, km, modifiable, onFermer, onModifie }) => {
                         Waze
                     </a>
                 </div>
+
+                <AvisLieu type={lieu.source} id={lieu.idNum} onChange={onAvis} />
 
                 {/* Réservé aux admins : modifier un point d'intérêt */}
                 {modifiable && !edition && (

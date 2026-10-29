@@ -38,6 +38,8 @@
   position: relative;
   height: calc(100svh - var(--hauteur-entete) - var(--hauteur-onglets));
 }
+/* Admin : « Ajouter un lieu » → curseur en viseur sur la carte */
+.carte-zone--placement .leaflet-container { cursor: crosshair; }
 /* isolation : les calques Leaflet (z-index 400 à 800) restent DANS la carte,
    sinon ils passeraient devant le tiroir et la barre d'onglets */
 #carte { position: absolute; inset: 0; z-index: 0; isolation: isolate; background: var(--couleur-surface-creux); }

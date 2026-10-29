@@ -58,12 +58,15 @@ const ActivitePage = () => {
         }
     };
 
-    /* Position refusée (ou par choix) : on tape une ville */
-    const chercherVille = (event) => {
+    const chercherVille = async (event) => {
         event.preventDefault();
-        const trouvee = trouverVille(ville);
-        if (trouvee) definirPosition(trouvee, `de ${trouvee.nom}`);
-        else setAlerte(`On ne connaît pas encore « ${ville} ». Essaie une grande ville voisine.`);
+        try {
+            const trouvee = await trouverVille(ville);
+            if (trouvee) definirPosition(trouvee, `de ${trouvee.nom}`);
+            else setAlerte(`Aucune commune ne s'appelle « ${ville} ». Vérifie l'orthographe.`);
+        } catch (e) {
+            setAlerte(e.message);
+        }
     };
 
     /*

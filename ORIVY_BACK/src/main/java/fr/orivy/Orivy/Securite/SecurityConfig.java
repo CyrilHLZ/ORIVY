@@ -32,7 +32,7 @@ public class SecurityConfig {
                         .requestMatchers("/error", "/h2-console/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/utilisateurs/inscription", "/api/utilisateurs/connexion").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/carte", "/api/points-interet/**", "/api/activites/**",
-                                "/api/promenades/**", "/api/sorties/**", "/api/*/*/commentaires", "/api/fichiers/**").permitAll()
+                                "/api/promenades/**", "/api/sorties/**", "/api/notes", "/api/*/*/commentaires", "/api/fichiers/**").permitAll()
                         // Admin
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/utilisateurs/**").hasRole("ADMIN")

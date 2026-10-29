@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import fr.orivy.Orivy.DTO.CommentaireDto;
+import fr.orivy.Orivy.DTO.NoteLieuDto;
 import fr.orivy.Orivy.Model.Commentaire;
 import fr.orivy.Orivy.Service.CommentaireService;
 import jakarta.validation.Valid;
@@ -38,4 +40,17 @@ public class CommentaireController {
     public CommentaireDto creerCommentaire(@Valid @RequestBody Commentaire commentaire, @AuthenticationPrincipal Jwt jwt) {
         return CommentaireDto.depuis(commentaireService.creerCommentaire(commentaire, Long.valueOf(jwt.getSubject())));
     }
+
+    @GetMapping("/notes")
+    public List<NoteLieuDto> notes() {
+        return commentaireService.notesDesLieux();
+    }
+
+    @DeleteMapping("/commentaires/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void supprimer(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        boolean admin = "admin".equalsIgnoreCase(jwt.getClaimAsString("role"));
+        commentaireService.supprimer(id, Long.valueOf(jwt.getSubject()), admin);
+    }
+
 }

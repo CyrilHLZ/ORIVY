@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getMapData } from '../Services/Carte/CarteService.js';
+import { getNotes } from '../Services/Commentaire/CommentaireService.js';
 
 /*
  * Transforme la réponse de /api/carte en une seule liste de lieux, au même format :
@@ -45,11 +46,19 @@ export const useLieux = () => {
     const recharger = useCallback(() => {
         setChargement(true);
         setErreur(null);
-        getMapData()
-            .then((donnees) => setLieux(normaliserLieux(donnees)))
+        // Les deux requêtes partent EN MÊME TEMPS ; si les notes échouent, on affiche quand même les lieux
+        Promise.all([getMapData(), getNotes().catch(() => [])])
+            .then(([donnees, notes]) => {
+                // « point-12 » → { moyenne, nombre }
+                const parLieu = Object.fromEntries(notes.map((n) => [`${n.cibleType}-${n.cibleId}`, n]));
+                setLieux(normaliserLieux(donnees).map((l) => ({
+                    ...l, note: parLieu[l.id]?.moyenne ?? null, nombreAvis: parLieu[l.id]?.nombre ?? 0,
+                })));
+            })
             .catch(() => setErreur('Les lieux sont momentanément indisponibles.'))
             .finally(() => setChargement(false));
     }, []);
+
 
     useEffect(() => { recharger(); }, [recharger]);
 

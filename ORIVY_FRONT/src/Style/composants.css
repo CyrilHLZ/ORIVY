@@ -508,6 +508,19 @@ label.bouton:has(input:focus-visible) { outline: 3px solid var(--couleur-focus);
 .commentaire__actions .bouton[aria-pressed="true"] { color: var(--couleur-principale); }
 .commentaire__actions .bouton[aria-pressed="true"] .icone { fill: currentColor; }
 
+/* Avis des lieux : étoiles (pleines = couleur principale, vides = contour) */
+.etoiles { display: inline-flex; gap: 1px; vertical-align: middle; color: var(--couleur-texte-doux); }
+.etoiles .icone { width: 1em; height: 1em; }
+.etoile--pleine, .etoile--pleine .icone { color: var(--couleur-principale); fill: currentColor; }
+.avis-lieu { display: flex; flex-direction: column; gap: var(--espace-3); }
+.avis-lieu h3 { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espace-2); margin: 0; }
+.avis-lieu__moyenne { display: inline-flex; align-items: center; gap: var(--espace-1); font-size: var(--taille-s); font-weight: var(--graisse-moyenne); color: var(--couleur-texte-doux); }
+.choix-note { border: 0; margin: 0; padding: 0; display: flex; align-items: center; gap: var(--espace-1); }
+.choix-note legend { float: left; margin-right: var(--espace-2); }
+.choix-note label { cursor: pointer; display: inline-flex; padding: var(--espace-1); border-radius: var(--rayon-petit); color: var(--couleur-texte-doux); }
+.choix-note label .icone { width: 1.6rem; height: 1.6rem; }
+.choix-note label:has(input:focus-visible) { outline: 2px solid var(--couleur-principale); outline-offset: 2px; }
+
 /* Zone de saisie collée en bas (commentaire, message) */
 .saisie-message {
   display: flex;

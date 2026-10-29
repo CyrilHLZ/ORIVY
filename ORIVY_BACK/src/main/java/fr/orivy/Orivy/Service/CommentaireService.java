@@ -1,11 +1,13 @@
 package fr.orivy.Orivy.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import fr.orivy.Orivy.DTO.NoteLieuDto;
 import fr.orivy.Orivy.Model.Commentaire;
 import fr.orivy.Orivy.Model.Utilisateur;
 import fr.orivy.Orivy.Repository.CommentaireRepository;
@@ -14,6 +16,8 @@ import fr.orivy.Orivy.Repository.UtilisateurRepository;
 
 @Service
 public class CommentaireService {
+
+    private static final List<String> LIEUX = List.of("point", "activite");
 
     private final CommentaireRepository commentaireRepository;
     private final UtilisateurRepository utilisateurRepository;
@@ -32,11 +36,29 @@ public class CommentaireService {
         return commentaireRepository.findByCibleTypeAndCibleId(cibleType, cibleId);
     }
 
+    public List<NoteLieuDto> notesDesLieux() {
+        return commentaireRepository.notesDesLieux();
+    }
+
     // L'auteur vient du jeton, jamais du corps de la requête
     public Commentaire creerCommentaire(Commentaire commentaire, Long auteurId) {
         Utilisateur auteur = utilisateurRepository.findById(auteurId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur introuvable"));
         commentaire.setAuteur(auteur);
+        // Avis sur un lieu : note obligatoire, et UN seul avis par membre (le 2e remplace le 1er)
+        if (LIEUX.contains(commentaire.getCibleType())) {
+            if (commentaire.getNote() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Donne une note de 1 à 5 étoiles.");
+            }
+            Optional<Commentaire> ancien = commentaireRepository
+                    .findByAuteurIdAndCibleTypeAndCibleId(auteurId, commentaire.getCibleType(), commentaire.getCibleId());
+            if (ancien.isPresent()) {
+                ancien.get().setNote(commentaire.getNote());
+                ancien.get().setContenu(commentaire.getContenu());
+                return commentaireRepository.save(ancien.get());
+            }
+        }
+
         Commentaire enregistre = commentaireRepository.save(commentaire);
 
         // Commentaire sur une sortie : on prévient l'organisateur (sauf s'il commente lui-même)
@@ -50,5 +72,13 @@ public class CommentaireService {
             });
         }
         return enregistre;
+    }
+
+    public void supprimer(Long id, Long utilisateurId, boolean admin) {
+        Commentaire c = commentaireRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Commentaire introuvable."));
+        boolean auteur = c.getAuteur() != null && c.getAuteur().getId().equals(utilisateurId);
+        if (!auteur && !admin) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Ce n'est pas ton commentaire.");
+        commentaireRepository.delete(c);
     }
 }
