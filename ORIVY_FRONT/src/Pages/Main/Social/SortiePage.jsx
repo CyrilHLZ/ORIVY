@@ -16,6 +16,8 @@ import Confettis from '../../../Composants/Confettis.jsx';
 import { telechargerIcs } from '../../../Utils/agenda.js';
 import { meteoDeLaSortie } from '../../../Utils/meteo.js';
 import BoutonFavori from '../../../Composants/BoutonFavori.jsx';
+import FenetreEnvoi from '../../../Composants/FenetreEnvoi.jsx';
+import FenetreSignalement from '../../../Composants/FenetreSignalement.jsx';
 
 
 /*
@@ -66,6 +68,8 @@ const SortiePage = () => {
     const [texte, setTexte] = useState('');
     const [confirmation, setConfirmation] = useState(false);
     const [message, setMessage] = useState(null);
+    const [envoiOuvert, setEnvoiOuvert] = useState(false);   // « Envoyer à un membre »
+    const [signalementOuvert, setSignalementOuvert] = useState(false);
     const [fete, setFete] = useState(0);   // (75) compteur : chaque inscription relance les confettis
     const [meteo, setMeteo] = useState(null);
     const [album, setAlbum] = useState([]);
@@ -214,6 +218,9 @@ const SortiePage = () => {
                         <Link className="bouton bouton--icone bouton--flottant" to="/sorties" aria-label="Retour aux sorties"><Icone nom="retour" /></Link>
                         <span style={{ display: 'flex', gap: 'var(--espace-2)' }}>
                             <BoutonFavori type="sortie" id={sortie.id} nom={sortie.nom} flottant />
+                            {isAuthenticated && (
+                                <BoutonIcone icone="envoyer" label="Envoyer la sortie à un membre" flottant onClick={() => setEnvoiOuvert(true)} />
+                            )}
                             <BoutonIcone icone="partager" label="Partager la sortie" flottant onClick={partager} />
                         </span>
                     </div>
@@ -353,6 +360,11 @@ const SortiePage = () => {
                                 </div>
                             </section>
                         )}
+
+                        {/* Un membre (autre que l'organisateur) peut signaler la sortie à l'équipe */}
+                        {isAuthenticated && !peutGerer && (
+                            <Bouton variante="fantome" icone="drapeau" onClick={() => setSignalementOuvert(true)}>Signaler cette sortie</Bouton>
+                        )}
                     </div>
 
                     {/* Encart d'inscription : à droite sur ordinateur */}
@@ -380,6 +392,12 @@ const SortiePage = () => {
                 <p>{placesRestantes != null ? <><strong>{placesRestantes} places</strong><br />restantes</> : <strong>{dateLisible(sortie.dateDebut)}</strong>}</p>
                 <BoutonInscription connecte={isAuthenticated} inscrit={inscrit} complet={complet} position={position} enCours={enCours} onBasculer={basculerInscription} onAttente={basculerAttente} />
             </div>
+
+            <FenetreSignalement ouverte={signalementOuvert} cibleType="sortie" cibleId={sortie.id} nom="cette sortie"
+                                onFermer={() => setSignalementOuvert(false)}
+                                onEnvoye={() => { setSignalementOuvert(false); setMessage("Merci, l'équipe va regarder."); }} />
+            <FenetreEnvoi ouverte={envoiOuvert} sortie={sortie} onFermer={() => setEnvoiOuvert(false)}
+                          onEnvoye={(prenom) => { setEnvoiOuvert(false); setMessage(`Sortie envoyée à ${prenom} !`); }} />
 
             <FenetreConfirmation
                 ouverte={confirmation}

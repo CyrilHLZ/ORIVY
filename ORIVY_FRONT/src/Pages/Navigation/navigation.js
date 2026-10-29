@@ -13,6 +13,7 @@ export const ONGLETS = [
     { nom: 'Carte', icone: 'carte', lien: '/carte', chemins: ['/carte'] },
     { nom: 'Lieux', icone: 'epingle', lien: '/activites', chemins: ['/activites'] },
     { nom: 'Sorties', icone: 'calendrier', lien: '/sorties', chemins: ['/sorties'] },
+    { nom: 'Fil', icone: 'image', lien: '/fil', chemins: ['/fil'] },
     { nom: 'Messages', icone: 'messages', lien: '/messages', chemins: ['/messages'], mobile: false },
 ];
 

@@ -394,7 +394,14 @@
 @media (min-width: 1024px) { .mobile-seulement { display: none; } }
 
 /* Fil plein écran (mobile) : la décoration de coin chevaucherait les filtres posés en haut */
-@media (max-width: 1023px) { .page-sorties .entete .deco-coin { display: none; } }
+@media (max-width: 1023px) { .page-sorties .entete .deco-coin, .page-fil .entete .deco-coin { display: none; } }
+
+/* Page Fil (photos et vidéos des albums) : même mise en page que les sorties */
+.page-fil.avec-onglets { padding-bottom: 0; }
+.page-fil__etat:empty { display: none; }
+.page-fil__etat { padding-top: calc(var(--espace-8) + var(--espace-4)); }   /* sous les onglets posés en haut */
+.fil-sentinelle { height: 1px; }
+@media (min-width: 1024px) { .page-fil__etat { padding-top: 0; } }
 
 
 @media (min-width: 1024px) {
@@ -545,6 +552,17 @@
 .bulle:not(.bulle--moi) .carte-partagee { background: var(--couleur-surface-creux); }
 .carte-partagee .photo { width: var(--espace-8); aspect-ratio: 1; border-radius: var(--rayon-petit); flex-shrink: 0; }
 .carte-partagee .photo > .icone { width: var(--espace-5); height: var(--espace-5); }
+
+/* Admin : signalements à traiter */
+.liste-signalements { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--espace-3); }
+.liste-signalements li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--espace-3);
+  padding-top: var(--espace-3); border-top: 1px solid var(--couleur-bordure); }
+.liste-signalements li > div { flex: 1 1 calc(var(--espace-9) * 3); display: flex; flex-direction: column; gap: var(--espace-1); }
+
+/* Fenêtre « Envoyer à… » (partager une sortie en message) */
+.liste-envoi { list-style: none; margin: 0 0 var(--espace-4); padding: 0; display: flex; flex-direction: column; gap: var(--espace-2); max-height: 50svh; overflow-y: auto; }
+.liste-envoi li { display: flex; align-items: center; gap: var(--espace-3); }
+.liste-envoi li > span { flex: 1; min-width: 0; font-weight: var(--graisse-moyenne); }
 /* Mobile : la liste OU la conversation */
 .messagerie--ouverte .liste-conversations { display: none; }
 .messagerie--ouverte .conversation { display: flex; }

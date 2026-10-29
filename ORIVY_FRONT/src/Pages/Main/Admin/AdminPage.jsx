@@ -10,6 +10,7 @@ import { Champ } from '../../../Composants/Formulaire.jsx';
 import { EtatErreur, EtatVide } from '../../../Composants/Etats.jsx';
 import FenetreConfirmation from '../../../Composants/Fenetre.jsx';
 import FenetreLieu from '../../../Composants/FenetreLieu.jsx';
+import Signalements from './Signalements.jsx';
 
 /*
  * Administration des lieux (maquette design/maquettes/admin.html).
@@ -81,7 +82,8 @@ const AdminPage = () => {
 
     return (
         <main className="conteneur page-admin">
-            <div className="section-titre" style={{ marginTop: 'var(--espace-5)' }}>
+            <div style={{ marginTop: 'var(--espace-5)' }}><Signalements /></div>
+            <div className="section-titre">
                 <h1 style={{ margin: 0 }}>Lieux de la carte</h1>
                 <Bouton icone="plus" onClick={() => setEdition({})}>Ajoute un lieu</Bouton>
             </div>

@@ -8,6 +8,7 @@ import Bouton, { BoutonIcone } from '../../Composants/Bouton.jsx';
 import Icone from '../../Composants/Icone.jsx';
 import { Chargement, EtatVide } from '../../Composants/Etats.jsx';
 import { ilYa } from '../../Utils/dates.js';
+import CartePartagee from '../../Composants/CartePartagee.jsx';
 
 const nomDe = (p) => [p?.prenom, p?.nom].filter(Boolean).join(' ') || 'Membre';
 const heure = (date) => new Date(date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
@@ -113,6 +114,7 @@ const MessagesPage = () => {
                                     {messages.map((m) => (
                                         <li key={m.id} className={`bulle${m.expediteurId === user?.id ? ' bulle--moi' : ''}`}>
                                             <p style={{ whiteSpace: 'pre-line' }}>{m.contenu}</p>
+                                            <CartePartagee texte={m.contenu} />
                                             <span className="bulle__heure">{heure(m.dateEnvoi)}</span>
                                         </li>
                                     ))}

@@ -10,3 +10,8 @@ export const unfollowUser = (targetUserId) => apiRequest(`/utilisateurs/${target
 export const getFollowers = (userId) => apiRequest(`/utilisateurs/${userId}/abonnes`);
 // Ceux que cet utilisateur suit
 export const getFollowing = (userId) => apiRequest(`/utilisateurs/${userId}/abonnements`);
+
+// Blocage : plus de messages ni d'abonnement entre les deux membres
+export const bloquer = (userId) => apiRequest(`/utilisateurs/${userId}/blocage`, { method: 'POST' });
+export const debloquer = (userId) => apiRequest(`/utilisateurs/${userId}/blocage`, { method: 'DELETE' });
+export const getMesBlocages = () => apiRequest('/utilisateurs/moi/blocages');

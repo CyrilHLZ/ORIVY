@@ -960,6 +960,11 @@ button.entete__profil[aria-expanded="true"] .avatar { box-shadow: 0 0 0 3px var(
 }
 .menu-profil__liste .bouton { width: 100%; justify-content: flex-start; font-weight: var(--graisse-moyenne); }
 
+/* Menu « ⋯ » (profil d'un membre : Signaler, Bloquer) : réutilise la liste du menu profil */
+.menu-options { position: relative; display: inline-flex; }
+.menu-options .menu-profil__liste { left: 0; right: auto; }
+.menu-options__danger { color: var(--couleur-danger); }
+
 @media (min-width: 1024px) {
   .menu-profil { display: block; margin-left: var(--espace-2); }
   .entete__connexion { display: inline-flex; margin-left: var(--espace-2); }

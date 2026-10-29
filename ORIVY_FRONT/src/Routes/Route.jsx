@@ -18,6 +18,7 @@ import ProfilPage from '../Pages/Utilisateur/ProfilPage.jsx';
 import CommunautePage from '../Pages/Social/CommunautePage.jsx';
 import MessagesPage from '../Pages/Social/MessagesPage.jsx';
 import NotificationsPage from '../Pages/Social/NotificationsPage.jsx';
+import FilPage from '../Pages/Social/FilPage.jsx';
 
 // Catalogue des composants : outil de développement seulement.
 // lazy + import.meta.env.DEV : en production, la page n'existe pas et son code n'est même pas dans le build.
@@ -49,6 +50,7 @@ const AppRoutes = () => (
 		<Route path="/profil/:id" element={<RequireAuth><ProfilPage /></RequireAuth>} />
 		<Route path="/communaute" element={<RequireAuth><CommunautePage /></RequireAuth>} />
 		<Route path="/messages" element={<RequireAuth><MessagesPage /></RequireAuth>} />
+		<Route path="/fil" element={<RequireAuth><FilPage /></RequireAuth>} />
 		<Route path="/notifications" element={<RequireAuth><NotificationsPage /></RequireAuth>} />
 		<Route path="/connexion" element={<ConnexionPage />} />
 		<Route path="/inscription" element={<InscriptionPage />} />

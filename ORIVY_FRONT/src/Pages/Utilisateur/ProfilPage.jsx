@@ -13,7 +13,10 @@ import CarteSortie from '../../Composants/CarteSortie.jsx';
 import CarteLieu from '../../Composants/CarteLieu.jsx';
 import { useFavoris } from '../../Context/FavorisContext.jsx';
 import { useLieux } from '../../Hooks/useLieux.js';
-import { followUser, getFollowers, getFollowing, unfollowUser } from '../../Services/Social/SocialService.js';
+import { bloquer, debloquer, followUser, getFollowers, getFollowing, getMesBlocages, unfollowUser } from '../../Services/Social/SocialService.js';
+import MenuOptions from '../../Composants/MenuOptions.jsx';
+import FenetreConfirmation from '../../Composants/Fenetre.jsx';
+import FenetreSignalement from '../../Composants/FenetreSignalement.jsx';
 
 
 const OPTIONS_THEME = [
@@ -292,6 +295,35 @@ const ProfilPage = () => {
         }
     };
 
+    // Blocage : est-ce que J'AI bloqué ce membre ? (la liste ne contient que mes blocages)
+    const [bloque, setBloque] = useState(false);
+    const [confirmerBlocage, setConfirmerBlocage] = useState(false);
+    const [signalementOuvert, setSignalementOuvert] = useState(false);
+    useEffect(() => {
+        if (estMoi || !user) return;
+        getMesBlocages().then((liste) => setBloque(liste.some((m) => String(m.id) === String(idProfil)))).catch(() => {});
+    }, [idProfil]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const basculerBlocage = async () => {
+        setConfirmerBlocage(false);
+        try {
+            if (bloque) {
+                await debloquer(idProfil);
+                setBloque(false);
+                setMessage('Membre débloqué.');
+            } else {
+                await bloquer(idProfil);
+                setBloque(true);
+                // Le back a supprimé nos abonnements dans les deux sens : on recharge les compteurs
+                getFollowers(idProfil).then(setAbonnes).catch(() => {});
+                getFollowing(idProfil).then(setAbonnements).catch(() => {});
+                setMessage('Membre bloqué.');
+            }
+        } catch (e) {
+            setMessage(e.message);
+        }
+    };
+
     useEffect(() => {
         if (!message) return undefined;
         const minuteur = setTimeout(() => setMessage(null), 4000);
@@ -342,11 +374,23 @@ const ProfilPage = () => {
                             )}
                             {!estMoi && user && (
                                 <div className="ligne-actions">
-                                    <Bouton variante={jeSuis ? 'secondaire' : 'principal'} icone={jeSuis ? 'abonne' : 'suivre'}
-                                            aria-pressed={jeSuis} onClick={basculerAbonnement}>
-                                        {jeSuis ? 'Abonné' : 'Suivre'}
-                                    </Bouton>
-                                    <Bouton variante="secondaire" icone="messages" vers={`/messages?avec=${profil.id}`}>Écrire</Bouton>
+                                    {bloque ? (
+                                        <p className="texte-doux" style={{ margin: 0 }}>Tu as bloqué ce membre : vous ne pouvez plus vous écrire ni vous suivre.</p>
+                                    ) : (
+                                        <>
+                                            <Bouton variante={jeSuis ? 'secondaire' : 'principal'} icone={jeSuis ? 'abonne' : 'suivre'}
+                                                    aria-pressed={jeSuis} onClick={basculerAbonnement}>
+                                                {jeSuis ? 'Abonné' : 'Suivre'}
+                                            </Bouton>
+                                            <Bouton variante="secondaire" icone="messages" vers={`/messages?avec=${profil.id}`}>Écrire</Bouton>
+                                        </>
+                                    )}
+                                    <MenuOptions label={`Plus d'options pour ${profil.prenom || 'ce membre'}`} options={[
+                                        { texte: 'Signaler', icone: 'drapeau', onClick: () => setSignalementOuvert(true) },
+                                        bloque
+                                            ? { texte: 'Débloquer', icone: 'cadenas', onClick: basculerBlocage }
+                                            : { texte: 'Bloquer', icone: 'cadenas', danger: true, onClick: () => setConfirmerBlocage(true) },
+                                    ]} />
                                 </div>
                             )}
                         </div>
@@ -405,6 +449,18 @@ const ProfilPage = () => {
                 )}
             </div>
             {message && <div className="toast" role="status"><Icone nom="valider" />{message}</div>}
+
+            {!estMoi && (
+                <>
+                    <FenetreConfirmation ouverte={confirmerBlocage} titre={`Bloquer ${profil.prenom || 'ce membre'} ?`}
+                                         texteConfirmer="Oui, bloquer" onConfirmer={basculerBlocage} onAnnuler={() => setConfirmerBlocage(false)}>
+                        Vous ne pourrez plus vous écrire ni vous suivre. Tu pourras le débloquer à tout moment.
+                    </FenetreConfirmation>
+                    <FenetreSignalement ouverte={signalementOuvert} cibleType="membre" cibleId={profil.id} nom={profil.prenom || 'ce membre'}
+                                        onFermer={() => setSignalementOuvert(false)}
+                                        onEnvoye={() => { setSignalementOuvert(false); setMessage("Merci, l'équipe va regarder."); }} />
+                </>
+            )}
         </main>
     );
 };
