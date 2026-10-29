@@ -4,6 +4,7 @@ import java.util.List;
 
 import fr.orivy.Orivy.Model.Message;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -20,4 +21,9 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     // Tous les messages où le membre est l'un des deux (pour la liste des conversations)
     List<Message> findByExpediteurIdOrDestinataireIdOrderByDateEnvoiDesc(Long expediteurId, Long destinataireId);
+
+    // Suppression de compte : tout ce qui concerne ce membre (envoyés ET reçus)
+    @Modifying
+    @Query("DELETE FROM Message m WHERE m.expediteur.id = :id OR m.destinataire.id = :id")
+    void supprimerDuMembre(@Param("id") Long id);
 }

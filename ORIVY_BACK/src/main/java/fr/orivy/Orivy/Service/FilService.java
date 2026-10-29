@@ -27,6 +27,11 @@ public class FilService {
         return photoSortieRepository.findAllByOrderByDateAjoutDesc(PageRequest.of(page, PAR_PAGE));
     }
 
+    // Tout ce qu'un membre a posté dans les albums, du plus récent au plus ancien (page profil)
+    public List<PhotoSortie> duMembre(Long membreId) {
+        return photoSortieRepository.findByAuteurIdOrderByDateAjoutDesc(membreId);
+    }
+
     public List<PhotoSortie> abonnements(Long moi, int page) {
         List<Long> suivis = abonnementRepository.findByAbonneId(moi).stream()
                 .map((a) -> a.getSuivi().getId()).toList();

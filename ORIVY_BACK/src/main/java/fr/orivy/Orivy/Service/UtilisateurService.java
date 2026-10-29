@@ -16,7 +16,6 @@ import fr.orivy.Orivy.Repository.UtilisateurRepository;
 public class UtilisateurService {
 
     private static final String ROLE_UTILISATEUR = "utilisateur";
-    private static final String ROLE_ADMIN = "admin";
 
     private final UtilisateurRepository utilisateurRepository;
     private final PasswordEncoder passwordEncoder;
@@ -72,14 +71,6 @@ public class UtilisateurService {
         utilisateurExistant.setPays(utilisateur.getPays());
         utilisateurExistant.setBio(utilisateur.getBio());
         return utilisateurRepository.save(utilisateurExistant);
-    }
-
-    public void supprimerUtilisateur(Long id) {
-        Utilisateur utilisateur = trouverUtilisateur(id);
-        if (ROLE_ADMIN.equalsIgnoreCase(utilisateur.getRole())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Impossible de supprimer un administrateur.");
-        }
-        utilisateurRepository.delete(utilisateur);
     }
 
     private Utilisateur trouverUtilisateur(Long id) {

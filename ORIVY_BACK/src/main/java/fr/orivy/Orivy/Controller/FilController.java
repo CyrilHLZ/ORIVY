@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,5 +32,11 @@ public class FilController {
                 ? filService.abonnements(Long.valueOf(jwt.getSubject()), page)
                 : filService.pourToi(page);
         return publications.stream().map(PublicationDto::depuis).toList();
+    }
+
+    // GET /api/fil/membre/12 : les photos et vidéos postées par ce membre (page profil)
+    @GetMapping("/membre/{id}")
+    public List<PublicationDto> duMembre(@PathVariable Long id) {
+        return filService.duMembre(id).stream().map(PublicationDto::depuis).toList();
     }
 }

@@ -22,10 +22,12 @@ import org.springframework.web.server.ResponseStatusException;
 import fr.orivy.Orivy.DTO.ChangementEmailDto;
 import fr.orivy.Orivy.DTO.ChangementMotDePasseDto;
 import fr.orivy.Orivy.DTO.ReponseConnexionDto;
+import fr.orivy.Orivy.DTO.SuppressionCompteDto;
 import fr.orivy.Orivy.DTO.UtilisateurPriveeDto;
 import fr.orivy.Orivy.DTO.UtilisateurPublicDto;
 import fr.orivy.Orivy.Model.Utilisateur;
 import fr.orivy.Orivy.Service.JetonService;
+import fr.orivy.Orivy.Service.SuppressionCompteService;
 import fr.orivy.Orivy.Service.UtilisateurService;
 import jakarta.validation.Valid;
 
@@ -35,11 +37,13 @@ public class UtilisateurController {
 
     private final UtilisateurService utilisateurService;
     private final JetonService jetonService;
+    private final SuppressionCompteService suppressionCompteService;
 
-
-    public UtilisateurController(UtilisateurService utilisateurService, JetonService jetonService) {
+    public UtilisateurController(UtilisateurService utilisateurService, JetonService jetonService,
+                                 SuppressionCompteService suppressionCompteService) {
         this.utilisateurService = utilisateurService;
         this.jetonService = jetonService;
+        this.suppressionCompteService = suppressionCompteService;
     }
 
     @PostMapping("/inscription")
@@ -88,7 +92,14 @@ public class UtilisateurController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void supprimerUtilisateur(@PathVariable Long id) {
-        utilisateurService.supprimerUtilisateur(id);
+        suppressionCompteService.supprimerParAdmin(id);
+    }
+
+    // POST et pas DELETE : on envoie le mot de passe dans le corps de la requête
+    @PostMapping("/moi/suppression")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void supprimerMonCompte(@RequestBody SuppressionCompteDto demande, @AuthenticationPrincipal Jwt jwt) {
+        suppressionCompteService.supprimerMonCompte(Long.valueOf(jwt.getSubject()), demande.motDePasse());
     }
 
     @PutMapping("/moi/mot-de-passe")

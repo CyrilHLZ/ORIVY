@@ -13,6 +13,7 @@ public interface SortieRepository extends JpaRepository<Sortie, Long> {
 
     List<Sortie> findByOrganisateurId(Long id);
     List<Sortie> findByParticipantsId(Long id);
+    List<Sortie> findByAttenteId(Long id);
     List<Sortie> findByDateDebutBetween(LocalDateTime debut, LocalDateTime fin);
 
     @Query("""
