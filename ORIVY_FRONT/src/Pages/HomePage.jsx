@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { getSorties } from '../Services/Sortie/SortieService.js';
 import { lireDate } from '../Utils/dates.js';
-import fondAccueil from '../Style/fonds/accueil-lac.jpg';
 import Bouton from '../Composants/Bouton.jsx';
 import CarteSortie from '../Composants/CarteSortie.jsx';
 import { BadgeCategorie } from '../Composants/Badges.jsx';
 import { EtatVide } from '../Composants/Etats.jsx';
-import { ECRANS, EFFETS_LAC, FRAGMENT_ARBRE, ecranDuMoment } from './EcransAccueil.js';
+import { ECRANS, FRAGMENT_ARBRE, INTRO, ecranDuMoment } from './EcransAccueil.js';
 import PhotoAnimee from './Accueil/PhotoAnimee.jsx';
 import Icone from '../Composants/Icone.jsx';
 import Compteur from '../Composants/Compteur.jsx';
@@ -102,6 +101,7 @@ const HomePage = () => {
             return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
         }).map((e) => ecranDuMoment(e, theme, saison));
     }, [saison, theme]); // eslint-disable-line react-hooks/exhaustive-deps
+    const intro = ecranDuMoment(INTRO, theme, saison);   // le lac : de nuit, gelé en hiver…
 
     /* Liste de tous les écrans, pour l'indicateur de progression */
     const tousLesEcrans = useMemo(() => [
@@ -182,8 +182,9 @@ const HomePage = () => {
             <section className="ecran ecran--intro" id="ecran-intro" aria-labelledby="titre-intro">
                 <div className="ecran__scene">
                     {/* Pas de lazy loading : c'est la première chose qu'on voit */}
-                    <PhotoAnimee className="intro__paysage intro__paysage--photo" src={fondAccueil} ratio={1536 / 1024}
-                                 effets={EFFETS_LAC} chargement="eager" fetchPriority="high" />
+                    <PhotoAnimee className={['intro__paysage intro__paysage--photo', intro.etoiles && 'photo-animee--etoiles',
+                                             intro.floconsSeuls && 'photo-animee--flocons-seuls'].filter(Boolean).join(' ')}
+                                 src={intro.fond} ratio={intro.ratio} effets={intro.effets} chargement="eager" fetchPriority="high" />
                     <Ambiance type="feuilles" />
                     <div className="intro__carte">
                         {/* aria-label : le lecteur d'écran lit la phrase entière, pas mot par mot */}
@@ -224,7 +225,7 @@ const HomePage = () => {
                                     // Photo plein écran (sur ordinateur) : elle décrit une vraie scène, d'où un texte alternatif
                                     <PhotoAnimee src={e.fond} alt={e.alt} ratio={e.ratio} cadrage={e.cadrage} effets={e.effets}
                                                  className={[e.etoiles && 'photo-animee--etoiles', e.etoilesSeules && 'photo-animee--etoiles-seules',
-                                                             e.floconsSeuls && 'photo-animee--flocons-seuls'].filter(Boolean).join(' ')} />
+                                                             e.floconsSeuls && 'photo-animee--flocons-seuls', e.sansFilante && 'photo-animee--sans-filante'].filter(Boolean).join(' ')} />
                                 ) : (
                                     <img src={e.saisonnier ? `${e.illu}${FRAGMENT_ARBRE[saison] ?? ''}` : e.illu}
                                          alt="" width="800" height="600" loading="lazy" />

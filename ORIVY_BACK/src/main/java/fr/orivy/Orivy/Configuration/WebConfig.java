@@ -14,10 +14,15 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${orivy.dossier-uploads}")
     private String dossierUploads;
 
+    // Adresses du front autorisées (application.properties) : en dev, n'importe quel port de localhost
+    // (Vite prend 5174 si 5173 est déjà occupé) ; en prod, la vraie adresse du site
+    @Value("${orivy.cors.origines}")
+    private String[] origines;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:5173")
+                .allowedOriginPatterns(origines)
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("*");
     }

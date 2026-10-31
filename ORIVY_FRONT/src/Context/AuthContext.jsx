@@ -38,6 +38,7 @@ export const AuthProvider = ({ children }) => {
         effacerJeton();               // ← nouveau
         setUser(null);
         localStorage.removeItem(STORAGE_KEY);
+        window.orivySaison?.apercu(null);   // l'aperçu « Mode hiver » de l'admin ne survit pas à la déconnexion
     };
 
     // api.js signale un jeton refusé : on déconnecte

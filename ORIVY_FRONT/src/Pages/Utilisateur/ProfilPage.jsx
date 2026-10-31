@@ -29,9 +29,13 @@ const OPTIONS_THEME = [
 
 /* ---- Réglages : branchés sur les scripts des thèmes et des saisons (window.orivyTheme…) ---- */
 const Reglages = () => {
+    const { isAdmin } = useAuth();
     // On lit le choix enregistré une seule fois, au premier rendu
     const [theme, setTheme] = useState(() => window.orivyTheme?.preference() ?? 'auto');
     const [decorations, setDecorations] = useState(() => window.orivySaison?.decorations() ?? true);
+    // Admin : voir le site en hiver (photos enneigées) sans attendre le 21 décembre
+    const [hiver, setHiver] = useState(() => window.orivySaison?.apercuActif?.() === 'hiver');
+    const changerHiver = (actif) => { setHiver(actif); window.orivySaison?.apercu(actif ? 'hiver' : null); };
 
     // (98) Le nouveau thème s'étend en cercle depuis l'endroit cliqué
     const changerTheme = (valeur) => {
@@ -56,6 +60,14 @@ const Reglages = () => {
             <p className="champ__aide">Automatique : l'app suit le soleil, de l'aube à la nuit.</p>
             <Interrupteur label="Décorations saisonnières" detail="Citrouilles, flocons, fleurs…"
                           checked={decorations} onChange={(e) => changerDecorations(e.target.checked)} />
+            {isAdmin && (
+                <>
+                    <h3>Aperçu (admin)</h3>
+                    <Interrupteur label="Mode hiver" detail="Photos enneigées et flocons, de jour comme de nuit"
+                                  checked={hiver} onChange={(e) => changerHiver(e.target.checked)} />
+                    <p className="champ__aide">Associe-le au thème « Nuit » ci-dessus pour voir l'hiver de nuit.</p>
+                </>
+            )}
             <p className="champ__aide">Ces réglages sont enregistrés sur cet appareil.</p>
         </section>
     );
@@ -235,7 +247,8 @@ const FormSuppression = ({ onSupprime }) => {
 
 /* ---- Ses photos et vidéos : ce que le membre a posté dans les albums des sorties (= le Fil) ----
    Le titre suit le contenu : « Tes photos », « Tes vidéos » ou « Tes photos et vidéos ».
-   Chaque vignette mène à la sortie d'où elle vient. Rien de posté : la section ne s'affiche pas. */
+   Chaque vignette mène à la sortie d'où elle vient.
+   Rien de posté : sur MON profil, une phrase explique comment en ajouter ; chez un autre membre, rien. */
 const MesMedias = ({ membreId, estMoi }) => {
     const [medias, setMedias] = useState([]);
 
@@ -243,7 +256,7 @@ const MesMedias = ({ membreId, estMoi }) => {
         getMediasDuMembre(membreId).then(setMedias).catch(() => setMedias([]));
     }, [membreId]);
 
-    if (medias.length === 0) return null;
+    if (medias.length === 0 && !estMoi) return null;
 
     const videos = medias.filter((m) => estVideo(m.url)).length;
     const quoi = videos === 0 ? 'photos' : videos === medias.length ? 'vidéos' : 'photos et vidéos';
@@ -252,13 +265,16 @@ const MesMedias = ({ membreId, estMoi }) => {
     return (
         <section className="encart" aria-labelledby="t-medias" style={{ marginTop: 'var(--espace-5)' }}>
             <h2 id="t-medias" style={{ fontSize: 'var(--taille-xl)' }}>{titre}</h2>
-            <div className="galerie galerie--profil">
+            {medias.length === 0 && (
+                <p className="texte-doux">Après une sortie, ajoute tes photos ou une courte vidéo dans son album : elles apparaîtront ici et dans le Fil.</p>
+            )}
+            {medias.length > 0 && <div className="galerie galerie--profil">
                 {medias.map((m) => (
                     <Link key={m.id} to={`/sorties/${m.sortieId}`} aria-label={`${estVideo(m.url) ? 'Vidéo' : 'Photo'} de la sortie « ${m.sortieNom} »`}>
                         <Photo src={m.url} alt="" />
                     </Link>
                 ))}
-            </div>
+            </div>}
         </section>
     );
 };

@@ -97,6 +97,28 @@
   mix-blend-mode: screen;
 }
 
+/* Lampadaire au premier plan : un cœur lumineux dans la lanterne, et un halo plus large qui grésille */
+.effet--lampe-proche i { width: calc(var(--taille) * 1.4); height: calc(var(--taille) * 1.4);
+  margin: calc(var(--taille) * -0.7) 0 0 calc(var(--taille) * -0.7); }
+.effet--lampe-proche b {
+  width: calc(var(--taille) * 0.35); height: calc(var(--taille) * 0.35);
+  margin: calc(var(--taille) * -0.175) 0 0 calc(var(--taille) * -0.175);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #FFF8E0, rgb(255 220 140 / 0.8) 50%, rgb(255 200 110 / 0));
+  mix-blend-mode: screen;
+}
+
+/* Bougie au premier plan : halo plus large et plus chaud, et une petite flamme en goutte qui danse */
+.effet--flamme-proche i { width: 8em; height: 8em; margin: -4em 0 0 -4em;
+  background: radial-gradient(closest-side, rgb(255 222 150 / 0.85), rgb(255 160 60 / 0.3) 45%, rgb(255 160 60 / 0)); }
+.effet--flamme-proche b {
+  width: 0.55em; height: 1.1em; margin: -1.1em 0 0 -0.275em;
+  border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
+  background: radial-gradient(ellipse at 50% 75%, #FFF6D8 0%, #FFD27A 45%, rgb(255 150 50 / 0.6) 75%, rgb(255 150 50 / 0) 100%);
+  mix-blend-mode: screen;
+  transform-origin: 50% 100%;
+}
+
 /* (6, 22) Ruissellement : fines lignes de lumière qui descendent dans l'eau */
 .effet--ruissellement { overflow: hidden; }
 .effet--ruissellement i {
@@ -365,16 +387,27 @@
 .couche-saison i, .couche-saison b { position: absolute; display: block; }
 [data-decorations="off"] .couche-saison { display: none; }
 /* Certaines photos ne gardent que les étoiles de la nuit (ex. le parc la nuit) */
-.photo-animee--etoiles-seules .couche-saison > div:not(.s-etoiles) { display: none !important; }
+.photo-animee--etoiles-seules .couche-saison > div:not(.s-etoiles):not(.s-filante) { display: none !important; }
 /* Photo de neige : seulement les flocons (icône flocon.svg), quelle que soit la saison affichée */
-.photo-animee--flocons-seuls .couche-saison > div:not(.s-flocons) { display: none !important; }
+.photo-animee--flocons-seuls .couche-saison > div:not(.s-flocons):not(.s-etoiles):not(.s-filante) { display: none !important; }
 .photo-animee--flocons-seuls .couche-saison > .s-flocons { display: block !important; }
 /* Sur un paysage blanc, les flocons doivent se voir : plus grands, avec une ombre bleutée */
 .photo-animee--flocons-seuls .s-flocons i { width: 26px; height: 26px; filter: drop-shadow(0 0 2px rgb(40 70 120 / 0.55)); }
 .photo-animee--flocons-seuls .s-flocons i:nth-child(2n) { width: 17px; height: 17px; }
 /* Les étoiles ne scintillent QUE sur les vraies photos de nuit (choix du 2026-10-29) :
    sur une photo de coucher de soleil, elles n'ont rien à faire, même quand le thème est « nuit » */
-.photo-animee:not(.photo-animee--etoiles):not(.photo-animee--etoiles-seules) .s-etoiles { display: none !important; }
+/* Les étoiles des photos sont un effet posé dans le ciel de chaque image (effet--etoiles) :
+   l'ancienne couche, semée au hasard sur tout l'écran, tombait sur les bâtiments */
+.photo-animee .s-etoiles { display: none !important; }
+.effet--etoiles i { width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px; border-radius: 50%; background: #FFFFFF;
+  box-shadow: 0 0 4px 1px rgb(255 255 255 / 0.6); opacity: 0; }
+.effet--etoiles i:nth-child(3n) { width: 2px; height: 2px; }
+.effet--etoiles i:nth-child(5n) { width: 4px; height: 4px; box-shadow: 0 0 6px 2px rgb(255 255 255 / 0.7); }
+/* Une étoile filante, de temps en temps, sur les photos étoilées la nuit (et seulement là) */
+[data-theme="nuit"] .photo-animee--etoiles .s-filante,
+[data-theme="nuit"] .photo-animee--etoiles-seules .s-filante { display: block !important; }
+.photo-animee:not(.photo-animee--etoiles):not(.photo-animee--etoiles-seules) .s-filante { display: none !important; }
+.photo-animee--sans-filante .s-filante { display: none !important; }   /* écrans de ville : pas d'étoile filante */
 
 [data-theme="aube"] .s-brume,
 [data-theme="jour"] .s-rayons,
@@ -407,6 +440,9 @@
 
 /* (49) Nuit : étoiles qui scintillent dans le haut de l'image */
 .s-etoiles { bottom: 60% !important; }
+/* Une étoile sur trois plus petite et une sur cinq plus brillante : le ciel a de la profondeur */
+.s-etoiles i:nth-child(3n) { width: 2px; height: 2px; }
+.s-etoiles i:nth-child(5n) { width: 4px; height: 4px; box-shadow: 0 0 6px 2px rgb(255 255 255 / 0.7); }
 .s-etoiles i { width: 3px; height: 3px; border-radius: 50%; background: #FFFFFF;
   box-shadow: 0 0 4px 1px rgb(255 255 255 / 0.6); opacity: 0; }
 
@@ -443,9 +479,11 @@
 .s-guirlande i:nth-child(3n + 1) { background: #6FCB8F; box-shadow: 0 0 8px 2px rgb(111 203 143 / 0.7); }
 
 /* (60) Noël : étoile filante */
-.s-filante i { top: 10%; left: 10%; width: 140px; height: 2px;
+/* Elle file tout en haut du ciel : la zone s'arrête aux 15 % du haut de l'image, ce qui dépasse est coupé */
+.s-filante { bottom: 85% !important; overflow: hidden; }
+.s-filante i { top: 15%; left: 12%; width: 140px; height: 2px;
   background: linear-gradient(to right, rgb(255 255 255 / 0), #FFFFFF);
-  transform: rotate(18deg); opacity: 0; }
+  transform: rotate(3deg); opacity: 0; }
 
 
 /* ==========================================================================
@@ -457,6 +495,8 @@
   .effet--nuages i { animation: traverse 75s linear var(--delai, 0s) infinite; }
   .effet--lucioles i { animation: luciole var(--duree) ease-in-out var(--delai) infinite alternate; }
   .effet--flamme i { animation: vacille 1.6s steps(1, end) infinite, vacille-doux 0.8s ease-in-out infinite alternate; }
+  .effet--flamme-proche b { animation: flamme-danse 1.3s ease-in-out infinite alternate; }
+  .effet--lampe-proche b { animation: allumage 1.2s ease-out calc(var(--ordre) * 0.6s) both, gresille 3.4s steps(1, end) calc(1.2s + var(--ordre) * 0.6s) infinite; }
   .effet--ruissellement i { animation: ruisselle calc(var(--duree) * 0.35) linear var(--delai) infinite; }
   .effet--gouttes i { animation: goutte calc(var(--duree) * 0.5) ease-out var(--delai) infinite; }
   .effet--lampe i { animation: allumage 1.2s ease-out calc(var(--ordre) * 0.6s) both, respire 4s ease-in-out calc(1.2s + var(--ordre) * 0.6s) infinite alternate; }
@@ -493,14 +533,14 @@
   .s-brume i { animation: derive-lente 18s ease-in-out var(--delai, 0s) infinite alternate; }
   .s-rayons i { animation: rayon 15s ease-in-out var(--delai, 0s) infinite; }
   .s-rose { animation: respire-rose 12s ease-in-out infinite alternate; }
-  .s-etoiles i { animation: scintille var(--duree) ease-in-out var(--delai) infinite; }
+  .s-etoiles i, .effet--etoiles i { animation: scintille var(--duree) ease-in-out var(--delai) infinite; }
   .s-chute i { animation: tombe calc(var(--duree) * 2.4) linear var(--delai) infinite; }
   .s-chaleur i { animation: chaleur 3s ease-in-out infinite alternate; }
   .s-abeilles i { animation: volette var(--duree) ease-in-out var(--delai) infinite alternate; }
   .s-abeilles b { animation: battement 0.12s linear infinite alternate; }   /* battement rapide mais sans éclat lumineux */
   .s-citrouille { animation: respire 3s ease-in-out infinite alternate; }
   .s-guirlande i { animation: scintille 2.8s ease-in-out var(--delai) infinite; }
-  .s-filante i { animation: filante 9s ease-in 2s infinite; }
+  .s-filante i { animation: filante 14s ease-in 3s infinite; }   /* une seule, toutes les 14 secondes */
 }
 @media (prefers-reduced-motion: reduce) {
   .photo-effets, .couche-saison { display: none; }
@@ -511,6 +551,8 @@
 @keyframes traverse    { from { transform: translateX(0); } to { transform: translateX(450%); } }
 @keyframes luciole     { 0% { opacity: 0; transform: translate(0, 0); } 30% { opacity: 1; } 70% { opacity: 0.2; } 100% { opacity: 0.9; transform: translate(var(--dx), -2em); } }
 @keyframes vacille     { 0% { opacity: 0.85; } 20% { opacity: 1; } 45% { opacity: 0.75; } 70% { opacity: 0.95; } }
+@keyframes gresille { 0%, 100% { opacity: 1; } 41% { opacity: 0.82; } 44% { opacity: 1; } 71% { opacity: 0.9; } }
+@keyframes flamme-danse { 0% { transform: scaleY(0.9) skewX(-4deg); } 50% { transform: scaleY(1.08) skewX(3deg); } 100% { transform: scaleY(0.95) skewX(-2deg); } }
 @keyframes vacille-doux { from { transform: scale(0.94); } to { transform: scale(1.06); } }
 @keyframes ruisselle   { from { transform: translateY(0); } to { transform: translateY(450%); } }
 @keyframes goutte      { 0% { opacity: 0; transform: translate(0, 0); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), 3em); } }
@@ -545,7 +587,7 @@
 @keyframes chenillard  { 0%, 100% { opacity: 0.3; } 15% { opacity: 1; } 35% { opacity: 0.3; } }
 @keyframes confetti    { 0% { opacity: 0; transform: translate(0, 0) rotate(0) rotateY(0); } 8% { opacity: 0.95; } 90% { opacity: 0.9; } 100% { opacity: 0; transform: translate(var(--dx), 40em) rotate(540deg) rotateY(720deg); } }
 @keyframes note        { 0% { opacity: 0; transform: translate(0, 0) scale(0.6); } 20% { opacity: 0.95; } 100% { opacity: 0; transform: translate(var(--dx), -9em) scale(1.1) rotate(-12deg); } }
-@keyframes filante     { 0% { opacity: 0; transform: rotate(18deg) translateX(0); } 4% { opacity: 1; } 12% { opacity: 0; transform: rotate(18deg) translateX(60cqw); } 100% { opacity: 0; transform: rotate(18deg) translateX(60cqw); } }
+@keyframes filante     { 0% { opacity: 0; transform: rotate(3deg) translateX(0); } 4% { opacity: 1; } 12% { opacity: 0; transform: rotate(3deg) translateX(55cqw); } 100% { opacity: 0; transform: rotate(3deg) translateX(55cqw); } }
 
 
 /* ==========================================================================

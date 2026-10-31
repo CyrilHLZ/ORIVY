@@ -50,7 +50,12 @@ const Effet = ({ effet, index, src }) => {
         case 'lucioles':    // (4) lucioles au crépuscule et la nuit
             return <div className="effet effet--lucioles" style={zone(effet)}><Semis n={10} graine={g} /></div>;
         case 'flamme':      // (5, 11) lanterne, bougie
-            return <div className="effet effet--flamme" style={point(effet)}><i /></div>;
+            // proche : bougie au premier plan → halo plus grand et petite flamme qui danse (b)
+            return (
+                <div className={`effet effet--flamme${effet.proche ? ' effet--flamme-proche' : ''}`} style={point(effet)}>
+                    <i />{effet.proche && <b />}
+                </div>
+            );
         case 'jet':         // (6) jet de la fontaine
         case 'cascade':     // (22) eau de la cascade
             return <div className={`effet effet--ruissellement effet--${effet.type}`} style={zone(effet)}><Semis n={7} graine={g} /></div>;
@@ -58,7 +63,9 @@ const Effet = ({ effet, index, src }) => {
             return <div className="effet effet--gouttes" style={zone(effet)}><Semis n={12} graine={g} /></div>;
         case 'lampes':      // (8, 19, 24) réverbères qui s'allument l'un après l'autre
             return effet.points.map((p, i) => (
-                <div key={i} className="effet effet--lampe" style={{ ...point(p), '--ordre': i, '--taille': `${p.t ?? 4}em` }}><i /></div>
+                // proche : lampadaire au premier plan → la lanterne brille au centre (b) et grésille doucement
+                <div key={i} className={`effet effet--lampe${p.proche ? ' effet--lampe-proche' : ''}`}
+                     style={{ ...point(p), '--ordre': i, '--taille': `${p.t ?? 4}em` }}><i />{p.proche && <b />}</div>
             ));
         case 'statues':     // lueur dorée sur les statues, qui s'allument l'une après l'autre
             return effet.points.map((p, i) => (
@@ -118,6 +125,14 @@ const Effet = ({ effet, index, src }) => {
                     <img src={src} alt="" style={{ clipPath: `inset(${effet.y}% ${100 - effet.x - effet.l}% ${100 - effet.y - effet.h}% ${effet.x}%)` }} />
                 </div>
             );
+        case 'etoiles':     // étoiles posées dans le ciel de la photo (positions calculées : Accueil/ciel.js)
+            return (
+                <div className="effet effet--etoiles" style={{ left: 0, top: 0, width: '100%', height: '100%' }}>
+                    {effet.points.map(([x, y], i) => (
+                        <i key={i} style={{ left: `${x}%`, top: `${y}%`, '--delai': `${-hasard(i + 300) * 10}s`, '--duree': `${3 + hasard(i + 350) * 5}s` }} />
+                    ))}
+                </div>
+            );
         case 'lune':        // la pleine lune : un halo pâle qui respire doucement
             return <div className="effet effet--lune" style={{ ...point(effet), '--taille': `${effet.t ?? 8}em` }}><i /></div>;
         case 'soleil':      // le soleil couchant respire, ses rayons tournent lentement
@@ -156,7 +171,7 @@ export const CoucheSaison = () => (
         <div className="s-brume"><i /><i /></div>                                     {/* aube */}
         <div className="s-rayons"><i /><i /><i /></div>                               {/* jour */}
         <div className="s-rose" />                                                    {/* crépuscule */}
-        <div className="s-etoiles"><Semis n={16} graine={7} /></div>                  {/* nuit */}
+        <div className="s-etoiles"><Semis n={45} graine={7} /></div>                  {/* nuit : 45 étoiles, petites et grandes */}
         <div className="s-chute s-petales"><Semis n={8} graine={31} /></div>          {/* printemps */}
         <div className="s-chaleur"><i /></div>                                        {/* été */}
         <div className="s-abeilles"><Semis n={4} graine={61} enfant={<b />} /></div>  {/* été */}

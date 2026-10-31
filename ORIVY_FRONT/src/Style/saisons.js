@@ -28,9 +28,10 @@
   "use strict";
 
   var CLE = "orivy-decorations";
+  var CLE_APERCU = "orivy-saison-apercu";   // saison forcée par l'admin (« Mode hiver »), sur cet appareil
   var SAISONS = ["printemps", "ete", "automne", "hiver", "halloween", "noel"];
   var racine = document.documentElement;
-  var saisonForcee = null; // sélecteur des maquettes uniquement
+  var saisonForcee = lireApercu();
 
   /* Ordre des catégories sur l'accueil selon la saison (brief 6.2).
      Clés = celles des variables --cat-… de design-system.css. */
@@ -53,6 +54,15 @@
     if (mmjj >= 621 && mmjj <= 922) return "ete";
     if (mmjj >= 923 && mmjj <= 1220) return "automne";
     return "hiver";
+  }
+
+  function lireApercu() {
+    try {
+      var s = localStorage.getItem(CLE_APERCU);
+      return SAISONS.indexOf(s) !== -1 ? s : null;
+    } catch (e) {
+      return null;
+    }
   }
 
   function lireDecorations() {
@@ -93,10 +103,16 @@
     ordreCategories: function () {
       return (ORDRES[racine.getAttribute("data-saison")] || ORDRES.defaut).slice();
     },
-    /* Maquettes uniquement : apercu("noel"), apercu(null) pour revenir à la date réelle */
+    /* Aperçu d'une saison (maquettes, « Mode hiver » de l'admin) : apercu("hiver"),
+       apercu(null) pour revenir à la date réelle. Retenu sur cet appareil. */
     apercu: function (saison) {
       saisonForcee = SAISONS.indexOf(saison) !== -1 ? saison : null;
+      try {
+        if (saisonForcee) localStorage.setItem(CLE_APERCU, saisonForcee);
+        else localStorage.removeItem(CLE_APERCU);
+      } catch (e) { /* visite seulement */ }
       appliquer();
-    }
+    },
+    apercuActif: function () { return saisonForcee; }
   };
 })();

@@ -692,6 +692,37 @@
 .statut--attente { color: var(--couleur-texte-doux); }
 .tableau__actions { display: flex; gap: var(--espace-1); justify-content: flex-end; }
 .tableau__actions .bouton--danger { width: var(--cible-min); padding: 0; }
+
+/* Admin : la flèche tourne quand le détail est ouvert ; le détail se déroule sous la ligne */
+.tableau__deplier .icone { transition: transform var(--duree-normale) var(--courbe-sortie); }
+.tableau__deplier[aria-expanded="true"] .icone { transform: rotate(180deg); }
+.tableau__detail > td { padding: 0 var(--espace-4) var(--espace-4); }
+.detail-point {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr 1fr;   /* image · carte · catégorie */
+  gap: var(--espace-4);
+  align-items: start;
+  padding: var(--espace-4);
+  border-radius: var(--rayon-petit);
+  background: var(--couleur-surface-creux);
+  transform-origin: top;
+}
+.detail-point .photo { aspect-ratio: 4 / 3; border-radius: var(--rayon-petit); }
+.detail-point p { margin: var(--espace-2) 0 0; font-size: var(--taille-s); }
+.detail-point__carte .leaflet-container { aspect-ratio: 4 / 3; border-radius: var(--rayon-petit); z-index: 0; }
+.detail-point__infos { display: flex; flex-direction: column; align-items: flex-start; gap: var(--espace-2); }
+.detail-point__infos h3 { margin: 0; font-size: var(--taille-l); }
+.detail-point__infos p { margin: 0; }
+@media (max-width: 767px) {
+  .detail-point { grid-template-columns: 1fr; }
+  .tableau .tableau__detail { padding: 0; background: none; box-shadow: none; }
+  .tableau .tableau__detail > td { display: block; padding: 0; }
+  .tableau .tableau__detail > td::before { display: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .detail-point { animation: deroule 0.35s var(--courbe-sortie) both; }
+}
+@keyframes deroule { from { opacity: 0; transform: scaleY(0.6) translateY(-8px); } to { opacity: 1; transform: none; } }
 @media (max-width: 767px) {
   .tableau thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
   .tableau, .tableau tbody, .tableau tr, .tableau td { display: block; }

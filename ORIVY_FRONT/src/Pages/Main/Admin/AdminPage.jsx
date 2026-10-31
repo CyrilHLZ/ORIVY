@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { deletePoint, getMapData } from '../../../Services/Carte/CarteService.js';
 import { getSorties } from '../../../Services/Sortie/SortieService.js';
@@ -11,6 +11,7 @@ import { EtatErreur, EtatVide } from '../../../Composants/Etats.jsx';
 import FenetreConfirmation from '../../../Composants/Fenetre.jsx';
 import FenetreLieu from '../../../Composants/FenetreLieu.jsx';
 import Signalements from './Signalements.jsx';
+import DetailPoint from './DetailPoint.jsx';
 
 /*
  * Administration des lieux (maquette design/maquettes/admin.html).
@@ -31,6 +32,7 @@ const AdminPage = () => {
     const [edition, setEdition] = useState(null);       // null = fermé ; {} = ajout ; point = modification
     const [aSupprimer, setASupprimer] = useState(null);
     const [message, setMessage] = useState(null);
+    const [deplie, setDeplie] = useState(null);         // id du lieu dont le détail est ouvert sous sa ligne
 
     const charger = () => {
         setChargement(true);
@@ -137,8 +139,10 @@ const AdminPage = () => {
                             </thead>
                             <tbody>
                                 {pageVisible.map((p) => (
-                                    // data-label : sert d'intitulé quand le tableau devient des cartes sur mobile
-                                    <tr key={p.id}>
+                                    // Fragment : une ligne + (si dépliée) la ligne de détail juste en dessous
+                                    <Fragment key={p.id}>
+                                    {/* data-label : sert d'intitulé quand le tableau devient des cartes sur mobile */}
+                                    <tr className={deplie === p.id ? 'tableau__ligne--ouverte' : undefined}>
                                         <td data-label="Lieu"><Link to={`/carte?lieu=point-${p.id}`}>{p.nom}</Link></td>
                                         <td data-label="Catégorie"><BadgeCategorie cle={p.type} /></td>
                                         <td data-label="Adresse">{p.adresse || <span className="texte-doux">—</span>}</td>
@@ -147,6 +151,12 @@ const AdminPage = () => {
                                         </td>
                                         <td data-label="Actions">
                                             <div className="tableau__actions">
+                                                <button className="bouton bouton--icone tableau__deplier" type="button"
+                                                        aria-expanded={deplie === p.id} aria-controls={`detail-${p.id}`}
+                                                        aria-label={`${deplie === p.id ? 'Replier' : 'Voir'} le détail de ${p.nom}`}
+                                                        onClick={() => setDeplie(deplie === p.id ? null : p.id)}>
+                                                    <Icone nom="chevron-bas" />
+                                                </button>
                                                 <button className="bouton bouton--icone" type="button" aria-label={`Modifier ${p.nom}`} onClick={() => setEdition(p)}>
                                                     <Icone nom="modifier" />
                                                 </button>
@@ -156,6 +166,12 @@ const AdminPage = () => {
                                             </div>
                                         </td>
                                     </tr>
+                                    {deplie === p.id && (
+                                        <tr className="tableau__detail" id={`detail-${p.id}`}>
+                                            <td colSpan={5}><DetailPoint point={p} onModifier={() => setEdition(p)} /></td>
+                                        </tr>
+                                    )}
+                                    </Fragment>
                                 ))}
                             </tbody>
                         </table>
