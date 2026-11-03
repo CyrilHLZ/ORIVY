@@ -1,4 +1,5 @@
 import Icone from './Icone.jsx';
+import EmojiCategorie from './EmojiCategorie.jsx';
 import { categorie } from '../Constants/categories.js';
 import { formaterDistance } from '../Utils/proximite.js';
 import Compteur from './Compteur.jsx';
@@ -13,7 +14,7 @@ export const BadgeCategorie = ({ cle }) => {
     const cat = categorie(cle);
     return (
         <span className={`badge-cat cat-${cat.cle}`}>
-            <Icone nom={`cat-${cat.cle}`} />
+            <EmojiCategorie cle={cat.cle} />
             {cat.nom}
         </span>
     );

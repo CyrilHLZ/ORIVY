@@ -1,0 +1,35 @@
+# =====================================================================
+# Caddy : le serveur web d'ORIVY en ligne.
+# {$ORIVY_SITE} vient de .env.prod : « orivy.fr » en ligne (HTTPS automatique),
+# « :80 » pour un essai sur ton PC (HTTP simple).
+# =====================================================================
+{$ORIVY_SITE} {
+	encode zstd gzip
+
+	# L'API et les fichiers des membres : transmis au back (même adresse que le site → pas de CORS)
+	handle /api/* {
+		reverse_proxy back:8081
+	}
+
+	# Le site React : les fichiers de dist/ ; toute autre adresse (/carte, /sorties/12…) renvoie
+	# index.html, et c'est React Router qui affiche la bonne page
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+
+	# Les fichiers construits ont un nom unique (index-BmOQ.js) : on peut les garder un an.
+	# Le service worker et index.html, eux, doivent toujours être relus.
+	@immuables path /assets/*
+	header @immuables Cache-Control "public, max-age=31536000, immutable"
+	@frais path /sw.js /index.html /manifest.webmanifest
+	header @frais Cache-Control "no-cache"
+
+	# Protections de base
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}

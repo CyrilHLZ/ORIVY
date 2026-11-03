@@ -1,11 +1,14 @@
 package fr.orivy.Orivy.Service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -53,6 +56,9 @@ public class FichierService {
         if (video && fichier.getSize() > MAX_VIDEO) {
             throw new ResponseStatusException(HttpStatus.CONTENT_TOO_LARGE, "La vidéo ne doit pas dépasser 50 Mo (1 minute en 720p).");
         }
+        if (!signatureValide(fichier, type)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ce fichier n'est pas une vraie image ou vidéo.");
+        }
 
         // Nom inventé par le back : on n'utilise JAMAIS le nom envoyé par le navigateur
         String nom = prefixe + "-" + UUID.randomUUID() + "." + EXTENSIONS.get(type);
@@ -61,5 +67,30 @@ public class FichierService {
         fichier.transferTo(cible.resolve(nom));
         return "/api/fichiers/" + sousDossier + "/" + nom;
     }
+
+    private static boolean signatureValide(MultipartFile fichier, String type) throws IOException {
+        byte[] tete = new byte[16];
+        try (InputStream in = fichier.getInputStream()) {
+            tete = Arrays.copyOf(tete, in.readNBytes(tete, 0, tete.length));
+        }
+        return switch (type) {
+            case "image/jpeg"     -> octets(tete, 0, 0xFF, 0xD8, 0xFF);                                   // JPEG
+            case "image/png"      -> octets(tete, 0, 0x89, 0x50, 0x4E, 0x47);                             // .PNG
+            case "image/webp"     -> octets(tete, 0, 0x52, 0x49, 0x46, 0x46) && octets(tete, 8, 0x57, 0x45, 0x42, 0x50); // RIFF…WEBP
+            case "video/mp4",
+                 "video/quicktime" -> octets(tete, 4, 0x66, 0x74, 0x79, 0x70);                            // ….ftyp (MP4 et MOV)
+            case "video/webm"     -> octets(tete, 0, 0x1A, 0x45, 0xDF, 0xA3);                             // EBML (Matroska/WebM)
+            default               -> false;
+        };
+    }
+
+    private static boolean octets(byte[] tete, int debut, int... attendus) {
+        if (tete.length < debut + attendus.length) return false;
+        for (int i = 0; i < attendus.length; i++) {
+            if ((tete[debut + i] & 0xFF) != attendus[i]) return false;
+        }
+        return true;
+    }
+
 }
 

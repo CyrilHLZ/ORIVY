@@ -1,22 +1,15 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { login as loginRequest } from '../Services/Utilisateur/UtilisateurService.js';
-import { effacerJeton, enregistrerJeton, jetonExpire, lireJeton } from '../Services/jeton.js';
+import { login as loginRequest, deconnexion as deconnexionRequest } from '../Services/Utilisateur/UtilisateurService.js';
 
 const STORAGE_KEY = 'orivy.user';
 const AuthContext = createContext(null);
 
+// Le jeton est dans un cookie HttpOnly (invisible au JS) : ici on ne garde que le membre,
+// qui n'est pas secret. Si le cookie a expiré, la 1re requête protégée renverra 401 → déconnexion.
 const readStoredUser = () => {
-    const jeton = lireJeton();
-
-    if (!jeton || jetonExpire(jeton)) {
-        effacerJeton();
-        localStorage.removeItem(STORAGE_KEY);
-        return null;
-    }
-
     try {
-        const storedUser = localStorage.getItem(STORAGE_KEY);
-        return storedUser ? JSON.parse(storedUser) : null;
+        const stocke = localStorage.getItem(STORAGE_KEY);
+        return stocke ? JSON.parse(stocke) : null;
     } catch {
         localStorage.removeItem(STORAGE_KEY);
         return null;
@@ -27,15 +20,14 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(readStoredUser);
 
     const login = async (credentials) => {
-        const { token, utilisateur } = await loginRequest(credentials);
-        enregistrerJeton(token);
+        const utilisateur = await loginRequest(credentials);   // le back renvoie le membre et pose le cookie
         setUser(utilisateur);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(utilisateur));
         return utilisateur;
     };
 
     const logout = () => {
-        effacerJeton();               // ← nouveau
+        deconnexionRequest().catch(() => {});   // demande au back d'effacer le cookie (sans bloquer)
         setUser(null);
         localStorage.removeItem(STORAGE_KEY);
         window.orivySaison?.apercu(null);   // l'aperçu « Mode hiver » de l'admin ne survit pas à la déconnexion
@@ -44,7 +36,6 @@ export const AuthProvider = ({ children }) => {
     // api.js signale un jeton refusé : on déconnecte
     useEffect(() => {
         const surExpiration = () => {
-            effacerJeton();
             localStorage.removeItem(STORAGE_KEY);
             setUser(null);
         };

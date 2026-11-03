@@ -17,8 +17,7 @@ const DetailPoint = ({ point, onModifier }) => {
     return (
         <div className={`detail-point cat-${cat.cle}`}>
             <div className="detail-point__image">
-                <Photo src={point.imageUrl || cat.image} alt={point.imageUrl ? `Photo de ${point.nom}` : ''} cle={cat.cle} />
-                {!point.imageUrl && <p className="texte-doux">Pas d'image : la photo de la catégorie est utilisée.</p>}
+                <Photo src={point.imageUrl} alt={point.imageUrl ? `Photo de ${point.nom}` : ''} cle={cat.cle} attente />
             </div>
 
             <div className="detail-point__carte">

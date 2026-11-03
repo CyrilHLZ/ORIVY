@@ -3,6 +3,7 @@ import { useLieux } from '../../../Hooks/useLieux.js';
 import { LISTE_CATEGORIES, categorie } from '../../../Constants/categories.js';
 import Bouton from '../../../Composants/Bouton.jsx';
 import Icone from '../../../Composants/Icone.jsx';
+import EmojiCategorie from '../../../Composants/EmojiCategorie.jsx';
 import CarteSortie from '../../../Composants/CarteSortie.jsx';
 import Photo, { estVideo } from '../../../Composants/Photo.jsx';
 import { Champ } from '../../../Composants/Formulaire.jsx';
@@ -132,7 +133,7 @@ const FormulaireSortie = ({ initial, texteValider, onValider, onAnnuler, enPlus 
                             <label key={c.cle} className={`cat-${c.cle}`}>
                                 <input type="radio" name="categorie" value={c.cle}
                                        checked={sortie.categorie === c.cle} onChange={() => modifier('categorie', c.cle)} />
-                                <span className="puce"><Icone nom={`cat-${c.cle}`} />{c.nom}</span>
+                                <span className="puce"><EmojiCategorie cle={c.cle} />{c.nom}</span>
                             </label>
                         ))}
                     </div>

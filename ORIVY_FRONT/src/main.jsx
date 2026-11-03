@@ -23,3 +23,9 @@ createRoot(document.getElementById('root')).render(
         <App />
     </StrictMode>,
 );
+
+// Service worker (public/sw.js) : seulement sur le site construit (npm run build), pas pendant le développement,
+// sinon il garderait d'anciennes versions des fichiers et Vite ne pourrait plus recharger la page
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+}

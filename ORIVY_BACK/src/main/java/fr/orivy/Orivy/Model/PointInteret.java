@@ -1,5 +1,9 @@
 package fr.orivy.Orivy.Model;
 
+import java.time.LocalDate;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -32,6 +36,19 @@ public class PointInteret {
     private String imageSource;
     @Column(columnDefinition = "TEXT")
     private String imageLicence;
+    // Lieux importés ('monuments-historiques'…) : null pour les lieux saisis dans ORIVY
+    private String source;
+    @JsonIgnore
+    private String idExterne;
+    @JsonIgnore
+    private String majExterne;
+    private LocalDate dateFin;
+    // Lieu importé supprimé par l'admin : caché, et l'import ne le recrée pas
+    @JsonIgnore
+    private boolean masque;
+    // Photo changée ou retirée par l'admin : l'import ne la remplace plus
+    @JsonIgnore
+    private boolean photoChoisie;
 
     public PointInteret() {
     }
@@ -57,4 +74,16 @@ public class PointInteret {
     public void setImageSource(String imageSource) { this.imageSource = imageSource; }
     public String getImageLicence() { return imageLicence; }
     public void setImageLicence(String imageLicence) { this.imageLicence = imageLicence; }
+    public String getSource() { return source; }
+    public void setSource(String source) { this.source = source; }
+    public String getIdExterne() { return idExterne; }
+    public void setIdExterne(String idExterne) { this.idExterne = idExterne; }
+    public String getMajExterne() { return majExterne; }
+    public void setMajExterne(String majExterne) { this.majExterne = majExterne; }
+    public LocalDate getDateFin() { return dateFin; }
+    public void setDateFin(LocalDate dateFin) { this.dateFin = dateFin; }
+    public boolean isMasque() { return masque; }
+    public void setMasque(boolean masque) { this.masque = masque; }
+    public boolean isPhotoChoisie() { return photoChoisie; }
+    public void setPhotoChoisie(boolean photoChoisie) { this.photoChoisie = photoChoisie; }
 }

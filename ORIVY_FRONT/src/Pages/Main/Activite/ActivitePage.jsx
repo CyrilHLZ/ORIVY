@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useLieux } from '../../../Hooks/useLieux.js';
+import { avecNote, normaliserPoint, useLieux } from '../../../Hooks/useLieux.js';
+import { getAutour } from '../../../Services/Carte/CarteService.js';
 import { LISTE_CATEGORIES } from '../../../Constants/categories.js';
 import { demanderPosition, distanceKm, trouverVille } from '../../../Utils/proximite.js';
 import Bouton from '../../../Composants/Bouton.jsx';
@@ -15,9 +16,11 @@ import { Chargement, EtatErreur, EtatVide } from '../../../Composants/Etats.jsx'
  * Sans position : tous les lieux, triés du plus récent au plus ancien.
  * Avec position (GPS ou ville tapée) : distance sur chaque carte, filtre de
  * rayon actif, tri « plus proche » par défaut.
+ * Avec une position, les lieux importés (Monuments historiques…) du rayon s'ajoutent :
+ * ils sont trop nombreux pour « partout en France ».
  */
 const ActivitePage = () => {
-    const { lieux, chargement, erreur, recharger } = useLieux();
+    const { lieux: lieuxOrivy, chargement, erreur, recharger, notes } = useLieux();
 
     // La catégorie est dans l'adresse (?cat=parc) : on peut partager un lien filtré,
     // et les boutons de l'accueil « Vois les parcs » arrivent directement filtrés
@@ -38,6 +41,18 @@ const ActivitePage = () => {
     const [affiches, setAffiches] = useState(PAQUET);
     // Quand un filtre change, on repart du premier paquet
     useEffect(() => { setAffiches(PAQUET); }, [cat, position, rayon, tri]);
+
+    /* Lieux importés dans le rayon (seulement quand une position est choisie) */
+    const [lieuxAutour, setLieuxAutour] = useState([]);
+    useEffect(() => {
+        if (!position) { setLieuxAutour([]); return undefined; }
+        let annule = false;
+        getAutour(position, rayon, cat)
+            .then((points) => { if (!annule) setLieuxAutour(points.map((p) => avecNote(normaliserPoint(p), notes))); })
+            .catch(() => {});   // sans eux, la liste garde les lieux d'ORIVY
+        return () => { annule = true; };
+    }, [position, rayon, cat, notes]);
+    const lieux = useMemo(() => [...lieuxOrivy, ...lieuxAutour], [lieuxOrivy, lieuxAutour]);
 
     const definirPosition = (pos, nom) => {
         setPosition({ ...pos, nom });

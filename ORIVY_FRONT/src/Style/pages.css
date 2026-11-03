@@ -169,6 +169,16 @@
   color: var(--cat-texte);
   stroke-width: 2.4;
 }
+/* Emoji au centre de la goutte de l'épingle (remplace l'icône SVG) */
+.epingle-emoji {
+  position: absolute;
+  top: var(--espace-3);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--espace-5);
+  line-height: 1;
+}
+.choix-categorie .emoji-cat { font-size: 1.1rem; }
 .epingle--active { transform: scale(1.3); z-index: 1000 !important; }
 .leaflet-marker-icon:focus-visible { outline: none; }
 .leaflet-marker-icon:focus-visible .epingle { transform: scale(1.3); }
@@ -204,6 +214,8 @@
    au-dessus des outils posés sur la carte (z-index 1000) */
 .page-carte .entete .deco-coin { display: none; }
 .page-carte .toast { z-index: 1200; }
+/* L'en-tête (et le menu du profil qui s'ouvre dessous) passe au-dessus de la recherche et des catégories (1000) */
+.page-carte .entete { z-index: 1050; }
 
 /* Vue éloignée de la carte : un petit point par lieu, de la couleur de sa catégorie
    (la classe cat-xxx est posée sur le cercle SVG lui-même, qui reçoit donc --cat) */
@@ -556,6 +568,22 @@
 /* Profil : « Supprimer mon compte », séparé du reste par un trait */
 .zone-danger { padding-top: var(--espace-4); border-top: 1px solid var(--couleur-bordure); }
 .zone-danger h3 { color: var(--couleur-danger); }
+
+/* Pages légales : texte long, lisible (ligne de 70 caractères au plus) */
+.page-legale { max-width: 72ch; padding-bottom: var(--espace-8); }
+.page-legale section { scroll-margin-top: calc(var(--hauteur-entete) + var(--espace-4)); }
+.page-legale h2 { font-size: var(--taille-xl); margin: var(--espace-6) 0 var(--espace-2); }
+.page-legale ul { padding-left: var(--espace-5); display: flex; flex-direction: column; gap: var(--espace-2); }
+.page-legale__sommaire ol { margin: 0; padding-left: var(--espace-5); display: grid; gap: var(--espace-1); }
+.page-legale__autres, .pied-legal { display: flex; flex-wrap: wrap; gap: var(--espace-2) var(--espace-5); margin-top: var(--espace-7); font-size: var(--taille-s); }
+.pied-legal { justify-content: center; padding-block: var(--espace-5); color: var(--couleur-texte-doux); }
+.pied-legal a, .liens-legaux a { color: inherit; }
+
+/* Admin : gestion des catégories */
+.liste-categories { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.liste-categories li { display: flex; align-items: center; gap: var(--espace-3); padding: var(--espace-2) 0; border-top: 1px solid var(--couleur-bordure); }
+.pastille-couleur { width: var(--espace-4); height: var(--espace-4); border-radius: var(--rayon-pilule); flex-shrink: 0; box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.1); }
+.champ__couleur { height: var(--cible-min); padding: var(--espace-1); cursor: pointer; }
 
 /* Admin : signalements à traiter */
 .liste-signalements { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--espace-3); }

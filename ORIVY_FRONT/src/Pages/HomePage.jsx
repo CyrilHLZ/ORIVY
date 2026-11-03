@@ -7,6 +7,7 @@ import { BadgeCategorie } from '../Composants/Badges.jsx';
 import { EtatVide } from '../Composants/Etats.jsx';
 import { ECRANS, FRAGMENT_ARBRE, INTRO, ecranDuMoment } from './EcransAccueil.js';
 import PhotoAnimee from './Accueil/PhotoAnimee.jsx';
+import { Link } from 'react-router-dom';
 import Icone from '../Composants/Icone.jsx';
 import Compteur from '../Composants/Compteur.jsx';
 import { useLieux } from '../Hooks/useLieux.js';
@@ -264,6 +265,13 @@ const HomePage = () => {
                     </div>
                 </div>
             </section>
+
+            {/* Pied de page : les informations légales, accessibles sans compte */}
+            <footer className="pied-legal conteneur">
+                <Link to="/mentions-legales">Mentions légales</Link>
+                <Link to="/cgu">Conditions d'utilisation</Link>
+                <Link to="/confidentialite">Confidentialité</Link>
+            </footer>
 
             {/* Indicateur de progression (ordinateur seulement, CSS).
                 Chaque point est une icône de la saison (citrouille, cadeau, flocon…) ;

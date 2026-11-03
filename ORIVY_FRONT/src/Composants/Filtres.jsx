@@ -1,4 +1,5 @@
 import Icone from './Icone.jsx';
+import EmojiCategorie from './EmojiCategorie.jsx';
 
 /*
  * <Puce actif={…} cle="parc" onClick={…}>Parcs</Puce>
@@ -13,7 +14,7 @@ export const Puce = ({ actif = false, cle, icone, children, ...autres }) => (
         aria-pressed={actif}
         {...autres}
     >
-        {(icone || cle) && <Icone nom={icone || `cat-${cle}`} />}
+        {icone ? <Icone nom={icone} /> : cle ? <EmojiCategorie cle={cle} /> : null}
         {children}
     </button>
 );

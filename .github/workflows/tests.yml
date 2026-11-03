@@ -1,0 +1,37 @@
+# Tests automatiques : à chaque push sur GitHub, le back est testé et le front construit.
+# Une croix rouge sur GitHub = quelque chose est cassé, avant même la mise en ligne.
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  back:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ORIVY_BACK
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+      - run: chmod +x mvnw && ./mvnw -q test
+
+  front:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ORIVY_FRONT
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: ORIVY_FRONT/package-lock.json
+      - run: npm ci
+      - run: npm run build

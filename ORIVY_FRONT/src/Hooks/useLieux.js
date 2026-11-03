@@ -8,19 +8,26 @@ import { getNotes } from '../Services/Commentaire/CommentaireService.js';
  * Les points d'intérêt et les activités n'ont pas les mêmes noms de champs dans le back
  * (type / categorie, adresse / lieu) : on les harmonise ici, une fois pour toutes.
  */
+export const normaliserPoint = (point) => ({
+    id: `point-${point.id}`,
+    idNum: point.id,
+    source: 'point',
+    fournisseur: point.source,   // 'monuments-historiques', 'musees-de-france' pour un lieu importé, sinon null (lieu d'ORIVY)
+    nom: point.nom,
+    description: point.description,
+    categorie: point.type,
+    lieu: point.adresse,
+    latitude: point.latitude,
+    longitude: point.longitude,
+    imageUrl: point.imageUrl,
+    dateFin: point.dateFin,
+});
+
+/* Ajoute la note d'un lieu (notes : celles renvoyées par useLieux) */
+export const avecNote = (lieu, notes) => ({ ...lieu, note: notes[lieu.id]?.moyenne ?? null, nombreAvis: notes[lieu.id]?.nombre ?? 0 });
+
 export const normaliserLieux = ({ pointsInteret = [], activites = [] }) => [
-    ...pointsInteret.map((point) => ({
-        id: `point-${point.id}`,
-        idNum: point.id,
-        source: 'point',
-        nom: point.nom,
-        description: point.description,
-        categorie: point.type,
-        lieu: point.adresse,
-        latitude: point.latitude,
-        longitude: point.longitude,
-        imageUrl: point.imageUrl,
-    })),
+    ...pointsInteret.map(normaliserPoint),
     ...activites.map((activite) => ({
         ...activite,
         id: `activite-${activite.id}`,
@@ -40,6 +47,7 @@ export const useLieux = () => {
     const [lieux, setLieux] = useState([]);
     const [chargement, setChargement] = useState(true);
     const [erreur, setErreur] = useState(null);
+    const [notes, setNotes] = useState({});   // « point-12 » → { moyenne, nombre } (aussi pour les lieux importés)
 
     // useCallback : la fonction garde la même identité d'un rendu à l'autre,
     // on peut donc la mettre dans les dépendances de useEffect sans boucle infinie
@@ -51,6 +59,7 @@ export const useLieux = () => {
             .then(([donnees, notes]) => {
                 // « point-12 » → { moyenne, nombre }
                 const parLieu = Object.fromEntries(notes.map((n) => [`${n.cibleType}-${n.cibleId}`, n]));
+                setNotes(parLieu);
                 setLieux(normaliserLieux(donnees).map((l) => ({
                     ...l, note: parLieu[l.id]?.moyenne ?? null, nombreAvis: parLieu[l.id]?.nombre ?? 0,
                 })));
@@ -62,5 +71,5 @@ export const useLieux = () => {
 
     useEffect(() => { recharger(); }, [recharger]);
 
-    return { lieux, chargement, erreur, recharger };
+    return { lieux, chargement, erreur, recharger, notes };
 };

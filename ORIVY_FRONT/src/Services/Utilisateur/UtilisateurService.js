@@ -3,6 +3,7 @@ import { apiRequest } from '../api.js';
 // Authentification
 export const register = (user) => apiRequest('/utilisateurs/inscription', { method: 'POST', body: user });
 export const login = (credentials) => apiRequest('/utilisateurs/connexion', { method: 'POST', body: credentials });
+export const deconnexion = () => apiRequest('/utilisateurs/deconnexion', { method: 'POST' });
 
 // Liste des membres (page Communauté).
 // ⚠ Le back renvoie aussi e-mail, téléphone et adresse : n'afficher QUE prénom, nom, ville.

@@ -4,20 +4,22 @@ import { Circle, CircleMarker, MapContainer, Marker, Polyline, Popup, TileLayer,
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useAuth } from '../../../Context/AuthContext.jsx';
-import { useLieux } from '../../../Hooks/useLieux.js';
-import { getPromenades, updatePoint } from '../../../Services/Carte/CarteService.js';
+import { normaliserPoint, useLieux } from '../../../Hooks/useLieux.js';
+import { deletePoint, envoyerPhotoPoint, getPoint, getPromenades, getZone, retirerPhotoPoint, updatePoint } from '../../../Services/Carte/CarteService.js';
 import { ICONES } from '../../../Composants/icones.js';
 import { LISTE_CATEGORIES, categorie } from '../../../Constants/categories.js';
 import { demanderPosition, distanceKm, formaterDistance, trouverVille, adresseDe } from '../../../Utils/proximite.js';
 import Bouton, { BoutonIcone } from '../../../Composants/Bouton.jsx';
 import Icone from '../../../Composants/Icone.jsx';
 import Photo from '../../../Composants/Photo.jsx';
+import EmojiCategorie from '../../../Composants/EmojiCategorie.jsx';
 import { BadgeCategorie } from '../../../Composants/Badges.jsx';
 import { Champ } from '../../../Composants/Formulaire.jsx';
 import BoutonFavori from '../../../Composants/BoutonFavori.jsx';
 import FenetreLieu from '../../../Composants/FenetreLieu.jsx';
 import { ChoixSegmente, OPTIONS_RAYON, Puce, Puces } from '../../../Composants/Filtres.jsx';
 import AvisLieu from '../../../Composants/AvisLieu.jsx';
+import FenetreConfirmation from '../../../Composants/Fenetre.jsx';
 
 /*
  * Page Carte (maquette design/maquettes/carte.html) :
@@ -27,7 +29,8 @@ import AvisLieu from '../../../Composants/AvisLieu.jsx';
  *   - clic sur une épingle : tiroir de détail (monte du bas sur mobile) ;
  *   - à l'arrivée, une fenêtre demande les catégories à afficher (765 lieux d'un coup, c'est illisible) ;
  *   - les promenades sont tracées (ligne) avec la catégorie « Randonnées » ;
- *   - admin : « Ajouter un lieu », puis clic sur la carte → fenêtre pré-remplie (coordonnées + adresse).
+ *   - admin : « Ajouter un lieu », puis clic sur la carte → fenêtre pré-remplie (coordonnées + adresse) ;
+ *   - de près (zoom 12 et plus), les lieux importés (Monuments historiques…) de la zone affichée s'ajoutent.
  * Adresses comprises :
  *   /carte?cat=parc                 → filtre une catégorie
  *   /carte?lieu=point-12            → ouvre la fiche d'un lieu (liens des cartes de lieu)
@@ -50,7 +53,7 @@ const iconeEpingle = (cle, active) => {
             html:
                 `<div class="epingle cat-${cle}${active ? ' epingle--active' : ''}">` +
                 '<svg class="goutte" viewBox="0 0 48 60" aria-hidden="true"><path d="M24 58 C24 58 4 36 4 22 A20 20 0 0 1 44 22 C44 36 24 58 24 58 Z"/></svg>' +
-                `<svg class="icone" viewBox="0 0 24 24" aria-hidden="true">${ICONES[`cat-${cle}`] || ''}</svg>` +
+                `<span class="epingle-emoji" aria-hidden="true">${categorie(cle).emoji || ''}</span>` +
                 '</div>',
         });
     }
@@ -85,6 +88,14 @@ const SuiviZoom = ({ onZoom }) => {
     return null;
 };
 
+/* ---- Suit la zone affichée (pour charger les lieux importés qui s'y trouvent) ---- */
+const SuiviZone = ({ onZone }) => {
+    const ecouteurs = useMemo(() => ({ moveend: (e) => onZone(e.target.getBounds()) }), [onZone]);
+    const carte = useMapEvents(ecouteurs);
+    useEffect(() => { onZone(carte.getBounds()); }, [carte, onZone]);
+    return null;
+};
+
 /* ---- Mode « ajout d'un lieu » (admin) : un clic sur la carte donne ses coordonnées ---- */
 const ClicCarte = ({ onClic }) => {
     const ecouteurs = useMemo(() => ({ click: (e) => onClic(e.latlng) }), [onClic]);
@@ -94,6 +105,8 @@ const ClicCarte = ({ onClic }) => {
 
 /* En dessous de ce zoom, les épingles s'empileraient : on montre de petits points */
 const ZOOM_EPINGLES = 9;
+/* Lieux importés : des dizaines de milliers en France, on ne les charge que de près */
+const ZOOM_OFFICES = 12;
 
 /* Dernier choix de catégories, retrouvé à la visite suivante (sur cet appareil seulement) */
 const CLE_CHOIX = 'orivy.carte.categories';
@@ -141,7 +154,7 @@ const ChoixCategories = ({ ouverte, choix, nombres, onValider, onFermer }) => {
                 {LISTE_CATEGORIES.filter((c) => c.cle !== 'autre').map((c) => (
                     <label key={c.cle} className={`choix-categorie cat-${c.cle}`}>
                         <input type="checkbox" className="visuellement-cache" checked={coches.includes(c.cle)} onChange={() => basculer(c.cle)} />
-                        <Icone nom={`cat-${c.cle}`} />{c.pluriel}
+                        <EmojiCategorie cle={c.cle} />{c.pluriel}
                     </label>
                 ))}
             </fieldset>
@@ -178,6 +191,8 @@ const CartePage = () => {
     const marqueurs = useRef({});   // id du lieu → marqueur Leaflet (pour rendre le focus)
     const [placement, setPlacement] = useState(false);   // admin : « clique sur la carte »
     const [nouveauLieu, setNouveauLieu] = useState(null); // ouvre FenetreLieu pré-remplie
+    const [zone, setZone] = useState(null);               // limites de la carte affichée
+    const [lieuxZone, setLieuxZone] = useState([]);       // lieux importés de cette zone
 
     /* Cette page occupe tout l'écran : classe sur <body> (voir pages.css) */
     useEffect(() => {
@@ -192,10 +207,23 @@ const CartePage = () => {
         return () => clearTimeout(minuteur);
     }, [message]);
 
+    /* Lieux importés de la zone affichée, rechargés après chaque déplacement.
+       Le minuteur attend que la carte s'arrête ; « annule » ignore une réponse arrivée trop tard. */
+    useEffect(() => {
+        if (!zone || zoom < ZOOM_OFFICES) { setLieuxZone([]); return undefined; }
+        let annule = false;
+        const minuteur = setTimeout(() => {
+            getZone({ nord: zone.getNorth(), sud: zone.getSouth(), est: zone.getEast(), ouest: zone.getWest() }, actives)
+                .then((points) => { if (!annule) setLieuxZone(points.map(normaliserPoint)); })
+                .catch(() => {});   // sans eux, la carte garde les lieux d'ORIVY
+        }, 300);
+        return () => { annule = true; clearTimeout(minuteur); };
+    }, [zone, zoom, actives]);
+
     /* Lieux visibles selon les catégories cochées (aucune = toutes) */
     const visibles = useMemo(
-        () => lieux.filter((l) => l.latitude != null && (actives.length === 0 || actives.includes(l.categorie))),
-        [lieux, actives],
+        () => [...lieux, ...lieuxZone].filter((l) => l.latitude != null && (actives.length === 0 || actives.includes(l.categorie))),
+        [lieux, lieuxZone, actives],
     );
 
     const basculerCategorie = (cle) => setActives((liste) => (liste.includes(cle) ? liste.filter((c) => c !== cle) : [...liste, cle]));
@@ -287,8 +315,11 @@ const CartePage = () => {
     useEffect(() => {
         const demande = parametres.get('lieu');
         if (!demande || lieux.length === 0) return;
+        const montrer = (lieu) => { setSelection(lieu); setVue({ centre: [lieu.latitude, lieu.longitude], zoom: 13 }); };
         const lieu = lieux.find((l) => l.id === demande);
-        if (lieu) { setSelection(lieu); setVue({ centre: [lieu.latitude, lieu.longitude], zoom: 13 }); }
+        if (lieu) montrer(lieu);
+        // Un lieu importé n'est pas dans la liste : on le demande au back
+        else if (demande.startsWith('point-')) getPoint(demande.slice(6)).then((p) => montrer(normaliserPoint(p))).catch(() => {});
     }, [lieux, parametres]);
 
     /* Arrivée avec ?lat=…&lng=…&nom=… (ex. depuis une sortie) */
@@ -302,6 +333,21 @@ const CartePage = () => {
     useEffect(() => { if (repere) setVue({ centre: repere.centre, zoom: 15 }); }, [repere]);
 
     const km = (l) => (position ? distanceKm(position.lat, position.lng, l.latitude, l.longitude) : null);
+
+    /* Admin : la photo d'un lieu a changé → on remplace le lieu partout où il est affiché */
+    const photoChangee = (point) => {
+        const lieu = normaliserPoint(point);
+        setSelection(lieu);
+        setLieuxZone((liste) => liste.map((l) => (l.id === lieu.id ? lieu : l)));
+        if (!lieu.fournisseur) recharger();
+    };
+    /* Admin : lieu supprimé → la fiche se ferme et l'épingle disparaît */
+    const lieuSupprime = (lieu) => {
+        setSelection(null);
+        setLieuxZone((liste) => liste.filter((l) => l.id !== lieu.id));
+        recharger();
+        setMessage(`« ${lieu.nom} » est supprimé.`);
+    };
 
     return (
         <main className={placement ? "carte-zone carte-zone--placement" : "carte-zone"}>
@@ -322,6 +368,7 @@ const CartePage = () => {
                 <ZoomControl position="bottomleft" />
                 <PiloteCarte vue={vue} />
                 <SuiviZoom onZoom={setZoom} />
+                <SuiviZone onZone={setZone} />
 
                 {/* Promenades : une ligne qui relie les points de l'itinéraire, clic = fiche */}
                 {promenadesVisibles.map((p) => {
@@ -426,10 +473,15 @@ const CartePage = () => {
                     <DetailLieu
                         lieu={selection}
                         km={km(selection)}
-                        modifiable={isAdmin && selection.source === 'point'}
+                        // Un lieu importé est réécrit à chaque import : on ne le modifie pas ici
+                        modifiable={isAdmin && selection.source === 'point' && !selection.fournisseur}
                         onFermer={fermer}
                         onModifie={() => { recharger(); setMessage('Point enregistré.'); }}
                         onAvis={recharger}
+                        // Photo et suppression : tous les points (importés compris), pas les activités
+                        gerable={isAdmin && selection.source === 'point'}
+                        onPhoto={photoChangee}
+                        onSupprime={lieuSupprime}
                     />
                 )}
             </aside>
@@ -455,9 +507,40 @@ const CartePage = () => {
 };
 
 /* ---- Contenu du tiroir : fiche d'un lieu (+ modification pour les admins) ---- */
-const DetailLieu = ({ lieu, km, modifiable, onFermer, onModifie, onAvis }) => {
+const DetailLieu = ({ lieu, km, modifiable, gerable, onFermer, onModifie, onAvis, onPhoto, onSupprime }) => {
     const [edition, setEdition] = useState(null);   // null = lecture ; objet = formulaire ouvert
     const [statut, setStatut] = useState('');
+    const [confirmation, setConfirmation] = useState(false);   // fenêtre « Supprimer ce lieu ? »
+
+    /* Admin : nouvelle photo (fichier choisi sur l'appareil) */
+    const changerPhoto = async (event) => {
+        const fichier = event.target.files[0];
+        event.target.value = '';   // permet de rechoisir le même fichier
+        if (!fichier) return;
+        try {
+            onPhoto(await envoyerPhotoPoint(lieu.idNum, fichier));
+            setStatut('');
+        } catch (e) {
+            setStatut(e.message);
+        }
+    };
+    const retirerPhoto = async () => {
+        try {
+            onPhoto(await retirerPhotoPoint(lieu.idNum));
+            setStatut('');
+        } catch (e) {
+            setStatut(e.message);
+        }
+    };
+    const supprimer = async () => {
+        setConfirmation(false);
+        try {
+            await deletePoint(lieu.idNum);
+            onSupprime(lieu);
+        } catch (e) {
+            setStatut(e.message);
+        }
+    };
 
     const enregistrer = async (event) => {
         event.preventDefault();
@@ -485,13 +568,24 @@ const DetailLieu = ({ lieu, km, modifiable, onFermer, onModifie, onAvis }) => {
                         <BoutonIcone icone="fermer" label="Fermer la fiche du lieu" onClick={onFermer} />
                     </span>
                 </div>
-                <Photo src={lieu.imageUrl || categorie(lieu.categorie).image} alt="" cle={lieu.categorie} paresseuse={false} />
+                <Photo src={lieu.imageUrl} alt="" cle={lieu.categorie} paresseuse={false} attente />
                 <h2 id="tiroir-titre">{lieu.nom}</h2>
                 <div className="detail-lieu__infos">
                     {lieu.lieu && <span className="badge-distance"><Icone nom="epingle" />{lieu.lieu}</span>}
                     {km != null && <span className="badge-distance"><Icone nom="autour" />{formaterDistance(km)}</span>}
                 </div>
                 {lieu.description && <p className="texte-doux" style={{ margin: 0 }}>{lieu.description}</p>}
+                {lieu.dateFin && <p className="texte-doux" style={{ margin: 0 }}>Jusqu'au {new Date(lieu.dateFin).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}</p>}
+                {lieu.fournisseur === 'monuments-historiques' && (
+                    <p className="texte-doux" style={{ margin: 0, fontSize: 'var(--taille-xs)' }}>
+                        Source : ministère de la Culture, <a href="https://pop.culture.gouv.fr" target="_blank" rel="noreferrer">base Mérimée</a>
+                    </p>
+                )}
+                {lieu.fournisseur === 'musees-de-france' && (
+                    <p className="texte-doux" style={{ margin: 0, fontSize: 'var(--taille-xs)' }}>
+                        Source : ministère de la Culture, <a href="https://pop.culture.gouv.fr" target="_blank" rel="noreferrer">base Muséofile</a>
+                    </p>
+                )}
 
                 <div className="ligne-actions">
                     <Link className="bouton bouton--principal" to={`/sorties/creation?lieu=${lieu.id}`}>
@@ -506,6 +600,24 @@ const DetailLieu = ({ lieu, km, modifiable, onFermer, onModifie, onAvis }) => {
                 </div>
 
                 <AvisLieu type={lieu.source} id={lieu.idNum} onChange={onAvis} />
+
+                {/* Réservé aux admins : la photo et la suppression du lieu */}
+                {gerable && (
+                    <div className="ligne-actions">
+                        <label className="bouton bouton--fantome">
+                            <Icone nom="appareil-photo" />{lieu.imageUrl ? 'Changer la photo' : 'Ajouter une photo'}
+                            <input type="file" accept="image/jpeg,image/png,image/webp" className="visuellement-cache" onChange={changerPhoto} />
+                        </label>
+                        {lieu.imageUrl && <Bouton variante="fantome" icone="image" onClick={retirerPhoto}>Retirer la photo</Bouton>}
+                        <Bouton variante="danger" icone="supprimer" onClick={() => setConfirmation(true)}>Supprimer ce lieu</Bouton>
+                    </div>
+                )}
+                {gerable && statut && !edition && <p className="champ__erreur" role="alert"><Icone nom="alerte" />{statut}</p>}
+                <FenetreConfirmation ouverte={confirmation} titre="Supprimer ce lieu ?" texteConfirmer="Oui, supprimer"
+                                     onConfirmer={supprimer} onAnnuler={() => setConfirmation(false)}>
+                    « {lieu.nom} » disparaîtra de la carte et des listes.
+                    {lieu.fournisseur && " L'import de la semaine ne le fera pas revenir."}
+                </FenetreConfirmation>
 
                 {/* Réservé aux admins : modifier un point d'intérêt */}
                 {modifiable && !edition && (

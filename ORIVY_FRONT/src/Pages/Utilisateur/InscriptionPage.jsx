@@ -77,7 +77,8 @@ const InscriptionPage = () => {
 
                 <label className="case">
                     <input type="checkbox" checked={accepte} onChange={(e) => setAccepte(e.target.checked)} />
-                    <span>J'accepte les <a href="#">conditions d'utilisation</a> et la <a href="#">politique de confidentialité</a>.</span>
+                    <span>J'ai au moins 15 ans et j'accepte les <Link to="/cgu" target="_blank">conditions d'utilisation</Link> et
+                        la <Link to="/confidentialite" target="_blank">politique de confidentialité</Link>.</span>
                 </label>
 
                 {erreur && <p className="champ__erreur" role="alert"><Icone nom="alerte" />{erreur}</p>}

@@ -4,11 +4,13 @@ import Entete from './Pages/Navigation/Entete.jsx';
 import BarreOnglets from './Pages/Navigation/BarreOnglets.jsx';
 import { AuthProvider } from './Context/AuthContext.jsx';
 import { FavorisProvider } from './Context/FavorisContext.jsx';
+import { CategoriesProvider } from './Context/CategoriesContext.jsx';
 import RetourHaut from './Composants/RetourHaut.jsx';
 
 const App = () => {
     return (
         <AuthProvider>
+            <CategoriesProvider>
             <FavorisProvider>
             <BrowserRouter>
                 {/* En haut : logo, onglets (ordinateur), recherche, notifications, compte */}
@@ -20,6 +22,7 @@ const App = () => {
                 <RetourHaut />
             </BrowserRouter>
             </FavorisProvider>
+            </CategoriesProvider>
         </AuthProvider>
     );
 };

@@ -20,7 +20,7 @@ const CarteLieu = ({ lieu, km, lien }) => {
 
     return (
         <article className={`carte-lieu cat-${cat.cle}`}>
-            <Photo src={lieu.imageUrl || cat.image} alt={lieu.alt ?? ''} cle={cat.cle} />
+            <Photo src={lieu.imageUrl} alt={lieu.alt ?? ''} cle={cat.cle} attente />
             <div className="carte-lieu__haut">
                 <BadgeCategorie cle={cat.cle} />
                 <span className="carte-lieu__droite">

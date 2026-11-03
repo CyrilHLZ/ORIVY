@@ -20,12 +20,14 @@ public class UtilisateurService {
     private final UtilisateurRepository utilisateurRepository;
     private final PasswordEncoder passwordEncoder;
     private final FichierService fichierService;
+    private final LimiteurConnexion limiteur;
 
     public UtilisateurService(UtilisateurRepository utilisateurRepository, PasswordEncoder passwordEncoder,
-                              FichierService fichierService) {
+                              FichierService fichierService, LimiteurConnexion limiteur) {
         this.utilisateurRepository = utilisateurRepository;
         this.passwordEncoder = passwordEncoder;
         this.fichierService = fichierService;
+        this.limiteur = limiteur;
     }
 
     public Utilisateur creerUtilisateur(Utilisateur utilisateur) {
@@ -40,15 +42,19 @@ public class UtilisateurService {
     }
 
     public Utilisateur authentifierUtilisateur(String email, String motDePasse) {
-        // Même message dans les deux cas : on ne révèle pas si l'email existe
-        Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Email ou mot de passe incorrect."));
+        String cle = email == null ? "" : email.trim().toLowerCase();
+        limiteur.verifier(cle);   // 429 si cet e-mail a trop échoué récemment
 
-        if (motDePasse == null || !passwordEncoder.matches(motDePasse, utilisateur.getMotDePasse())) {
+        // Même message si l'e-mail n'existe pas ou si le mot de passe est faux : on ne révèle rien
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(email).orElse(null);
+        if (utilisateur == null || motDePasse == null || !passwordEncoder.matches(motDePasse, utilisateur.getMotDePasse())) {
+            limiteur.echec(cle);
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Email ou mot de passe incorrect.");
         }
+        limiteur.succes(cle);
         return utilisateur;
     }
+
 
     public List<Utilisateur> getAllUtilisateurs() {
         return utilisateurRepository.findAll();
@@ -121,5 +127,4 @@ public class UtilisateurService {
         utilisateur.setPhotoUrl(fichierService.enregistrerImage(fichier, "avatars", "avatar-" + id));
         return utilisateurRepository.save(utilisateur);
     }
-
 }

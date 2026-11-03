@@ -25,13 +25,14 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // Reprend les règles CORS de WebConfig
                 .cors(Customizer.withDefaults())
-                // La console H2 s'affiche dans un <iframe>
-                .headers(h -> h.frameOptions(f -> f.sameOrigin()))
+                .headers(h -> h.frameOptions(f -> f.deny())
+                               .contentTypeOptions(Customizer.withDefaults()))
+
+
                 .authorizeHttpRequests(auth -> auth
                         // Public
-                        .requestMatchers("/error", "/h2-console/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/utilisateurs/inscription", "/api/utilisateurs/connexion").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/carte", "/api/points-interet/**", "/api/activites/**",
+                        .requestMatchers(HttpMethod.POST, "/api/utilisateurs/inscription", "/api/utilisateurs/connexion", "/api/utilisateurs/deconnexion").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/carte", "/api/carte/zone", "/api/carte/autour", "/api/carte/recherche", "/api/categories", "/api/points-interet/**", "/api/activites/**",
                                 "/api/promenades/**", "/api/sorties/**", "/api/notes", "/api/*/*/commentaires", "/api/fichiers/**").permitAll()
                         // Admin
                         .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -40,13 +41,18 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/utilisateurs/*/blocage").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/utilisateurs/**").hasRole("ADMIN")
                         .requestMatchers("/api/points-interet/**", "/api/activites/**", "/api/promenades/**").hasRole("ADMIN")
+                        // Catégories : lecture publique (ci-dessus), écriture réservée à l'admin
+                        .requestMatchers(HttpMethod.POST, "/api/categories").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/categories/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasRole("ADMIN")
                         // Signalements : tout membre en envoie (POST), seul l'admin les lit et les traite
                         .requestMatchers(HttpMethod.GET, "/api/signalements").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/signalements/**").hasRole("ADMIN")
                         // Tout le reste : il faut être connecté
                         .anyRequest().authenticated())
                 // Lit l'en-tête « Authorization: Bearer … » et vérifie le jeton
-                .oauth2ResourceServer(o -> o.jwt(jwt -> jwt.jwtAuthenticationConverter(convertisseurRoles())))
+                .oauth2ResourceServer(o -> o.bearerTokenResolver(new CookieBearerTokenResolver())
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(convertisseurRoles())))
                 .build();
     }
 

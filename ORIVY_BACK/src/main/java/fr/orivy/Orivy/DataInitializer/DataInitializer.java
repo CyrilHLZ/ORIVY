@@ -28,17 +28,19 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (pointRepository.count() > 700) {
-            pointRepository.findAll().forEach(point -> {
+        // Seulement les lieux d'ORIVY : les lieux importés ont leur propre import
+        if (pointRepository.countBySourceIsNull() > 700) {
+            pointRepository.findBySourceIsNull().forEach(point -> {
                 if (point.getCouleur() == null) point.setCouleur(colorFor(point.getType()));
-                if (point.getImageUrl() == null || point.getImageUrl().contains("Chateau_de_Chambord_2015")
+                // photoChoisie : l'admin a changé ou retiré la photo, on n'y touche plus
+                if (!point.isPhotoChoisie() && (point.getImageUrl() == null || point.getImageUrl().contains("Chateau_de_Chambord_2015")
                     || point.getImageUrl().contains("Palace_of_Versailles_2015")
                     || point.getImageUrl().contains("Louvre-Lens_-_B%C3%A2timent")
                     || point.getImageUrl().contains("Louvre-Lens.jpg")
                     || point.getImageUrl().contains("Gorges_du_Verdon_3")
                     || point.getImageUrl().contains("Gorges_du_Verdon_depuis")
                     || point.getImageUrl().contains("Vulcania_au_pied_du_Puy_de_Dome")
-                    || point.getImageUrl().contains("Vulcania%2C_vue_du_parc")) {
+                    || point.getImageUrl().contains("Vulcania%2C_vue_du_parc"))) {
                     String image = imageFor(point.getNom());
                     point.setImageUrl(image);
                     if (image != null) {
@@ -50,7 +52,7 @@ public class DataInitializer implements CommandLineRunner {
             pointRepository.flush();
             return;
         }
-        pointRepository.deleteAllInBatch();
+        pointRepository.deleteAllInBatch(pointRepository.findBySourceIsNull());
         importKmz(pointRepository);
     }
 

@@ -1,0 +1,8 @@
+# Ce que Docker n'envoie PAS dans l'image du back
+target/
+data/
+uploads/
+.env
+.idea/
+.vscode/
+*.log

@@ -1,0 +1,5 @@
+# Ce que Docker n'envoie PAS dans l'image du front
+node_modules/
+dist/
+_correction/
+apercu-*

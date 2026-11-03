@@ -19,16 +19,19 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import org.springframework.http.HttpHeaders;
+
 import fr.orivy.Orivy.DTO.ChangementEmailDto;
 import fr.orivy.Orivy.DTO.ChangementMotDePasseDto;
-import fr.orivy.Orivy.DTO.ReponseConnexionDto;
 import fr.orivy.Orivy.DTO.SuppressionCompteDto;
 import fr.orivy.Orivy.DTO.UtilisateurPriveeDto;
 import fr.orivy.Orivy.DTO.UtilisateurPublicDto;
 import fr.orivy.Orivy.Model.Utilisateur;
+import fr.orivy.Orivy.Securite.CookieJeton;
 import fr.orivy.Orivy.Service.JetonService;
 import fr.orivy.Orivy.Service.SuppressionCompteService;
 import fr.orivy.Orivy.Service.UtilisateurService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 @RestController
@@ -38,12 +41,14 @@ public class UtilisateurController {
     private final UtilisateurService utilisateurService;
     private final JetonService jetonService;
     private final SuppressionCompteService suppressionCompteService;
+    private final CookieJeton cookieJeton;
 
     public UtilisateurController(UtilisateurService utilisateurService, JetonService jetonService,
-                                 SuppressionCompteService suppressionCompteService) {
+                                 SuppressionCompteService suppressionCompteService, CookieJeton cookieJeton) {
         this.utilisateurService = utilisateurService;
         this.jetonService = jetonService;
         this.suppressionCompteService = suppressionCompteService;
+        this.cookieJeton = cookieJeton;
     }
 
     @PostMapping("/inscription")
@@ -63,9 +68,17 @@ public class UtilisateurController {
 
 
     @PostMapping("/connexion")
-    public ReponseConnexionDto connexion(@RequestBody Utilisateur identifiants) {
+    public UtilisateurPriveeDto connexion(@RequestBody Utilisateur identifiants, HttpServletResponse reponse) {
         Utilisateur utilisateur = utilisateurService.authentifierUtilisateur(identifiants.getEmail(), identifiants.getMotDePasse());
-        return new ReponseConnexionDto(jetonService.generateToken(utilisateur), UtilisateurPriveeDto.depuis(utilisateur));
+        String jeton = jetonService.generateToken(utilisateur);
+        reponse.addHeader(HttpHeaders.SET_COOKIE, cookieJeton.creer(jeton).toString());   // jeton posé dans le cookie HttpOnly
+        return UtilisateurPriveeDto.depuis(utilisateur);                                   // plus de jeton dans le corps
+    }
+
+    @PostMapping("/deconnexion")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deconnexion(HttpServletResponse reponse) {
+        reponse.addHeader(HttpHeaders.SET_COOKIE, cookieJeton.effacer().toString());
     }
 
     @GetMapping

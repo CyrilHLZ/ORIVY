@@ -159,6 +159,10 @@
 }
 .badge-cat .icone { width: var(--espace-4); height: var(--espace-4); }
 
+/* Emoji d'une catégorie (remplace l'ancienne icône SVG) : dimensionné par la taille de police */
+.emoji-cat { display: inline-block; line-height: 1; font-size: 1.15em; font-style: normal; }
+.badge-cat .emoji-cat { font-size: var(--espace-4); }
+
 .badge-distance {
   display: inline-flex;
   align-items: center;
@@ -309,6 +313,14 @@ label.bouton:has(input:focus-visible) { outline: 3px solid var(--couleur-focus);
   aspect-ratio: 4 / 3;
 }
 .photo > .icone { width: var(--espace-7); height: var(--espace-7); opacity: 0.6; }
+/* Lieu sans photo : la mention se place sous l'icône de la catégorie */
+.photo__attente {
+  position: absolute;
+  bottom: var(--espace-3);
+  font-size: var(--taille-s);
+  font-weight: var(--graisse-moyenne);
+  opacity: 0.85;
+}
 .photo img,
 .photo video {
   position: absolute;

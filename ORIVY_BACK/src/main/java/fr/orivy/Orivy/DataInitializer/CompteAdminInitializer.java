@@ -48,7 +48,7 @@ public class CompteAdminInitializer implements CommandLineRunner {
                     if (!"admin".equalsIgnoreCase(existant.getRole())) {
                         existant.setRole("admin");
                         utilisateurRepository.save(existant);
-                        log.info("Le compte {} devient administrateur.", email);
+                        log.info("Un compte existant est promu administrateur.");
                     }
                 },
                 () -> {
@@ -59,7 +59,7 @@ public class CompteAdminInitializer implements CommandLineRunner {
                     admin.setMotDePasse(passwordEncoder.encode(motDePasse));
                     admin.setRole("admin");
                     utilisateurRepository.save(admin);
-                    log.info("Compte administrateur {} créé.", email);
+                    log.info("Compte administrateur créé.");
                 });
     }
 }

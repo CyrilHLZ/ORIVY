@@ -1,9 +1,7 @@
-import { lireJeton } from './jeton.js';
-
-
 /**
  * Client HTTP unique de l'application.
- * Tous les services l'utilisent : c'est le SEUL endroit du projet qui appelle fetch.
+ * Le jeton est dans un cookie HttpOnly posé par le back : le navigateur l'envoie tout seul
+ * (credentials), le JavaScript ne le voit jamais.
  *
  * - ajoute le préfixe /api (le proxy Vite redirige vers le back)
  * - transforme automatiquement `body` en JSON
@@ -11,20 +9,20 @@ import { lireJeton } from './jeton.js';
  * - renvoie directement les données (JSON, texte, ou null si la réponse est vide)
  */
 export const apiRequest = async (path, { body, headers, ...options } = {}) => {
-    const jeton = lireJeton();
     const estFichier = body instanceof FormData;
 
     const response = await fetch(`/api${path}`, {
         ...options,
+        credentials: 'include',   // envoie le cookie de connexion
         headers: {
             ...(!estFichier && { 'Content-Type': 'application/json'}),
-            ...(jeton && { 'Authorization': `Bearer ${jeton}` }),
             ...headers,
         },
         body: body === undefined ? undefined : estFichier ? body : JSON.stringify(body),
     });
 
-     if (response.status === 401 && jeton) {
+    // 401 sur une requête autre que la connexion = session expirée → on déconnecte
+    if (response.status === 401 && !path.includes('/utilisateurs/connexion')) {
         window.dispatchEvent(new Event('orivy:session-expiree'));
     }
 

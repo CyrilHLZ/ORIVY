@@ -1,0 +1,16 @@
+{
+  "name": "ORIVY — Sorties et lieux près de chez toi",
+  "short_name": "ORIVY",
+  "description": "Découvre des lieux et organise des sorties avec d'autres passionnés.",
+  "lang": "fr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F6EFE6",
+  "theme_color": "#F6EFE6",
+  "icons": [
+    { "src": "/icones/icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icones/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

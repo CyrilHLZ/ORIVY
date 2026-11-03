@@ -1,0 +1,55 @@
+# =====================================================================
+# ORIVY en ligne : la base, le back et le site, d'une seule commande sur le serveur :
+#     docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+# Les secrets viennent de .env.prod (jamais dans git : copier .env.prod.example).
+# =====================================================================
+services:
+
+  base:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: orivy
+      POSTGRES_USER: orivy
+      POSTGRES_PASSWORD: ${ORIVY_DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data      # les données survivent aux mises à jour
+    healthcheck:                              # le back attend que la base soit prête
+      test: ["CMD-SHELL", "pg_isready -U orivy -d orivy"]
+      interval: 5s
+      retries: 10
+
+  back:
+    build: ./ORIVY_BACK
+    restart: unless-stopped
+    depends_on:
+      base:
+        condition: service_healthy
+    environment:
+      ORIVY_DB_URL: jdbc:postgresql://base:5432/orivy
+      ORIVY_DB_USER: orivy
+      ORIVY_DB_PASSWORD: ${ORIVY_DB_PASSWORD}
+      ORIVY_JWT_SECRET: ${ORIVY_JWT_SECRET}
+      ORIVY_ADMIN_EMAIL: ${ORIVY_ADMIN_EMAIL}
+      ORIVY_ADMIN_MOT_DE_PASSE: ${ORIVY_ADMIN_MOT_DE_PASSE}
+      ORIVY_CORS_ORIGINES: ${ORIVY_CORS_ORIGINES}
+    volumes:
+      - uploads:/app/uploads                  # photos et vidéos des membres
+    # Pas de « ports » : le back n'est joignable QUE par Caddy, pas depuis Internet
+
+  site:
+    build: ./ORIVY_FRONT
+    restart: unless-stopped
+    depends_on: [back]
+    environment:
+      ORIVY_SITE: ${ORIVY_SITE}
+    ports:
+      - "${ORIVY_PORT_HTTP:-80}:80"
+      - "${ORIVY_PORT_HTTPS:-443}:443"
+    volumes:
+      - caddy_data:/data                      # les certificats HTTPS (ne pas les redemander à chaque fois)
+
+volumes:
+  pgdata:
+  uploads:
+  caddy_data:
