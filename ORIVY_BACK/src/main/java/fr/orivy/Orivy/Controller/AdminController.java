@@ -6,18 +6,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import fr.orivy.Orivy.Component.ImageEnrichmentRunner;
-import fr.orivy.Orivy.Service.MonumentsHistoriquesService;
+import fr.orivy.Orivy.Service.OpenStreetMapService;
 
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
 
     private final ImageEnrichmentRunner runner;
-    private final MonumentsHistoriquesService monuments;
+    private final OpenStreetMapService openStreetMap;
 
-    public AdminController(ImageEnrichmentRunner runner, MonumentsHistoriquesService monuments) {
+    public AdminController(ImageEnrichmentRunner runner, OpenStreetMapService openStreetMap) {
         this.runner = runner;
-        this.monuments = monuments;
+        this.openStreetMap = openStreetMap;
     }
 
     @PostMapping("/enrich-images")
@@ -26,10 +26,10 @@ public class AdminController {
         return ResponseEntity.accepted().body("Enrichissement lancé en tâche de fond.");
     }
 
-    // Relance tout de suite l'import des Monuments historiques (sinon : chaque vendredi à 5 h)
-    @PostMapping("/monuments-historiques")
-    public ResponseEntity<String> importerMonuments() {
-        monuments.importChaqueSemaine();
-        return ResponseEntity.accepted().body("Import des Monuments historiques lancé en tâche de fond.");
+    // Relance tout de suite l'import OpenStreetMap (sinon : le 1er de chaque mois)
+    @PostMapping("/import-osm")
+    public ResponseEntity<String> importOpenStreetMap() {
+        openStreetMap.importerEnFond();
+        return ResponseEntity.accepted().body("Import OpenStreetMap lancé en tâche de fond.");
     }
 }

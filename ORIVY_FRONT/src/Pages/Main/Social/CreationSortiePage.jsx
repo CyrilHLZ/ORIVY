@@ -1,8 +1,6 @@
-import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { createSortie, envoyerMediaSortie } from '../../../Services/Sortie/SortieService';
-import { normaliserPoint, useLieux } from '../../../Hooks/useLieux.js';
-import { getPoint } from '../../../Services/Carte/CarteService.js';
+import { useLieux } from '../../../Hooks/useLieux.js';
 import { categorie } from '../../../Constants/categories.js';
 import Bouton from '../../../Composants/Bouton.jsx';
 import FormulaireSortie from './FormulaireSortie.jsx';
@@ -16,22 +14,11 @@ const CreationSortiePage = () => {
     const [parametres] = useSearchParams();
     const idLieu = parametres.get('lieu');
     const { lieux, chargement } = useLieux();
-    const lieuOrivy = idLieu ? lieux.find((l) => l.id === idLieu) : null;
-
-    // Un lieu importé n'est pas dans useLieux : on le demande au back
-    const [lieuImporte, setLieuImporte] = useState(undefined);   // undefined = pas encore cherché
-    const aChercher = Boolean(idLieu?.startsWith('point-') && !chargement && !lieuOrivy);
-    useEffect(() => {
-        if (!aChercher) return;
-        getPoint(idLieu.slice(6)).then((p) => setLieuImporte(normaliserPoint(p))).catch(() => setLieuImporte(null));
-    }, [aChercher, idLieu]);
 
     // On attend les lieux avant d'afficher le formulaire, pour pouvoir le préremplir
-    if (idLieu && (chargement || (aChercher && lieuImporte === undefined))) {
-        return <main className="conteneur" aria-busy="true"><p style={{ paddingTop: 'var(--espace-6)' }}>Chargement…</p></main>;
-    }
+    if (idLieu && chargement) return <main className="conteneur" aria-busy="true"><p style={{ paddingTop: 'var(--espace-6)' }}>Chargement…</p></main>;
 
-    const lieu = lieuOrivy ?? lieuImporte ?? null;
+    const lieu = idLieu ? lieux.find((l) => l.id === idLieu) : null;
     const initial = {
         nom: '',
         categorie: lieu ? categorie(lieu.categorie).cle : 'promenade',

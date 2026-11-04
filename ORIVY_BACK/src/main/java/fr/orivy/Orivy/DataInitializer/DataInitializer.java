@@ -28,9 +28,8 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Seulement les lieux d'ORIVY : les lieux importés ont leur propre import
-        if (pointRepository.countBySourceIsNull() > 700) {
-            pointRepository.findBySourceIsNull().forEach(point -> {
+        if (pointRepository.count() > 700) {
+            pointRepository.findAll().forEach(point -> {
                 if (point.getCouleur() == null) point.setCouleur(colorFor(point.getType()));
                 // photoChoisie : l'admin a changé ou retiré la photo, on n'y touche plus
                 if (!point.isPhotoChoisie() && (point.getImageUrl() == null || point.getImageUrl().contains("Chateau_de_Chambord_2015")
@@ -52,7 +51,7 @@ public class DataInitializer implements CommandLineRunner {
             pointRepository.flush();
             return;
         }
-        pointRepository.deleteAllInBatch(pointRepository.findBySourceIsNull());
+        pointRepository.deleteAllInBatch();
         importKmz(pointRepository);
     }
 

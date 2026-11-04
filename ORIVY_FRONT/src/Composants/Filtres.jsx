@@ -1,3 +1,4 @@
+import { useRef, useState, useEffect, useCallback } from 'react';
 import Icone from './Icone.jsx';
 import EmojiCategorie from './EmojiCategorie.jsx';
 
@@ -21,11 +22,55 @@ export const Puce = ({ actif = false, cle, icone, children, ...autres }) => (
 
 /*
  * <Puces label="Catégories">…</Puces>
- * Rangée de puces qui défile horizontalement au pouce.
+ * Rangée de puces qui défile horizontalement. Avec beaucoup de catégories
+ * elle déborde : on ajoute une vraie barre défilante (flèches + dégradés sur
+ * les bords) qui n'apparaît QUE s'il y a de quoi faire défiler.
  */
-export const Puces = ({ label, children }) => (
-    <div className="puces" role="group" aria-label={label}>{children}</div>
-);
+export const Puces = ({ label, children }) => {
+    const rangee = useRef(null);
+    const [gauche, setGauche] = useState(false); // peut défiler vers la gauche ?
+    const [droite, setDroite] = useState(false); // peut défiler vers la droite ?
+
+    // Recalcule, à partir du scroll, s'il reste du contenu caché de chaque côté
+    const majFleches = useCallback(() => {
+        const el = rangee.current;
+        if (!el) return;
+        const max = el.scrollWidth - el.clientWidth;
+        setGauche(el.scrollLeft > 1);
+        setDroite(el.scrollLeft < max - 1);
+    }, []);
+
+    useEffect(() => {
+        majFleches();
+        const el = rangee.current;
+        if (!el) return;
+        el.addEventListener('scroll', majFleches, { passive: true });
+        window.addEventListener('resize', majFleches);
+        return () => {
+            el.removeEventListener('scroll', majFleches);
+            window.removeEventListener('resize', majFleches);
+        };
+    }, [majFleches, children]);
+
+    const glisser = (sens) => {
+        const el = rangee.current;
+        if (el) el.scrollBy({ left: sens * el.clientWidth * 0.8, behavior: 'smooth' });
+    };
+
+    return (
+        <div className={`puces-barre${gauche ? ' puces-barre--gauche' : ''}${droite ? ' puces-barre--droite' : ''}`}>
+            <button type="button" className="puces-fleche puces-fleche--g" aria-label="Voir les catégories précédentes"
+                    onClick={() => glisser(-1)}>
+                <Icone nom="chevron-gauche" />
+            </button>
+            <div className="puces" role="group" aria-label={label} ref={rangee}>{children}</div>
+            <button type="button" className="puces-fleche puces-fleche--d" aria-label="Voir les catégories suivantes"
+                    onClick={() => glisser(1)}>
+                <Icone nom="chevron-droit" />
+            </button>
+        </div>
+    );
+};
 
 /*
  * <ChoixSegmente nom="rayon" legende="Rayon de recherche" valeur={25} onChange={setRayon}

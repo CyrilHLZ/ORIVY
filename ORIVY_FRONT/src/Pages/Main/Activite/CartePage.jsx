@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Circle, CircleMarker, MapContainer, Marker, Polyline, Popup, TileLayer, ZoomControl, useMap, useMapEvents } from 'react-leaflet';
+import { Circle, MapContainer, Marker, Polyline, Popup, TileLayer, ZoomControl, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useAuth } from '../../../Context/AuthContext.jsx';
 import { normaliserPoint, useLieux } from '../../../Hooks/useLieux.js';
-import { deletePoint, envoyerPhotoPoint, getPoint, getPromenades, getZone, retirerPhotoPoint, updatePoint } from '../../../Services/Carte/CarteService.js';
+import { deletePoint, envoyerPhotoPoint, getPromenades, retirerPhotoPoint, updatePoint } from '../../../Services/Carte/CarteService.js';
 import { ICONES } from '../../../Composants/icones.js';
 import { LISTE_CATEGORIES, categorie } from '../../../Constants/categories.js';
 import { demanderPosition, distanceKm, formaterDistance, trouverVille, adresseDe } from '../../../Utils/proximite.js';
@@ -27,10 +27,10 @@ import FenetreConfirmation from '../../../Composants/Fenetre.jsx';
  *   - épingles colorées par catégorie, accessibles au clavier (Tab puis Entrée) ;
  *   - « Me localiser » (position demandée au clic seulement), point bleu, cercle du rayon ;
  *   - clic sur une épingle : tiroir de détail (monte du bas sur mobile) ;
- *   - à l'arrivée, une fenêtre demande les catégories à afficher (765 lieux d'un coup, c'est illisible) ;
+ *   - à l'arrivée, une fenêtre demande les catégories à afficher (15 000 lieux d'un coup, c'est illisible) ;
+ *   - de loin, un point de couleur par lieu (dessinés sur un canvas) ; de près, les épingles de la zone affichée ;
  *   - les promenades sont tracées (ligne) avec la catégorie « Randonnées » ;
  *   - admin : « Ajouter un lieu », puis clic sur la carte → fenêtre pré-remplie (coordonnées + adresse) ;
- *   - de près (zoom 12 et plus), les lieux importés (Monuments historiques…) de la zone affichée s'ajoutent.
  * Adresses comprises :
  *   /carte?cat=parc                 → filtre une catégorie
  *   /carte?lieu=point-12            → ouvre la fiche d'un lieu (liens des cartes de lieu)
@@ -41,7 +41,7 @@ const FRANCE = [46.6, 2.4];
 
 /* ---- Icônes d'épingle (Leaflet veut du HTML en texte) ----
    On les fabrique une seule fois par catégorie et par état, puis on les réutilise :
-   765 épingles ne créent donc que quelques dizaines d'icônes. */
+   des milliers d'épingles ne créent donc que quelques dizaines d'icônes. */
 const cacheIcones = {};
 const iconeEpingle = (cle, active) => {
     const id = `${cle}-${active}`;
@@ -73,26 +73,43 @@ const PiloteCarte = ({ vue }) => {
     return null;
 };
 
+/* ---- Vue éloignée : un petit point de couleur par lieu ----
+   ~15 000 lieux : un composant <CircleMarker> par lieu serait trop lent (et 15 000 éléments SVG aussi).
+   On les dessine tous sur un seul <canvas>, directement avec Leaflet, et on ne les refait
+   que si la liste change. */
+const RENDU_POINTS = L.canvas({ padding: 0.5 });
+const PointsLieux = ({ lieux, onClic }) => {
+    const carte = useMap();
+    // Le clic passe par une ref : sinon chaque nouveau rendu de la page redessinerait les 15 000 points
+    const clic = useRef(onClic);
+    useEffect(() => { clic.current = onClic; }, [onClic]);
+    useEffect(() => {
+        const groupe = L.layerGroup(lieux.map((lieu) => L.circleMarker([lieu.latitude, lieu.longitude], {
+            renderer: RENDU_POINTS,
+            radius: 5,
+            weight: 1.5,
+            color: '#fff',
+            fillColor: categorie(lieu.categorie).couleur,
+            fillOpacity: 1,
+        }).on('click', () => clic.current(lieu)))).addTo(carte);
+        return () => { groupe.remove(); };
+    }, [carte, lieux]);
+    return null;
+};
+
 /* ---- Suit le niveau de zoom (même règle : seulement dans un enfant de <MapContainer>) ----
    Piège : useMapEvents réinstalle ses écouteurs si on lui donne un NOUVEL objet à chaque rendu.
    Or React fait tous les nettoyages AVANT les effets : pendant ce court instant, aucun écouteur,
    et le moveend déclenché par le pilote (setView) est perdu. D'où useMemo : un objet stable. */
-const SuiviZoom = ({ onZoom }) => {
+const SuiviZoom = ({ onZoom, onLimites }) => {
     const ecouteurs = useMemo(() => ({
         zoomend: (e) => onZoom(e.target.getZoom()),
-        moveend: (e) => onZoom(e.target.getZoom()),   // après tout déplacement, zoom compris
-    }), [onZoom]);
+        // après tout déplacement, zoom compris : on note aussi la zone affichée
+        moveend: (e) => { onZoom(e.target.getZoom()); onLimites(e.target.getBounds()); },
+    }), [onZoom, onLimites]);
     const carte = useMapEvents(ecouteurs);
     // Le zoom a pu changer avant que l'écouteur ne soit branché
-    useEffect(() => { onZoom(carte.getZoom()); }, [carte, onZoom]);
-    return null;
-};
-
-/* ---- Suit la zone affichée (pour charger les lieux importés qui s'y trouvent) ---- */
-const SuiviZone = ({ onZone }) => {
-    const ecouteurs = useMemo(() => ({ moveend: (e) => onZone(e.target.getBounds()) }), [onZone]);
-    const carte = useMapEvents(ecouteurs);
-    useEffect(() => { onZone(carte.getBounds()); }, [carte, onZone]);
+    useEffect(() => { onZoom(carte.getZoom()); onLimites(carte.getBounds()); }, [carte, onZoom, onLimites]);
     return null;
 };
 
@@ -104,9 +121,7 @@ const ClicCarte = ({ onClic }) => {
 };
 
 /* En dessous de ce zoom, les épingles s'empileraient : on montre de petits points */
-const ZOOM_EPINGLES = 9;
-/* Lieux importés : des dizaines de milliers en France, on ne les charge que de près */
-const ZOOM_OFFICES = 12;
+const ZOOM_EPINGLES = 10;
 
 /* Dernier choix de catégories, retrouvé à la visite suivante (sur cet appareil seulement) */
 const CLE_CHOIX = 'orivy.carte.categories';
@@ -185,14 +200,13 @@ const CartePage = () => {
     const [selection, setSelection] = useState(null);
     const [vue, setVue] = useState(null);
     const [zoom, setZoom] = useState(window.innerWidth < 768 ? 5 : 6);
+    const [limites, setLimites] = useState(null);   // zone affichée (L.LatLngBounds)
     const [message, setMessage] = useState(null);
     const champVille = useRef(null);
     const tiroir = useRef(null);
     const marqueurs = useRef({});   // id du lieu → marqueur Leaflet (pour rendre le focus)
     const [placement, setPlacement] = useState(false);   // admin : « clique sur la carte »
     const [nouveauLieu, setNouveauLieu] = useState(null); // ouvre FenetreLieu pré-remplie
-    const [zone, setZone] = useState(null);               // limites de la carte affichée
-    const [lieuxZone, setLieuxZone] = useState([]);       // lieux importés de cette zone
 
     /* Cette page occupe tout l'écran : classe sur <body> (voir pages.css) */
     useEffect(() => {
@@ -207,24 +221,18 @@ const CartePage = () => {
         return () => clearTimeout(minuteur);
     }, [message]);
 
-    /* Lieux importés de la zone affichée, rechargés après chaque déplacement.
-       Le minuteur attend que la carte s'arrête ; « annule » ignore une réponse arrivée trop tard. */
-    useEffect(() => {
-        if (!zone || zoom < ZOOM_OFFICES) { setLieuxZone([]); return undefined; }
-        let annule = false;
-        const minuteur = setTimeout(() => {
-            getZone({ nord: zone.getNorth(), sud: zone.getSouth(), est: zone.getEast(), ouest: zone.getWest() }, actives)
-                .then((points) => { if (!annule) setLieuxZone(points.map(normaliserPoint)); })
-                .catch(() => {});   // sans eux, la carte garde les lieux d'ORIVY
-        }, 300);
-        return () => { annule = true; clearTimeout(minuteur); };
-    }, [zone, zoom, actives]);
-
     /* Lieux visibles selon les catégories cochées (aucune = toutes) */
     const visibles = useMemo(
-        () => [...lieux, ...lieuxZone].filter((l) => l.latitude != null && (actives.length === 0 || actives.includes(l.categorie))),
-        [lieux, lieuxZone, actives],
+        () => lieux.filter((l) => l.latitude != null && (actives.length === 0 || actives.includes(l.categorie))),
+        [lieux, actives],
     );
+
+    /* Vue rapprochée : les épingles de la zone affichée seulement (+ une marge), et toujours celle du lieu ouvert */
+    const epingles = useMemo(() => {
+        if (zoom < ZOOM_EPINGLES || !limites) return visibles.filter((l) => l.id === selection?.id);
+        const zone = limites.pad(0.2);
+        return visibles.filter((l) => l.id === selection?.id || zone.contains([l.latitude, l.longitude]));
+    }, [visibles, zoom, limites, selection]);
 
     const basculerCategorie = (cle) => setActives((liste) => (liste.includes(cle) ? liste.filter((c) => c !== cle) : [...liste, cle]));
 
@@ -315,11 +323,8 @@ const CartePage = () => {
     useEffect(() => {
         const demande = parametres.get('lieu');
         if (!demande || lieux.length === 0) return;
-        const montrer = (lieu) => { setSelection(lieu); setVue({ centre: [lieu.latitude, lieu.longitude], zoom: 13 }); };
         const lieu = lieux.find((l) => l.id === demande);
-        if (lieu) montrer(lieu);
-        // Un lieu importé n'est pas dans la liste : on le demande au back
-        else if (demande.startsWith('point-')) getPoint(demande.slice(6)).then((p) => montrer(normaliserPoint(p))).catch(() => {});
+        if (lieu) { setSelection(lieu); setVue({ centre: [lieu.latitude, lieu.longitude], zoom: 13 }); }
     }, [lieux, parametres]);
 
     /* Arrivée avec ?lat=…&lng=…&nom=… (ex. depuis une sortie) */
@@ -338,13 +343,11 @@ const CartePage = () => {
     const photoChangee = (point) => {
         const lieu = normaliserPoint(point);
         setSelection(lieu);
-        setLieuxZone((liste) => liste.map((l) => (l.id === lieu.id ? lieu : l)));
-        if (!lieu.fournisseur) recharger();
+        recharger();
     };
     /* Admin : lieu supprimé → la fiche se ferme et l'épingle disparaît */
     const lieuSupprime = (lieu) => {
         setSelection(null);
-        setLieuxZone((liste) => liste.filter((l) => l.id !== lieu.id));
         recharger();
         setMessage(`« ${lieu.nom} » est supprimé.`);
     };
@@ -360,15 +363,16 @@ const CartePage = () => {
                 zoomControl={false}
                 scrollWheelZoom
             >
+                {/* Fond « Voyager » de CARTO : coloré et lisible façon Waze/Google (tuiles OSM stylées). */}
                 <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">les contributeurs OpenStreetMap</a>'
-                    url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    maxZoom={19}
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                    url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                    subdomains="abcd"
+                    maxZoom={20}
                 />
                 <ZoomControl position="bottomleft" />
                 <PiloteCarte vue={vue} />
-                <SuiviZoom onZoom={setZoom} />
-                <SuiviZone onZone={setZone} />
+                <SuiviZoom onZoom={setZoom} onLimites={setLimites} />
 
                 {/* Promenades : une ligne qui relie les points de l'itinéraire, clic = fiche */}
                 {promenadesVisibles.map((p) => {
@@ -387,20 +391,11 @@ const CartePage = () => {
                     );
                 })}
 
-                {/* Vue éloignée : de petits points de couleur (lisibles même à 765 lieux) */}
-                {zoom < ZOOM_EPINGLES && visibles.map((lieu) => (
-                    <CircleMarker
-                        key={lieu.id}
-                        center={[lieu.latitude, lieu.longitude]}
-                        radius={6}
-                        // className en prop directe : dans pathOptions, react-leaflet l'ignorerait
-                        className={`point-lieu cat-${categorie(lieu.categorie).cle}`}
-                        eventHandlers={{ click: () => ouvrir(lieu) }}
-                    />
-                ))}
+                {/* Vue éloignée : de petits points de couleur */}
+                {zoom < ZOOM_EPINGLES && <PointsLieux lieux={visibles} onClic={ouvrir} />}
 
-                {/* Vue rapprochée : les vraies épingles (et toujours celle du lieu ouvert) */}
-                {visibles.filter((lieu) => zoom >= ZOOM_EPINGLES || selection?.id === lieu.id).map((lieu) => {
+                {/* Vue rapprochée : les vraies épingles */}
+                {epingles.map((lieu) => {
                     const distance = km(lieu);
                     return (
                         <Marker
@@ -473,12 +468,12 @@ const CartePage = () => {
                     <DetailLieu
                         lieu={selection}
                         km={km(selection)}
-                        // Un lieu importé est réécrit à chaque import : on ne le modifie pas ici
-                        modifiable={isAdmin && selection.source === 'point' && !selection.fournisseur}
+                        // Un lieu OpenStreetMap est relu chaque mois : son nom et son adresse seraient écrasés
+                        modifiable={isAdmin && selection.source === 'point' && !selection.osm}
                         onFermer={fermer}
                         onModifie={() => { recharger(); setMessage('Point enregistré.'); }}
                         onAvis={recharger}
-                        // Photo et suppression : tous les points (importés compris), pas les activités
+                        // Photo et suppression : les points d'intérêt, pas les activités
                         gerable={isAdmin && selection.source === 'point'}
                         onPhoto={photoChangee}
                         onSupprime={lieuSupprime}
@@ -575,15 +570,10 @@ const DetailLieu = ({ lieu, km, modifiable, gerable, onFermer, onModifie, onAvis
                     {km != null && <span className="badge-distance"><Icone nom="autour" />{formaterDistance(km)}</span>}
                 </div>
                 {lieu.description && <p className="texte-doux" style={{ margin: 0 }}>{lieu.description}</p>}
-                {lieu.dateFin && <p className="texte-doux" style={{ margin: 0 }}>Jusqu'au {new Date(lieu.dateFin).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}</p>}
-                {lieu.fournisseur === 'monuments-historiques' && (
-                    <p className="texte-doux" style={{ margin: 0, fontSize: 'var(--taille-xs)' }}>
-                        Source : ministère de la Culture, <a href="https://pop.culture.gouv.fr" target="_blank" rel="noreferrer">base Mérimée</a>
-                    </p>
-                )}
-                {lieu.fournisseur === 'musees-de-france' && (
-                    <p className="texte-doux" style={{ margin: 0, fontSize: 'var(--taille-xs)' }}>
-                        Source : ministère de la Culture, <a href="https://pop.culture.gouv.fr" target="_blank" rel="noreferrer">base Muséofile</a>
+                {/* Licence ODbL : un lieu venu d'OpenStreetMap doit le dire */}
+                {lieu.osm && (
+                    <p className="texte-doux" style={{ margin: 0, fontSize: 'var(--taille-s)' }}>
+                        Données © <a href={`https://www.openstreetmap.org/${lieu.osm}`} target="_blank" rel="noreferrer">les contributeurs OpenStreetMap</a>
                     </p>
                 )}
 
@@ -616,7 +606,6 @@ const DetailLieu = ({ lieu, km, modifiable, gerable, onFermer, onModifie, onAvis
                 <FenetreConfirmation ouverte={confirmation} titre="Supprimer ce lieu ?" texteConfirmer="Oui, supprimer"
                                      onConfirmer={supprimer} onAnnuler={() => setConfirmation(false)}>
                     « {lieu.nom} » disparaîtra de la carte et des listes.
-                    {lieu.fournisseur && " L'import de la semaine ne le fera pas revenir."}
                 </FenetreConfirmation>
 
                 {/* Réservé aux admins : modifier un point d'intérêt */}

@@ -194,6 +194,58 @@
 }
 .puces::-webkit-scrollbar { display: none; }
 
+/* Barre défilante : enveloppe la rangée .puces et porte flèches + dégradés.
+   Les dégradés et les flèches n'apparaissent que si on ajoute --gauche / --droite. */
+.puces-barre { position: relative; }
+/* Dégradé qui estompe les bords pour montrer qu'il reste des catégories cachées */
+.puces-barre::before,
+.puces-barre::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  width: var(--espace-6);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--duree-normale);
+  z-index: 1;
+}
+.puces-barre::before { left: 0;  background: linear-gradient(to right, var(--couleur-fond), transparent); }
+.puces-barre::after  { right: 0; background: linear-gradient(to left,  var(--couleur-fond), transparent); }
+.puces-barre--gauche::before { opacity: 1; }
+.puces-barre--droite::after  { opacity: 1; }
+
+/* Flèches de défilement : cachées par défaut, montrées quand il y a du débordement */
+.puces-fleche {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1.5px solid var(--couleur-bordure-forte);
+  border-radius: var(--rayon-pilule);
+  background: var(--couleur-surface);
+  color: var(--couleur-texte);
+  cursor: pointer;
+  box-shadow: var(--ombre-1);
+}
+.puces-fleche--g { left: 0; }
+.puces-fleche--d { right: 0; }
+.puces-barre--gauche .puces-fleche--g { display: inline-flex; }
+.puces-barre--droite .puces-fleche--d { display: inline-flex; }
+.puces-fleche:hover { background: var(--couleur-surface-creux); }
+.puces-fleche .icone { width: var(--espace-4); height: var(--espace-4); }
+/* Au-dessus de la carte, le fond est transparent : le dégradé n'a pas de sens */
+.carte-outils .puces-barre::before,
+.carte-outils .puces-barre::after { display: none; }
+/* Doigt : on sait déjà faire glisser, les flèches sont inutiles (et prennent la place) */
+@media (hover: none) {
+  .puces-fleche { display: none !important; }
+}
+
 .puce {
   display: inline-flex;
   align-items: center;

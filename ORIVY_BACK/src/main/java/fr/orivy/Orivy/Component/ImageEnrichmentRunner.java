@@ -28,7 +28,7 @@ public class ImageEnrichmentRunner {
 
     @Async
     public void enrichMissingImages() {
-        List<PointInteret> points = repository.findByImageUrlIsNullAndSourceIsNullAndPhotoChoisieFalse();
+        List<PointInteret> points = repository.findByImageUrlIsNullAndPhotoChoisieFalse();
         int total = points.size();
         log.info("Enrichissement de {} points sans image", total);
 

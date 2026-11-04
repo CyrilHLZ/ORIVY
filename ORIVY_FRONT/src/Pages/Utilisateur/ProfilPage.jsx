@@ -12,8 +12,7 @@ import { getSortieById, getSortiesMembre } from '../../Services/Sortie/SortieSer
 import CarteSortie from '../../Composants/CarteSortie.jsx';
 import CarteLieu from '../../Composants/CarteLieu.jsx';
 import { useFavoris } from '../../Context/FavorisContext.jsx';
-import { normaliserPoint, useLieux } from '../../Hooks/useLieux.js';
-import { getPoint } from '../../Services/Carte/CarteService.js';
+import { useLieux } from '../../Hooks/useLieux.js';
 import { getMediasDuMembre } from '../../Services/Fil/FilService.js';
 import Photo, { estVideo } from '../../Composants/Photo.jsx';
 import { bloquer, debloquer, followUser, getFollowers, getFollowing, getMesBlocages, unfollowUser } from '../../Services/Social/SocialService.js';
@@ -297,19 +296,9 @@ const MesFavoris = () => {
             .then((liste) => setSorties(liste.filter(Boolean)));   // une sortie supprimée entre-temps est ignorée
     }, [idsSorties.join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Un lieu importé n'est pas dans useLieux : on le demande au back
-    const [lieuxImportes, setLieuxImportes] = useState([]);
-    const manquants = favoris
-        .filter((f) => f.cibleType === 'point' && lieux.length > 0 && !lieux.some((l) => l.id === `point-${f.cibleId}`))
-        .map((f) => f.cibleId);
-    useEffect(() => {
-        Promise.all(manquants.map((id) => getPoint(id).then(normaliserPoint).catch(() => null)))
-            .then((liste) => setLieuxImportes(liste.filter(Boolean)));
-    }, [manquants.join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
-
     const lieuxAimes = favoris
         .filter((f) => f.cibleType !== 'sortie')
-        .map((f) => [...lieux, ...lieuxImportes].find((l) => l.id === `${f.cibleType}-${f.cibleId}`))
+        .map((f) => lieux.find((l) => l.id === `${f.cibleType}-${f.cibleId}`))
         .filter(Boolean);
 
     return (
