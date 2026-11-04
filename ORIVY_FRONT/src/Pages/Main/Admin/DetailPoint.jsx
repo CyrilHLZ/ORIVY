@@ -24,8 +24,9 @@ const DetailPoint = ({ point, onModifier }) => {
                 {aDesCoordonnees ? (
                     <MapContainer center={[point.latitude, point.longitude]} zoom={13} zoomControl={false} dragging={false}
                                   scrollWheelZoom={false} doubleClickZoom={false} touchZoom={false} keyboard={false}>
-                        {/* La mention d'OpenStreetMap est obligatoire, même sur une petite carte */}
-                        <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap" />
+                        {/* Même fond Google Maps que la carte principale */}
+                        <TileLayer url="https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                                   subdomains={['mt0', 'mt1', 'mt2', 'mt3']} attribution="&copy; Google Maps" />
                         <CircleMarker center={[point.latitude, point.longitude]} radius={9}
                                       pathOptions={{ color: '#FFFFFF', weight: 3, fillColor: '#A34E2C', fillOpacity: 1 }} />
                     </MapContainer>
