@@ -1,0 +1,34 @@
+# =====================================================================
+# Mise en ligne GRATUITE, sans carte bancaire et sans IP publique, via un
+# tunnel ngrok — comme DesignPulse. Le conteneur ngrok ouvre une connexion
+# SORTANTE vers ngrok, qui renvoie les visiteurs de https://SITE_DOMAIN vers
+# Caddy (service « site »). Aucun port à ouvrir sur ta box, marche même en 4G/CGNAT.
+#
+# À ajouter APRÈS docker-compose.prod.yml :
+#   docker compose -f docker-compose.prod.yml -f docker-compose.tunnel.yml --env-file .env.prod up -d --build
+#
+# Dans .env.prod, en plus des secrets habituels :
+#   NGROK_AUTHTOKEN=...                     (tableau de bord ngrok → Your Authtoken)
+#   SITE_DOMAIN=ton-sous-domaine.ngrok-free.app   (ngrok → Domains → ton domaine statique gratuit)
+#   ORIVY_CORS_ORIGINES=https://ton-sous-domaine.ngrok-free.app
+# =====================================================================
+services:
+
+  site:
+    ports: !reset []              # plus aucun port public : le tunnel ngrok suffit
+    environment:
+      ORIVY_SITE: ":80"           # Caddy écoute en HTTP sur le réseau interne ; ngrok gère le HTTPS
+
+  back:
+    environment:
+      ORIVY_COOKIE_SECURE: "true" # ngrok sert en HTTPS → le cookie de connexion peut être « Secure »
+
+  ngrok:
+    image: ngrok/ngrok:3-alpine
+    container_name: orivy-ngrok
+    command: ["http", "--url", "https://${SITE_DOMAIN:?SITE_DOMAIN manquant dans .env.prod}", "site:80"]
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:?NGROK_AUTHTOKEN manquant dans .env.prod}
+    depends_on:
+      - site
+    restart: unless-stopped

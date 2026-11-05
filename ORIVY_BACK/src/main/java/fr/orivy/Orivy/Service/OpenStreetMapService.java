@@ -35,8 +35,9 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 /*
- * Import des PLAGES et des CHÂTEAUX VISITABLES d'OpenStreetMap pour toute la France
- * (licence ODbL : citer « © OpenStreetMap »). Les autres lieux (musées, parcs…) viennent de la carte curée (V7).
+ * Import des lieux d'OpenStreetMap pour toute la France (licence ODbL : citer « © OpenStreetMap »),
+ * en plus de la carte curée (V7). Seuls les lieux VÉRIFIÉS entrent (voir verifie()) ; la France est
+ * découpée en zones (ZONES) pour que chaque requête reste légère pour les serveurs gratuits.
  * Quand : au démarrage si rien n'est encore importé, puis le 1er de chaque mois à 4 h.
  * Photos : seulement celles du lieu lui-même (balises image / wikimedia_commons, ou photo Wikidata).
  */
@@ -44,11 +45,11 @@ import tools.jackson.databind.ObjectMapper;
 public class OpenStreetMapService {
 
     private static final Logger log = LoggerFactory.getLogger(OpenStreetMapService.class);
-    // Deux serveurs Overpass gratuits : souvent saturés (réponse 429 ou 502), on alterne entre eux
+    // Deux serveurs Overpass gratuits, souvent saturés : le principal, puis le secours au dernier essai seulement
     private static final List<String> OVERPASS = List.of(
             "https://overpass-api.de/api/interpreter",
             "https://overpass.private.coffee/api/interpreter");
-    private static final int ESSAIS = 6;
+    private static final int ESSAIS = 4;
     private static final String WIKIDATA = "https://query.wikidata.org/sparql";
     private static final String AGENT = "Orivy/1.0 (import des lieux OpenStreetMap)";
 
@@ -78,11 +79,59 @@ public class OpenStreetMapService {
         REQUETES.put("camping", List.of("nwr[\"tourism\"=\"camp_site\"][\"name\"]"));
         REQUETES.put("phare", List.of("nwr[\"man_made\"=\"lighthouse\"][\"name\"]"));
         REQUETES.put("grotte", List.of("nwr[\"natural\"=\"cave_entrance\"][\"name\"][\"tourism\"]"));        // grottes ouvertes au public
-        REQUETES.put("jardin", List.of("nwr[\"leisure\"=\"garden\"][\"name\"][\"garden:type\"=\"botanical\"]")); // jardins botaniques
         REQUETES.put("vignoble", List.of("nwr[\"craft\"=\"winery\"][\"name\"]"));
         REQUETES.put("thermes", List.of(
                 "nwr[\"leisure\"=\"spa\"][\"name\"]",
                 "nwr[\"amenity\"=\"public_bath\"][\"name\"]"));
+        // V17 — activités en ville (vérifiées par verifie() : site, téléphone, horaires ou Wikidata)
+        REQUETES.put("culture", List.of("nwr[\"tourism\"=\"museum\"][\"name\"]"));
+        REQUETES.put("theatre", List.of("nwr[\"amenity\"=\"theatre\"][\"name\"]"));
+        REQUETES.put("escape_game", List.of("nwr[\"leisure\"=\"escape_game\"][\"name\"]"));
+        REQUETES.put("laser_game", List.of("nwr[\"sport\"=\"laser_tag\"][\"name\"]"));
+        REQUETES.put("trampoline", List.of("nwr[\"leisure\"=\"trampoline_park\"][\"name\"]"));
+        REQUETES.put("mini_golf", List.of("nwr[\"leisure\"=\"miniature_golf\"][\"name\"]"));
+        REQUETES.put("patinoire", List.of("nwr[\"leisure\"=\"ice_rink\"][\"name\"]"));
+        REQUETES.put("accrobranche", List.of("nwr[\"sport\"=\"climbing_adventure\"][\"name\"]"));
+        REQUETES.put("escalade", List.of("nwr[\"leisure\"=\"sports_centre\"][\"sport\"~\"climbing\"][\"name\"]"));
+        // V17 — nature : seulement les lieux NOTABLES (fiche Wikidata), les GR et GR de Pays
+        REQUETES.put("jardin", List.of(
+                "nwr[\"leisure\"=\"garden\"][\"name\"][\"garden:type\"=\"botanical\"]",
+                "nwr[\"leisure\"=\"garden\"][\"name\"][\"wikidata\"]"));
+        REQUETES.put("espace_naturel", List.of("nwr[\"leisure\"=\"nature_reserve\"][\"name\"][\"wikidata\"]"));
+        REQUETES.put("parc", List.of("nwr[\"leisure\"=\"park\"][\"name\"][\"wikidata\"]"));
+        REQUETES.put("foret", List.of(
+                "nwr[\"landuse\"=\"forest\"][\"name\"][\"wikidata\"]",
+                "nwr[\"natural\"=\"wood\"][\"name\"][\"wikidata\"]"));
+        REQUETES.put("promenade", List.of(
+                "relation[\"route\"=\"hiking\"][\"name\"][\"network\"~\"^(nwn|rwn)$\"]",   // GR et GR de Pays
+                "relation[\"route\"=\"hiking\"][\"name\"][\"wikidata\"]"));
+    }
+
+    // Commerces / salles : on n'affiche que ceux qui prouvent qu'ils existent (site, téléphone, horaires ou Wikidata)
+    private static final Set<String> A_VERIFIER = Set.of("cinema", "bowling", "karting", "paintball", "culture",
+            "theatre", "escape_game", "laser_game", "trampoline", "mini_golf", "patinoire", "accrobranche", "escalade");
+    private static final List<String> PREUVES = List.of("website", "contact:website", "url", "phone", "contact:phone",
+            "opening_hours", "wikidata", "wikipedia");
+    // Tronçons de GR sans intérêt pour un promeneur
+    private static final java.util.regex.Pattern TRONCON =
+            java.util.regex.Pattern.compile("^(acc[eè]s|liaison|variante|bretelle|raccord|jonction)\\b.*", java.util.regex.Pattern.CASE_INSENSITIVE);
+
+    // France découpée en zones : une requête sur toute la France dépasse le temps limite des serveurs gratuits.
+    // {sud, ouest, nord, est} — métropole en 4×4 + Corse + outre-mer
+    private static final List<double[]> ZONES = new ArrayList<>();
+    static {
+        double sud = 42.3, ouest = -5.3, nord = 51.2, est = 8.3;
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                ZONES.add(new double[] { sud + (nord - sud) * i / 4, ouest + (est - ouest) * j / 4,
+                        sud + (nord - sud) * (i + 1) / 4, ouest + (est - ouest) * (j + 1) / 4 });
+            }
+        }
+        ZONES.add(new double[] { 41.3, 8.5, 43.1, 9.6 });        // Corse
+        ZONES.add(new double[] { 14.3, -61.9, 16.6, -60.7 });    // Guadeloupe, Martinique
+        ZONES.add(new double[] { 2.0, -54.7, 5.9, -51.5 });      // Guyane
+        ZONES.add(new double[] { -21.5, 55.1, -20.8, 55.9 });    // La Réunion
+        ZONES.add(new double[] { -13.1, 44.9, -12.5, 45.4 });    // Mayotte
     }
 
     private final PointInteretRepository repository;
@@ -146,15 +195,19 @@ public class OpenStreetMapService {
         try {
             for (Map.Entry<String, List<String>> requete : REQUETES.entrySet()) {
                 String type = requete.getKey();
-                JsonNode elements;
-                try {
-                    elements = overpass(requete.getValue()).path("elements");
-                } catch (IOException e) {
-                    log.warn("OpenStreetMap : {} non importés ({})", type, e.getMessage());
-                    continue;   // on garde les lieux déjà importés de ce type
+                List<JsonNode> elements = new ArrayList<>();
+                boolean complet = true;
+                for (double[] zone : ZONES) {
+                    try {
+                        overpass(requete.getValue(), zone).path("elements").forEach(elements::add);
+                    } catch (IOException e) {
+                        log.warn("OpenStreetMap : {} non importés dans une zone ({})", type, e.getMessage());
+                        complet = false;   // on garde les lieux déjà importés ; on ne retirera rien de ce type
+                    }
+                    Thread.sleep(2000);   // Overpass est un service gratuit : on souffle entre deux requêtes
                 }
-                typesLus.add(type);
-                int avant = lus.size();
+                if (complet) typesLus.add(type);
+                Map<String, PointInteret> duType = new LinkedHashMap<>();
                 for (JsonNode element : elements) {
                     String osmId = element.path("type").asString() + "/" + element.path("id").asString();
                     JsonNode tags = element.path("tags");
@@ -162,6 +215,7 @@ public class OpenStreetMapService {
                     // Un nœud a lat/lon ; un bâtiment ou une zone a son centre (« out center »)
                     JsonNode position = element.has("lat") ? element : element.path("center");
                     if (nom.isEmpty() || !position.has("lat") || lus.containsKey(osmId) || retires.contains(osmId)) continue;
+                    if (!verifie(type, nom, tags)) continue;
                     double lat = position.path("lat").asDouble();
                     double lon = position.path("lon").asDouble();
                     if (!dejaVus.add(simplifier(nom) + "|" + Math.round(lat * 100) + "|" + Math.round(lon * 100))) continue;
@@ -184,13 +238,14 @@ public class OpenStreetMapService {
                     }
                     if (tags.has("wikidata")) wikidata.put(osmId, tags.path("wikidata").asString());
                     lus.put(osmId, point);
+                    duType.put(osmId, point);
                 }
-                log.info("OpenStreetMap : {} {}", lus.size() - avant, type);
-                Thread.sleep(5000);   // Overpass est un service gratuit : on souffle entre deux requêtes
+                // Enregistré tout de suite : les lieux apparaissent sur la carte catégorie par catégorie,
+                // et un arrêt du back en plein import ne fait pas tout perdre
+                ajouterPhotosWikidata(duType, wikidata);
+                repository.saveAll(duType.values());
+                log.info("OpenStreetMap : {} {}", duType.size(), type);
             }
-
-            ajouterPhotosWikidata(lus, wikidata);
-            repository.saveAll(lus.values());
 
             // Disparus d'OpenStreetMap (ou devenus doublons) : seulement pour les types bien relus
             List<PointInteret> disparus = existants.values().stream()
@@ -205,9 +260,30 @@ public class OpenStreetMapService {
         }
     }
 
-    /* Une requête Overpass sur la France ; « out center » donne le centre des bâtiments et des zones */
-    private JsonNode overpass(List<String> filtres) throws IOException, InterruptedException {
-        StringBuilder requete = new StringBuilder("[out:json][timeout:300];area[\"ISO3166-1\"=\"FR\"][admin_level=2]->.fr;(");
+    /*
+     * Lieu fiable ? Pas privé ni fermé, pas un nom générique (« Parc », « Musée »), pas un tronçon de GR,
+     * et pour les commerces / salles : au moins une preuve d'existence (site, téléphone, horaires, Wikidata).
+     */
+    static boolean verifie(String type, String nom, JsonNode tags) {
+        String acces = tags.path("access").asString("");
+        if (acces.equals("private") || acces.equals("no")) return false;
+        if (tags.has("disused") || tags.has("abandoned") || tags.has("end_date")) return false;
+        String simple = simplifier(nom);
+        if (simple.length() < 4 || GENERIQUES.contains(simple)) return false;
+        if (type.equals("promenade") && TRONCON.matcher(nom.trim()).matches()) return false;
+        if (A_VERIFIER.contains(type)) return PREUVES.stream().anyMatch(tags::has);
+        return true;
+    }
+
+    private static final Set<String> GENERIQUES = Set.of("parc", "parcpublic", "squarepublic", "square", "jardin",
+            "jardinpublic", "musee", "cinema", "bowling", "foret", "bois", "theatre", "patinoire", "minigolf",
+            "escapegame", "lasergame", "karting", "paintball", "escalade", "accrobranche", "reservenaturelle");
+
+    /* Une requête Overpass sur une zone de la France ; « out center » donne le centre des bâtiments et des zones */
+    private JsonNode overpass(List<String> filtres, double[] zone) throws IOException, InterruptedException {
+        String cadre = String.format(Locale.ROOT, "[bbox:%.2f,%.2f,%.2f,%.2f]", zone[0], zone[1], zone[2], zone[3]);
+        StringBuilder requete = new StringBuilder("[out:json][timeout:180]" + cadre
+                + ";area[\"ISO3166-1\"=\"FR\"][admin_level=2]->.fr;(");
         filtres.forEach((f) -> requete.append(f).append("(area.fr);"));
         requete.append(");out center tags;");
         String corps = "data=" + URLEncoder.encode(requete.toString(), StandardCharsets.UTF_8);
@@ -216,8 +292,8 @@ public class OpenStreetMapService {
         IOException derniere = null;
         for (int essai = 0; essai < ESSAIS; essai++) {
             try {
-                return envoyer(HttpRequest.newBuilder(URI.create(OVERPASS.get(essai % OVERPASS.size())))
-                        .timeout(Duration.ofMinutes(6))
+                return envoyer(HttpRequest.newBuilder(URI.create(OVERPASS.get(essai < ESSAIS - 1 ? 0 : 1)))
+                        .timeout(Duration.ofMinutes(4))
                         .header("User-Agent", AGENT)
                         .header("Content-Type", "application/x-www-form-urlencoded")
                         .POST(HttpRequest.BodyPublishers.ofString(corps))
