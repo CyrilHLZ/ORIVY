@@ -1,0 +1,4 @@
+# Scripts lancés dans Docker (Linux) : toujours des fins de ligne Unix, même après un clone sous Windows
+*.sh text eol=lf
+*.py text eol=lf
+scripts/osm/filtres.txt text eol=lf
