@@ -1,0 +1,17 @@
+# Premier tri (large) de l'extrait France : toutes les balises utilisées par REQUETES
+# dans OpenStreetMapService.java. Le tri fin (nom, wikidata, access…) est fait par le back.
+# À tenir à jour quand on ajoute une catégorie OpenStreetMap.
+nwr/historic=castle
+nwr/heritage:operator=whc
+nwr/natural=beach,peak,cave_entrance,wood
+nwr/amenity=cinema,public_bath,theatre
+nwr/tourism=zoo,aquarium,theme_park,museum
+nwr/leisure=water_park,swimming_pool,bowling_alley,spa,escape_game,trampoline_park,miniature_golf,ice_rink,sports_centre,garden,nature_reserve,park
+nwr/waterway=waterfall
+nwr/highway=raceway
+nwr/sport=karting,paintball,laser_tag,climbing_adventure
+nwr/man_made=lighthouse
+nwr/craft=winery
+nwr/landuse=forest
+r/route=hiking
+nwr/amenity=restaurant,bar,pub,biergarten

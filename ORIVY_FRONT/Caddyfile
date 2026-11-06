@@ -25,6 +25,9 @@
 	header @immuables Cache-Control "public, max-age=31536000, immutable"
 	@frais path /sw.js /index.html /manifest.webmanifest
 	header @frais Cache-Control "no-cache"
+	# Contours des régions et départements (carte) : déclarés en JSON pour partir compressés
+	@contours path /geo/*
+	header @contours Content-Type "application/geo+json"
 
 	# Protections de base
 	header {

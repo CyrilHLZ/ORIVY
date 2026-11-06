@@ -43,6 +43,8 @@ export const useLieux = () => {
     const [lieux, setLieux] = useState([]);
     const [chargement, setChargement] = useState(true);
     const [erreur, setErreur] = useState(null);
+    // Restaurants et bars : chargés par zone sur la carte, ici seulement leur nombre { restaurant: 52000, … }
+    const [nombresZone, setNombresZone] = useState({});
 
     // useCallback : la fonction garde la même identité d'un rendu à l'autre,
     // on peut donc la mettre dans les dépendances de useEffect sans boucle infinie
@@ -54,6 +56,7 @@ export const useLieux = () => {
             .then(([donnees, notes]) => {
                 // « point-12 » → { moyenne, nombre }
                 const parLieu = Object.fromEntries(notes.map((n) => [`${n.cibleType}-${n.cibleId}`, n]));
+                setNombresZone(donnees.nombresParZone ?? {});
                 setLieux(normaliserLieux(donnees).map((l) => ({
                     ...l, note: parLieu[l.id]?.moyenne ?? null, nombreAvis: parLieu[l.id]?.nombre ?? 0,
                 })));
@@ -65,5 +68,5 @@ export const useLieux = () => {
 
     useEffect(() => { recharger(); }, [recharger]);
 
-    return { lieux, chargement, erreur, recharger };
+    return { lieux, nombresZone, chargement, erreur, recharger };
 };

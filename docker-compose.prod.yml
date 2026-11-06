@@ -34,8 +34,10 @@ services:
       ORIVY_ADMIN_MOT_DE_PASSE: ${ORIVY_ADMIN_MOT_DE_PASSE}
       ORIVY_CORS_ORIGINES: ${ORIVY_CORS_ORIGINES}
       ORIVY_OSM_IMPORT_AUTO: ${ORIVY_OSM_IMPORT_AUTO:-true}   # false : pas d'import OpenStreetMap auto (bouton admin seulement)
+      ORIVY_OSM_FICHIER: ${ORIVY_OSM_FICHIER:-}   # ex. /osm/lieux-osm.jsonl : import depuis le fichier, sans Overpass
     volumes:
       - uploads:/app/uploads                  # photos et vidéos des membres
+      - ./osm:/osm:ro                         # extrait OpenStreetMap préparé par scripts/osm/preparer.sh
     # Pas de « ports » : le back n'est joignable QUE par Caddy, pas depuis Internet
 
   site:

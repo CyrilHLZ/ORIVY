@@ -18,7 +18,13 @@ const CreationSortiePage = () => {
     // On attend les lieux avant d'afficher le formulaire, pour pouvoir le préremplir
     if (idLieu && chargement) return <main className="conteneur" aria-busy="true"><p style={{ paddingTop: 'var(--espace-6)' }}>Chargement…</p></main>;
 
-    const lieu = idLieu ? lieux.find((l) => l.id === idLieu) : null;
+    // Restaurant ou bar (chargé par zone sur la carte, absent de la liste) : la carte a mis
+    // son nom, ses coordonnées et sa catégorie dans l'adresse
+    const depuisAdresse = parametres.has('lat')
+        ? { nom: parametres.get('nom') ?? '', categorie: parametres.get('cat'),
+            latitude: Number(parametres.get('lat')), longitude: Number(parametres.get('lng')) }
+        : null;
+    const lieu = idLieu ? (lieux.find((l) => l.id === idLieu) ?? depuisAdresse) : null;
     const initial = {
         nom: '',
         categorie: lieu ? categorie(lieu.categorie).cle : 'promenade',

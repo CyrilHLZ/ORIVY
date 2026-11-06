@@ -19,3 +19,11 @@ export const retirerPhotoPoint = (id) => apiRequest(`/points-interet/${id}/photo
 
 // Promenades : { id, nom, description, distanceKm, dureeMinutes, difficulte, parcoursJson }
 export const getPromenades = () => apiRequest('/promenades');
+
+// Carte par zones : nombre de lieux par catégorie dans chaque région / département
+//   { regions: [{ code, nom, nombres: { parc: 120, … } }], departements: [{ code, nom, region, nombres }] }
+export const getZones = () => apiRequest('/carte/zones');
+// Tous les lieux (points d'intérêt) d'un département : « 75 », « 2A », « 974 »
+export const getLieuxDepartement = (code) => apiRequest(`/carte/departement/${encodeURIComponent(code)}`);
+// Un seul lieu (lien /carte?lieu=point-12)
+export const getPoint = (id) => apiRequest(`/points-interet/${id}`);

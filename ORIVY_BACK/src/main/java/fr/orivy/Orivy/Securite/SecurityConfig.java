@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public
                         .requestMatchers(HttpMethod.POST, "/api/utilisateurs/inscription", "/api/utilisateurs/connexion", "/api/utilisateurs/deconnexion").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/carte", "/api/categories", "/api/points-interet/**", "/api/activites/**",
+                        .requestMatchers(HttpMethod.GET, "/api/carte", "/api/carte/**", "/api/categories", "/api/points-interet/**", "/api/activites/**",
                                 "/api/promenades/**", "/api/sorties/**", "/api/notes", "/api/*/*/commentaires", "/api/fichiers/**").permitAll()
                         // Admin
                         .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -48,6 +48,9 @@ public class SecurityConfig {
                         // Signalements : tout membre en envoie (POST), seul l'admin les lit et les traite
                         .requestMatchers(HttpMethod.GET, "/api/signalements").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/signalements/**").hasRole("ADMIN")
+                        // Suggestions (lieu à ajouter, idée) : même règle
+                        .requestMatchers(HttpMethod.GET, "/api/suggestions").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/suggestions/**").hasRole("ADMIN")
                         // Tout le reste : il faut être connecté
                         .anyRequest().authenticated())
                 // Lit l'en-tête « Authorization: Bearer … » et vérifie le jeton

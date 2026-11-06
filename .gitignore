@@ -1,2 +1,5 @@
 # Secrets de production (modèle : .env.prod.example)
 .env.prod
+
+# Données OpenStreetMap téléchargées (plusieurs Go)
+/osm/

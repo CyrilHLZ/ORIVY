@@ -11,6 +11,7 @@ import { EtatErreur, EtatVide } from '../../../Composants/Etats.jsx';
 import FenetreConfirmation from '../../../Composants/Fenetre.jsx';
 import FenetreLieu from '../../../Composants/FenetreLieu.jsx';
 import Signalements from './Signalements.jsx';
+import Suggestions from './Suggestions.jsx';
 import GestionCategories from './GestionCategories.jsx';
 import DetailPoint from './DetailPoint.jsx';
 
@@ -85,7 +86,7 @@ const AdminPage = () => {
 
     return (
         <main className="conteneur page-admin">
-            <div style={{ marginTop: 'var(--espace-5)' }}><Signalements /></div>
+            <div style={{ marginTop: 'var(--espace-5)' }}><Signalements /><Suggestions /></div>
             <GestionCategories />
             <div className="section-titre">
                 <h1 style={{ margin: 0 }}>Lieux de la carte</h1>

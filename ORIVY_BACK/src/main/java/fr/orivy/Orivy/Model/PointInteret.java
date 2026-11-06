@@ -39,6 +39,8 @@ public class PointInteret {
     private boolean photoChoisie;
     // Lieu importé d'OpenStreetMap (« node/123 », « way/456 ») ; null pour les lieux saisis dans ORIVY
     private String osmId;
+    // Code du département (« 75 », « 2A », « 974 ») : la carte charge les lieux département par département
+    private String departement;
 
     public PointInteret() {
     }
@@ -68,4 +70,6 @@ public class PointInteret {
     public void setPhotoChoisie(boolean photoChoisie) { this.photoChoisie = photoChoisie; }
     public String getOsmId() { return osmId; }
     public void setOsmId(String osmId) { this.osmId = osmId; }
+    public String getDepartement() { return departement; }
+    public void setDepartement(String departement) { this.departement = departement; }
 }

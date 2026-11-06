@@ -16,6 +16,10 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import com.jayway.jsonpath.JsonPath;
 
+import fr.orivy.Orivy.Securite.CookieJeton;
+import jakarta.servlet.http.Cookie;
+import org.springframework.mock.web.MockHttpServletResponse;
+
 /*
  * Base des tests de l'API : démarre ORIVY en entier (profil "test", base H2 en mémoire)
  * et offre des raccourcis pour créer des membres et des sorties.
@@ -32,9 +36,9 @@ public abstract class TestApi {
     @Autowired
     protected MockMvc mockMvc;
 
-    /* Un membre inscrit et connecté : son id et son jeton */
+    /* Un membre inscrit et connecté : son id et son jeton (le back le pose dans le cookie orivy_jeton) */
     protected record Membre(long id, String jeton) {
-        String bearer() { return "Bearer " + jeton; }
+        Cookie cookie() { return new Cookie(CookieJeton.NOM, jeton); }
     }
 
     protected Membre nouveauMembre(String prenom) throws Exception {
@@ -43,12 +47,13 @@ public abstract class TestApi {
                 {"prenom":"%s","nom":"Test","email":"%s","motDePasse":"%s"}""".formatted(prenom, email, MOT_DE_PASSE);
         mockMvc.perform(post("/api/utilisateurs/inscription").contentType(MediaType.APPLICATION_JSON).content(json))
                 .andExpect(status().isCreated());
-        String reponse = mockMvc.perform(post("/api/utilisateurs/connexion").contentType(MediaType.APPLICATION_JSON)
+        MockHttpServletResponse reponse = mockMvc.perform(post("/api/utilisateurs/connexion").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"%s\",\"motDePasse\":\"%s\"}".formatted(email, MOT_DE_PASSE)))
                 .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-        long id = ((Number) JsonPath.read(reponse, "$.utilisateur.id")).longValue();
-        return new Membre(id, JsonPath.read(reponse, "$.token"));
+                .andReturn().getResponse();
+        // Depuis le cookie HttpOnly : le corps contient le profil (sans jeton), le jeton est dans le cookie
+        long id = ((Number) JsonPath.read(reponse.getContentAsString(), "$.id")).longValue();
+        return new Membre(id, reponse.getCookie(CookieJeton.NOM).getValue());
     }
 
     /* Une sortie dans une semaine, organisée par « organisateur ». nombreMax = null : places illimitées */
@@ -56,7 +61,7 @@ public abstract class TestApi {
         String json = """
                 {"nom":"Pique-nique","lieu":"Lyon","dateDebut":"%s"%s}"""
                 .formatted(LocalDateTime.now().plusDays(7).withNano(0), nombreMax == null ? "" : ",\"nombreMax\":" + nombreMax);
-        String reponse = mockMvc.perform(post("/api/sorties").header("Authorization", organisateur.bearer())
+        String reponse = mockMvc.perform(en(organisateur, post("/api/sorties"))
                         .contentType(MediaType.APPLICATION_JSON).content(json))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
@@ -65,6 +70,6 @@ public abstract class TestApi {
 
     /* Ajoute le jeton du membre à une requête */
     protected MockHttpServletRequestBuilder en(Membre membre, MockHttpServletRequestBuilder requete) {
-        return requete.header("Authorization", membre.bearer());
+        return requete.cookie(membre.cookie());
     }
 }

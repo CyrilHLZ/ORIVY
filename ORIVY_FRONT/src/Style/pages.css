@@ -99,8 +99,11 @@
 
 /* Fenêtre de choix des catégories, à l'arrivée sur la carte : petite pop-up compacte */
 .fenetre--categories {
-  width: min(100% - 2 * var(--marge-page), 28rem);
-  max-height: calc(100dvh - 2 * var(--espace-5));
+  /* 1000px, ramené à la largeur de l'écran sur téléphone */
+  width: min(100% - 2 * var(--marge-page), 1000px);
+  margin-top: 300px;
+  /* la fenêtre commence à 300px du haut : elle doit tenir dans le reste de l'écran */
+  max-height: calc(100dvh - 300px - var(--espace-5));
   overflow-y: auto;   /* petit écran : la fenêtre défile au lieu de dépasser */
   padding: var(--espace-4);
   box-sizing: border-box;
@@ -791,3 +794,72 @@
 .illu-404 #epingle-perdue { transform-box: fill-box; transform-origin: 50% 100%; animation: hesite 3s var(--courbe-douce) infinite alternate; }
 @keyframes hesite { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
 @media (prefers-reduced-motion: reduce) { .illu-404 #epingle-perdue { animation: none; } }
+
+/* ==========================================================================
+   Carte par zones : fil d'Ariane (France › Région › Département) et bulle des zones
+   ========================================================================== */
+.carte-ariane {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espace-2);
+}
+.carte-ariane .puce { box-shadow: var(--ombre-1); }
+/* Séparateur « › » entre deux niveaux */
+.carte-ariane > .puce + .puce::before {
+  content: "›";
+  margin-right: var(--espace-1);
+  color: var(--couleur-texte-doux);
+}
+.carte-ariane .puce--active {
+  background: var(--couleur-texte);
+  border-color: var(--couleur-texte);
+  color: var(--couleur-fond);
+  cursor: default;
+}
+.carte-ariane .puce--active::before { color: inherit; }
+.carte-ariane__aller select {
+  min-height: var(--cible-min);
+  padding: 0 var(--espace-3);
+  border-radius: var(--rayon-pilule);
+  border: 1.5px solid var(--couleur-bordure-forte);
+  background: var(--couleur-surface);
+  color: var(--couleur-texte);
+  font: inherit;
+  box-shadow: var(--ombre-1);
+  max-width: 14rem;
+}
+
+/* Bulle d'une région / d'un département : nom, total, nombre par catégorie */
+.leaflet-tooltip.bulle-zone {
+  padding: var(--espace-3) var(--espace-4);
+  border: none;
+  border-radius: var(--rayon-petit);
+  background: var(--couleur-surface);
+  color: var(--couleur-texte);
+  box-shadow: var(--ombre-2);
+  font: inherit;
+  font-size: var(--taille-s);
+  white-space: normal;
+  min-width: 12rem;
+  max-width: 18rem;
+}
+.leaflet-tooltip-top.bulle-zone::before { border-top-color: var(--couleur-surface); }
+.bulle-zone__titre { display: block; font-family: var(--police-titre); font-size: var(--taille-m); }
+.bulle-zone__total { display: block; color: var(--couleur-texte-doux); margin-bottom: var(--espace-2); }
+.bulle-zone ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; }
+.bulle-zone__reste { color: var(--couleur-texte-doux); }
+/* Écran peu haut (téléphone à l'horizontale…) : les 300px du haut ne laisseraient presque rien à la fenêtre */
+@media (max-height: 700px) {
+  .fenetre--categories { margin-top: auto; max-height: calc(100dvh - 2 * var(--espace-5)); }
+}
+
+/* Fenêtre « Suggérer » (carte) : choix « Un lieu à ajouter / Une idée » en pastilles */
+.fenetre--suggestion { width: min(100% - 2 * var(--marge-page), 32rem); }
+.choix-suggestion { display: flex; flex-wrap: wrap; gap: var(--espace-2); margin: 0; padding: 0; border: 0; }
+.choix-suggestion .puce:has(input:checked) {
+  background: var(--couleur-texte);
+  border-color: var(--couleur-texte);
+  color: var(--couleur-fond);
+}
+.choix-suggestion .puce:has(input:focus-visible) { outline: 3px solid var(--couleur-focus); outline-offset: 2px; }
